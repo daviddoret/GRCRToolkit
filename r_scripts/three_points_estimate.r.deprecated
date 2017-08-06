@@ -78,7 +78,7 @@ setMethod("set_range_size",
           {
             object@range_size <<- range_size
             #slot(object, "range_size") <<- range_size
-            return(object)
+              return(object)
           }
 )
 

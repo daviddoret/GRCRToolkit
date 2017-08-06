@@ -3,6 +3,8 @@
 install.packages("devtools")
 
 install.packages("testthat")
+install.packages("roxygen2")
+install.packages("rriskDistributions")
 
 library(testthat)
 
@@ -12,3 +14,5 @@ library(testthat)
 # Shortcut: Ctrl/Cmd + Shift + T
 # or:
 devtools::test()
+
+install.packages("R6")
