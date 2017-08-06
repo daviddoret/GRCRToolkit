@@ -37,13 +37,13 @@ fair_factor <- R6Class("fair_factor",
                      self$estimate_max <- estimate_max
                      self$range_size <- range_size
                    },
-                   fit_lnorm = function() {
+                   fit_dist_lnorm = function() {
                      fitted <- get.lnorm.par(p = self$get_dist_fit_probabilities(),
                                             q = self$get_dist_fit_quantiles(),
                                             show.output=TRUE,
                                             plot=TRUE,
                                             tol = 0.01,
-                                            fit.weights = c(2, 1, 1)
+                                            fit.weights = c(1, 1, 1)
                     )
                    },
                    #' get_dist_fit_probabilities
@@ -59,10 +59,10 @@ fair_factor <- R6Class("fair_factor",
                    #'
                    #' @export
                    get_dist_fit_probabilities = function(){
-                     p1 <- (1 - self$range_size) / 2
-                     p2 <- .5
-                     p3 <- 1 - (1 - self$range_size) / 2
-                     return(C(p1,p2,p3))
+                     p1 <- self$range_min
+                     p2 <- self$range_typical
+                     p3 <- self$range_max
+                     return(c(p1,p2,p3))
                    },
                    #' get_dist_fit_quantiles
                    #'
@@ -77,7 +77,10 @@ fair_factor <- R6Class("fair_factor",
                    #'
                    #' @export
                   get_dist_fit_quantiles = function(){
-                     return(C(self$estimate_min,self$typical,self$estimate_max))
+                    q1 <- self$estimate_min
+                    q2 <- self$estimate_typical
+                    q3 <- self$estimate_max
+                     return(c(q1,q2,q3))
                    }
                  ),
                  active = list(
@@ -98,15 +101,27 @@ fair_factor <- R6Class("fair_factor",
                      }
                    }
                    ,range_max = function(value) {
-                     if (missing(value)) return(private$private_range_max)
+                     if (missing(value)) {
+                       return( 1 - (1 - self$range_size) / 2 )
+                     }
                      else {
                        stop("range_max cannot be set. please set range_size instead.")
                      }
                    }
                    ,range_min = function(value) {
-                     if (missing(value)) return(private$private_range_min)
+                     if (missing(value)) {
+                       return( (1 - self$range_size) / 2 )
+                     }
                      else {
                        warning("range_min cannot be set. please set range_size instead.")
+                     }
+                   }
+                   ,range_typical = function(value) {
+                     if (missing(value)) {
+                       return( .5 )
+                     }
+                     else {
+                       warning("range_typical cannot be set. please set range_size instead.")
                      }
                    }
                    ,range_size = function(value) {
