@@ -1,6 +1,6 @@
 # Temp R snippets
 
-f2 <- fair_factor$new()
+f2 <- model_factor$new()
 f2$estimate_3_points(estimate_min = 100, estimate_typical = 800, estimate_max = 900, range_size = .9)
 f2$get_dist_fit_probabilities()
 f2$get_dist_fit_quantiles()
