@@ -1,7 +1,21 @@
 REFERENCES
 
+The beta-PERT distribution
+- https://www.riskamp.com/beta-pert
+
+Probability approach to risk
+(provides a very nice decision tree on how to pick distributions)
+- http://people.stern.nyu.edu/adamodar/pdfiles/papers/probabilistic.pdf
+
+Diagram of distribution relationships
+- https://www.johndcook.com/blog/distribution_chart/
+
+Fitting distributions with R
+- https://www.r-bloggers.com/fitting-distributions-with-r/
+
+R Studio
 How to setup RStudio / Github integration
-https://www.r-bloggers.com/rstudio-and-github/
+- https://www.r-bloggers.com/rstudio-and-github/
 
 R naming conventions:
 - http://stat405.had.co.nz/r-style.html

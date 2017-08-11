@@ -9,4 +9,4 @@
 #install.packages("R6")
 #install.packages("fitdistrplus")
 #install.packages("config")
-
+#install.packages("triangle")
