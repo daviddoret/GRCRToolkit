@@ -401,34 +401,36 @@ model_factor <- R6Class("model_factor",
                     scale_y_continuous(label = function(x) { round(x,3) }) +
 
                     # Display 3 vertical bars to highlight the 3 points of the estimate
-                    # TODO: Re-implement with vectors
-                    #geom_vline(xintercept = self$estim_quantiles
-                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[1]) +
-                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[2]) +
-                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[3]) +
+                    geom_vline(xintercept = self$estim_quantiles,
+                               color = model_config_get_option("plot", "pdf", "estim_interecept", "color"),
+                               size = model_config_get_option("plot", "pdf", "estim_interecept", "size")) +
 
-                    # Area plot the PDF function with a neutral background
-                    stat_function(fun = self$probability_density_function,
-                                  colour = "#555555",
-                                  geom = "area",
-                                  fill = "white",
-                                  alpha = 0.5 ) +
-
-                    # Area plot of PDF function within the estimation range with a vivid background
+                    # Area plot the function
                     stat_function(
-                      colour = "#00aa00",
+                      colour = model_config_get_option("plot", "pdf", "area", "color"),
                       fun = self$probability_density_function,
                       geom = 'area',
-                      fill = 'green',
-                      alpha = 0.1,
-                      size = 1.1,
+                      fill = model_config_get_option("plot", "pdf", "area", "fill"),
+                      alpha = model_config_get_option("plot", "pdf", "area", "alpha"),
+                      size = model_config_get_option("plot", "pdf", "area", "size"),
                       xlim = c(x_start, x_end)) +
 
-                    # On top of the rest, label the 3 vertical bars
-                      # TODO: Re-implement with vectors
-                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[2], y = 0, label = "Typical", angle = 90, hjust = -1, vjust = -.2) +
-                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[1], y = 0, label = "Min", angle = 90, hjust = -1, vjust = -.2) +
-                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[3], y = 0, label = "Max", angle = 90, hjust = -1, vjust = -.2) +
+                    # On top of the rest, label the vertical bars
+                      # TODO: Show transparently the difference
+                      # between the original estimate and the
+                      # corresponding quantile in the distribution.
+                      # Depending on the shape of the selected
+                      # distribution and the estimates, the
+                      # difference may be very important, e.g.
+                      # if estimates are skewed to the right
+                      # and the distribution is log normal.
+                    annotate(geom = "text",
+                             x = self$estim_quantiles,
+                             y = 0,
+                             label = self$estim_labels,
+                             angle = 90,
+                             hjust = -1,
+                             vjust = -.2) +
 
                     # And put a title on top of it
                     ggtitle("Probability density function")
@@ -464,37 +466,39 @@ model_factor <- R6Class("model_factor",
                     scale_y_continuous(label = function(x) { round(x,3) }) +
 
                     # Display 3 vertical bars to highlight the 3 points of the estimate
-                    # TODO: Re-implement with vectors
-                    #geom_vline(xintercept = self$estim_quantiles
-                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[1]) +
-                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[2]) +
-                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[3]) +
+                    geom_vline(xintercept = self$estim_quantiles,
+                               color = model_config_get_option("plot", "cdf", "estim_interecept", "color"),
+                               size = model_config_get_option("plot", "cdf", "estim_interecept", "size")) +
 
-                    # Area plot the PDF function with a neutral background
-                    stat_function(fun = self$cumulative_distribution_function,
-                                  colour = "#555555",
-                                  geom = "area",
-                                  fill = "white",
-                                  alpha = 0.5 ) +
+                    # Area plot the function
+                    stat_function(
+                      colour = model_config_get_option("plot", "cdf", "area", "color"),
+                      fun = self$cumulative_distribution_function,
+                      geom = 'area',
+                      fill = model_config_get_option("plot", "cdf", "area", "fill"),
+                      alpha = model_config_get_option("plot", "cdf", "area", "alpha"),
+                      size = model_config_get_option("plot", "cdf", "area", "size"),
+                      xlim = c(x_start, x_end)) +
 
-                      # Area plot of PDF function within the estimation range with a vivid background
-                      stat_function(
-                        colour = "#00aa00",
-                        fun = self$cumulative_distribution_function,
-                        geom = 'area',
-                        fill = 'green',
-                        alpha = 0.1,
-                        size = 1.1,
-                        xlim = c(x_start, x_end)) +
+                    # On top of the rest, label the vertical bars
+                      # TODO: Show transparently the difference
+                      # between the original estimate and the
+                      # corresponding quantile in the distribution.
+                      # Depending on the shape of the selected
+                      # distribution and the estimates, the
+                      # difference may be very important, e.g.
+                      # if estimates are skewed to the right
+                      # and the distribution is log normal.
+                    annotate(geom = "text",
+                             x = self$estim_quantiles,
+                             y = 0,
+                             label = self$estim_labels,
+                             angle = 90,
+                             hjust = -1,
+                             vjust = -.2) +
 
-                      # On top of the rest, label the 3 vertical bars
-                      # TODO: Re-implement with vectors
-                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[2], y = 0, label = "Typical", angle = 90, hjust = -1, vjust = -.2) +
-                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[1], y = 0, label = "Min", angle = 90, hjust = -1, vjust = -.2) +
-                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[3], y = 0, label = "Max", angle = 90, hjust = -1, vjust = -.2) +
-
-                      # And put a title on top of it
-                      ggtitle("Cumulative distribution function")
+                    # And put a title on top of it
+                    ggtitle("Cumulative distribution function")
 
                     return(g1)
                   }
@@ -502,8 +506,8 @@ model_factor <- R6Class("model_factor",
                     g1 <- self$probability_density_function_plot()
                     g2 <- self$cumulative_distribution_function_plot()
                     multiplot(g1,
-                              g2,
-                              cols=2)
+                              g2)
+                              #cols=2)
                   }
                  ),
                  active = list(

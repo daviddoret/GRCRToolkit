@@ -21,8 +21,22 @@ model_config_defaults <- list(
 
   # non-centrality parameter for beta distributions.
   # see help(rbeta) for a detailed description.
-  dist_fit.beta.ncp = NULL
+  dist_fit.beta.ncp = NULL,
   # dist_fit.beta.ncp = 0,
+
+  plot.pdf.estim_interecept.color = "dodgerblue3",
+  plot.pdf.estim_interecept.size = 0.5,
+  plot.pdf.area.color = "#00aa00",
+  plot.pdf.area.fill = "#55ff55",
+  plot.pdf.area.alpha = 0.1,
+  plot.pdf.area.size = 0.5,
+
+  plot.cdf.estim_interecept.color = "dodgerblue3",
+  plot.cdf.estim_interecept.size = 0.5,
+  plot.cdf.area.color = "#00aa00",
+  plot.cdf.area.fill = "#55ff55",
+  plot.cdf.area.alpha = 0.1,
+  plot.cdf.area.size = 0.5
 
 )
 
