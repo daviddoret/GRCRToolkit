@@ -1,22 +1,29 @@
 
 model_config_defaults <- list(
+
+  # Tolerance for distribution fitting may be started
+  # from a default config value but...
+  # QUESTION: it could be dynamically adapted to facilitate
+  #           fitting, as long as we transparently show the
+  #           difference between the resulting distribution
+  #           and the original estimates.
   dist_fit.tol = 0.001,
 
-  dist_fit.3_points_pert.range_size = .9,
+  # Poisson-PERT distribution
+  dist_fit.3_points_poissonpert.range_size = .9,
+
+  # Beta-PERT distribution
+  dist_fit.3_points_betapert.range_size = .9,
   # References:
   # - The beta-PERT distribution, RiskAmp
   #   https://www.riskamp.com/beta-pert
-  dist_fit.3_points_pert.lambda = 4,
+  dist_fit.3_points_betapert.lambda = 4,
 
   # non-centrality parameter for beta distributions.
   # see help(rbeta) for a detailed description.
-  dist_fit.beta.ncp = NULL,
+  dist_fit.beta.ncp = NULL
   # dist_fit.beta.ncp = 0,
 
-  #TODO: Remove these default configurations, it just creates confusion.
-  dist_fit.weights.beta = c(1,1,1),
-  dist_fit.weights.lnorm = c(.01,1,.8),
-  dist_fit.weights.norm = c(1,1,1)
 )
 
 model_config_get_option <- function(...){

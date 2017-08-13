@@ -14,7 +14,7 @@ f1$estim_3_points_betapert(
 #f1$get_dist_fit_weights()
 f1$fit_dist()
 f1$get_random(8)
-f1$get_proba_density_plot()
+f1$plot()
 
 f2 <- model_factor$new(name = "y", dist = "norm")
 f2$estim_n_points(
@@ -23,6 +23,7 @@ f2$estim_n_points(
 f2$fit_dist()
 f2$get_random(8)
 f2$get_proba_density_plot()
+
 
 
 #print(f1$dist_fitted_params)

@@ -37,6 +37,36 @@ model_factor <- R6Class("model_factor",
                          sep = "")
                      invisible(self)
                    },
+                   estim_3_points_poissonpert = function(estim_min = NULL,
+                                                      estim_typical = NULL,
+                                                      estim_max = NULL,
+                                                      range_size = NULL,
+                                                      lambda = NULL,
+                                                      ...) {
+                     # This is a helper function to facilitate
+                     # 3 points simplistic expert estimates
+                     # fitted to the poisson-PERT distribution.
+
+                     if(is.null(range_size)) {
+                       range_size = model_config_get_option("dist_fit", "3_points_poissonpert", "range_size")
+                     }
+
+                     self$dist <- "poissonpert"
+
+                     estim_quantiles <- c(estim_min, estim_typical, estim_max)
+                     estim_probas <- c((1 - range_size) / 2,
+                                       .5,
+                                       1 - (1 - range_size) / 2)
+                     estim_weights <- c(1, 1, 1)
+                     estim_labels <- c("Min.", "Typical", "Max.")
+
+                     # Stores the vectors locally
+                     self$estim_probas <- estim_probas
+                     self$estim_quantiles <- estim_quantiles
+                     self$estim_labels <- estim_labels
+                     self$estim_weights <- estim_weights
+
+                   },
                    estim_3_points_betapert = function(estim_min = NULL,
                                          estim_typical = NULL,
                                          estim_max = NULL,
@@ -48,25 +78,25 @@ model_factor <- R6Class("model_factor",
                      # fitted to the beta-PERT distribution.
 
                      if(is.null(range_size)) {
-                       range_size = model_config_get_option("dist_fit", "3_points_pert", "range_size")
+                       range_size = model_config_get_option("dist_fit", "3_points_betapert", "range_size")
                      }
 
                      if(is.null(lambda)) {
-                       lambda = model_config_get_option("dist_fit", "3_points_pert", "lambda")
+                       lambda = model_config_get_option("dist_fit", "3_points_betapert", "lambda")
                      }
 
                      self$dist <- "betapert"
                      self$dist_fitted_params["lambda"] <- lambda
 
                      estim_quantiles <- c(estim_min, estim_typical, estim_max)
-                     #estim_probas <- c((1 - range_size) / 2,
-                      #                 .5,
-                      #                 1 - (1 - range_size) / 2)
+                     estim_probas <- c((1 - range_size) / 2,
+                                       .5,
+                                       1 - (1 - range_size) / 2)
                      estim_weights <- c(1, 1, 1)
                      estim_labels <- c("Min.", "Typical", "Max.")
 
                      # Stores the vectors locally
-                     self$estim_probas <- NULL
+                     self$estim_probas <- estim_probas
                      self$estim_quantiles <- estim_quantiles
                      self$estim_labels <- estim_labels
                      self$estim_weights <- estim_weights
@@ -119,6 +149,12 @@ model_factor <- R6Class("model_factor",
                        # for more details.
                        self$fit_dist_betapert()
                      }
+                     else if(self$dist == "poissonpert") {
+                       # When named "betapert", we use our custom
+                       # fitting implementation. See the function
+                       # for more details.
+                       self$fit_dist_poissonpert()
+                     }
                      else
                      {
                        stop("unknown or not yet implemented distribution, sorry")
@@ -158,6 +194,16 @@ model_factor <- R6Class("model_factor",
                        fit.weights = self$estim_weights) #self$get_dist_fit_weights())
                      #meanlog <- fitted["meanlog"]
                      #sdlog <- fitted["sdlog"]
+                     self$dist_fitted_params <- fitted
+                   },
+                   fit_dist_poissonpert = function() {
+                     fitted <- get.poisson.par(
+                       p = self$estim_probas,
+                       q = self$estim_quantiles,
+                       show.output = TRUE,
+                       plot = FALSE,
+                       tol = model_config_get_option("dist_fit", "tol"),
+                       fit.weights = self$estim_weights)
                      self$dist_fitted_params <- fitted
                    },
                    fit_dist_pert = function() {
@@ -240,12 +286,12 @@ model_factor <- R6Class("model_factor",
                               max=self$dist_fitted_params["max"],
                               shape=self$dist_fitted_params["shape"]))
                     }
+                    else if(self$dist == "poissonpert") {
+                      return(
+                        rpert(n=n,
+                              lambda=self$dist_fitted_params["lambda"]))
+                    }
                     else if(self$dist == "betapert") {
-                      #message(cat(self$dist,
-                      #            n,
-                      #            self$dist_fitted_params["v"],
-                      #            self$dist_fitted_params["w"],
-                      #            sep="|"))
                       return(
                         rbeta(n=n,
                               shape1=self$dist_fitted_params["v"],
@@ -261,7 +307,40 @@ model_factor <- R6Class("model_factor",
                       stop("distribution not supported, sorry")
                     }
                   },
-                  get_proba_density = function(x) {
+                  cumulative_distribution_function = function(x) {
+                    if( self$dist == "lnorm" ) {
+                      return(
+                        plnorm(
+                          q = x,
+                          meanlog = self$dist_fitted_params["meanlog"],
+                          sdlog = self$dist_fitted_params["sdlog"],
+                          log.p = FALSE ))}
+                    else if( self$dist == "norm" ){
+                      return(
+                        pnorm(
+                          q = x,
+                          mean = self$dist_fitted_params["mean"],
+                          sd = self$dist_fitted_params["sd"],
+                          log.p = FALSE ))}
+                    else if (self$dist == "betapert"){
+                      # re-normalize x
+                      normalized_q <- (x - self$estim_quantiles[1]) /
+                        (self$estim_quantiles[3] - self$estim_quantiles[1])
+
+                      return(
+                        pbeta(
+                          q = normalized_q,
+                          shape1 = self$dist_fitted_params["v"],
+                          shape2 = self$dist_fitted_params["w"]
+                          #TODO: pass the ncp parameter only if it is not null, otherwise this fails.
+                          # ncp = self$dist_fitted_params["ncp"]
+                        )
+                      )
+                    }
+                    else {
+                      stop("distribution not implemented, sorry")}
+                  },
+                  probability_density_function = function(x) {
                     if( self$dist == "lnorm" ) {
                       return(
                         dlnorm(
@@ -277,13 +356,7 @@ model_factor <- R6Class("model_factor",
                           sd = self$dist_fitted_params["sd"],
                           log = FALSE ))}
                     else if (self$dist == "betapert"){
-                      #message(cat(self$dist,
-                      #            x,
-                      #            self$dist_fitted_params["v"],
-                      #            self$dist_fitted_params["w"],
-                      #            sep="|"))
-
-                      # normalize x
+                      # re-normalize x
                       normalized_x <- (x - self$estim_quantiles[1]) /
                         (self$estim_quantiles[3] - self$estim_quantiles[1])
 
@@ -299,7 +372,7 @@ model_factor <- R6Class("model_factor",
                     }
                     else {
                       stop("distribution not implemented, sorry")}},
-                  get_proba_density_plot = function() {
+                  probability_density_function_plot = function() {
 
                     # Define the plot x axis
                     # TODO: Replace this with a function that computes
@@ -311,46 +384,108 @@ model_factor <- R6Class("model_factor",
                     x_end <- max(self$estim_quantiles) * 1.2
 
                     # Prepare the data
-                    df <- data.frame(x=c(x_start, x_end)) #self$estim_min - (self$estim_max - self$estim_min) * .2,
-                                         #self$estim_max + (self$estim_max - self$estim_min) * .2))
+                    df <- data.frame(x=c(x_start, x_end))
 
                     # Configure the graph
                     g_density <- ggplot(df, aes(x)) +
 
-                      # Give a little bit of margin on the graph sides
-                      xlim(x_start, #self$estim_min - (self$estim_max - self$estim_min) * .2
-                           x_end) + #,self$estim_max + (self$estim_max - self$estim_min) * .2) +
-                      #ylim: let it scale automatically
+                    # Give a little bit of margin on the graph sides
+                    xlim(x_start, x_end) +
+                    #ylim: let it scale automatically
 
-                      # Axis titles
-                      ylab("Relative likelihood")  +
-                      xlab("Factor value")  +
+                    # Axis titles
+                    ylab("Relative likelihood")  +
+                    xlab("Factor value")  +
 
-                      # Limit the number of digits on the vertical axis
-                      scale_y_continuous(label = function(x) { round(x,3) }) +
+                    # Limit the number of digits on the vertical axis
+                    scale_y_continuous(label = function(x) { round(x,3) }) +
 
-                      # Display 3 vertical bars to highlight the 3 points of the estimate
+                    # Display 3 vertical bars to highlight the 3 points of the estimate
+                    # TODO: Re-implement with vectors
+                    #geom_vline(xintercept = self$estim_quantiles
+                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[1]) +
+                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[2]) +
+                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[3]) +
+
+                    # Area plot the PDF function with a neutral background
+                    stat_function(fun = self$probability_density_function,
+                                  colour = "#555555",
+                                  geom = "area",
+                                  fill = "white",
+                                  alpha = 0.5 ) +
+
+                    # Area plot of PDF function within the estimation range with a vivid background
+                    stat_function(
+                      colour = "#00aa00",
+                      fun = self$probability_density_function,
+                      geom = 'area',
+                      fill = 'green',
+                      alpha = 0.1,
+                      size = 1.1,
+                      xlim = c(x_start, x_end)) +
+
+                    # On top of the rest, label the 3 vertical bars
                       # TODO: Re-implement with vectors
-                      #geom_vline(xintercept = self$get_dist_fit_quantiles()[1]) +
-                      #geom_vline(xintercept = self$get_dist_fit_quantiles()[2]) +
-                      #geom_vline(xintercept = self$get_dist_fit_quantiles()[3]) +
+                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[2], y = 0, label = "Typical", angle = 90, hjust = -1, vjust = -.2) +
+                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[1], y = 0, label = "Min", angle = 90, hjust = -1, vjust = -.2) +
+                      #annotate(geom = "text", x = self$get_dist_fit_quantiles()[3], y = 0, label = "Max", angle = 90, hjust = -1, vjust = -.2) +
 
-                      # Area plot the PDF function with a neutral background
-                      stat_function(fun = self$get_proba_density, #prob_density_fun,
-                                    colour = "#555555",
-                                    geom = "area",
-                                    fill = "white",
-                                    alpha = 0.5 ) +
+                    # And put a title on top of it
+                    ggtitle("Probability density function")
+
+                    return(g_density)
+                  },
+                  cumulative_distribution_function_plot = function() {
+
+                    # Define the plot x axis
+                    # TODO: Replace this with a function that computes
+                    # automatically a more meaningful axis than that,
+                    # taking into account situations where the point
+                    # estimates are all stuffed on the left or the right
+                    # of the distribution.
+                    x_start <- min(self$estim_quantiles) * .8
+                    x_end <- max(self$estim_quantiles) * 1.2
+
+                    # Prepare the data
+                    df <- data.frame(x=c(x_start, x_end))
+
+                    # Configure the graph
+                    g1 <- ggplot(df, aes(x)) +
+
+                    # Give a little bit of margin on the graph sides
+                    xlim(x_start, x_end) +
+                    #ylim: let it scale automatically
+
+                    # Axis titles
+                    ylab("Probability")  +
+                    xlab("Factor value")  +
+
+                    # Limit the number of digits on the vertical axis
+                    scale_y_continuous(label = function(x) { round(x,3) }) +
+
+                    # Display 3 vertical bars to highlight the 3 points of the estimate
+                    # TODO: Re-implement with vectors
+                    #geom_vline(xintercept = self$estim_quantiles
+                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[1]) +
+                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[2]) +
+                    #geom_vline(xintercept = self$get_dist_fit_quantiles()[3]) +
+
+                    # Area plot the PDF function with a neutral background
+                    stat_function(fun = self$cumulative_distribution_function,
+                                  colour = "#555555",
+                                  geom = "area",
+                                  fill = "white",
+                                  alpha = 0.5 ) +
 
                       # Area plot of PDF function within the estimation range with a vivid background
                       stat_function(
                         colour = "#00aa00",
-                        fun = self$get_proba_density, #prob_density_fun,
+                        fun = self$cumulative_distribution_function,
                         geom = 'area',
                         fill = 'green',
                         alpha = 0.1,
                         size = 1.1,
-                        xlim = c(x_start, x_end)) + #c(self$get_dist_fit_quantiles()[1],self$get_dist_fit_quantiles()[3])) +
+                        xlim = c(x_start, x_end)) +
 
                       # On top of the rest, label the 3 vertical bars
                       # TODO: Re-implement with vectors
@@ -359,17 +494,24 @@ model_factor <- R6Class("model_factor",
                       #annotate(geom = "text", x = self$get_dist_fit_quantiles()[3], y = 0, label = "Max", angle = 90, hjust = -1, vjust = -.2) +
 
                       # And put a title on top of it
-                      ggtitle("Probability density function")
+                      ggtitle("Cumulative distribution function")
 
-                    return(g_density)
+                    return(g1)
+                  }
+                  ,plot = function() {
+                    g1 <- self$probability_density_function_plot()
+                    g2 <- self$cumulative_distribution_function_plot()
+                    multiplot(g1,
+                              g2,
+                              cols=2)
                   }
                  ),
                  active = list(
                    dist = function(value,...) {
-                     if(missing(value)) return(private$private_dist)
+                     if(missing(value)) {
+                       return(private$private_dist) }
                      else {
-                       private$private_dist <- value
-                     }
+                       private$private_dist <- value }
                    },
                    dist_fitted_params = function(value, ...) {
                      if(missing(value)) return(private$private_dist_fitted_params)
@@ -377,64 +519,13 @@ model_factor <- R6Class("model_factor",
                        private$private_dist_fitted_params <- value
                      }
                    }
-                   #estim_max = function(value) {
-                    # if (missing(value)) return(private$private_estim_max)
-                    # else {
-                    #   stopifnot(is.numeric(value),
-                    #             is.null(self$estim_min) | self$estim_min < value,
-                    #             is.null(self$typical) | self$typical < value)
-                    #   private$private_estim_max <- value
-                    # }
-                   #},
-                   #estim_min = function(value) {
-                    # if (missing(value)) return(private$private_estim_min)
-                    # else {
-                    #   stopifnot(is.numeric(value))
-                    #   private$private_estim_min <- value
-                    # }
-                   #},
-                   #estim_typical = function(value) {
-                    # if (missing(value)) return(private$private_estim_typical)
-                    # else private$private_estim_typical <- value
-                   #},
-                   #range_max = function(value) {
-                    # if (missing(value)) {
-                    #   return( 1 - (1 - self$range_size) / 2 )
-                    # }
-                    # else {
-                    #   stop("range_max cannot be set. please set range_size instead.")
-                    # }
-                   #},
-                   #range_min = function(value) {
-                    # if (missing(value)) {
-                    #   return( (1 - self$range_size) / 2 )
-                    # }
-                    # else {
-                    #   warning("range_min cannot be set. please set range_size instead.")
-                    # }
-                   #},
-                   #range_typical = function(value) {
-                    # if (missing(value)) {
-                    #   return( .5 )
-                    # }
-                    # else {
-                    #   warning("range_typical cannot be set. please set range_size instead.")
-                    # }
-                   #},
-                   #range_size = function(value) {
-                    # if (missing(value)) return(private$private_range_size)
-                    # else {
-                    #   stopifnot(is.numeric(value),value > 0, value < 1)
-                    #   private$private_range_size <- value
-                    # }
-                   #}
                  ),
                  private = list(
                    private_dist = NULL,
-                   private_dist_fitted_params = NULL,
-                   private_estim_min = NULL,
-                   private_estim_typical = NULL,
-                   private_estim_max = NULL,
-                   private_range_size = NULL
+                   private_dist_fitted_params = NULL
+                   #private_estim_min = NULL,
+                   #private_estim_typical = NULL,
+                   #private_estim_max = NULL,
+                   #private_range_size = NULL
                  )
 )

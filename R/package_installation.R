@@ -10,3 +10,4 @@
 #install.packages("fitdistrplus")
 #install.packages("config")
 #install.packages("triangle")
+#install.packages("rsconnect")
