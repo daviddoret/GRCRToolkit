@@ -1,5 +1,5 @@
 
-f1 <- model_factor$new(name = "x", dist = "beta-pert")
+f1 <- model_factor$new(name = "impact sample")
 f1$estim_3_points_betapert(
   estim_min = 200,
   estim_typical = 300,
@@ -9,11 +9,23 @@ f1$fit_dist()
 f1$get_random(8)
 f1$plot()
 
-f2 <- model_factor$new(name = "y", dist = "norm")
+f2 <- model_factor$new(name = "norm sample", dist = "norm")
 f2$estim_n_points(
   estim_quantiles = c(10,50,100,150,160),
   estim_probas = c(.1,.2,.5,.8,.9))
 f2$fit_dist()
 f2$get_random(8)
 f2$plot()
+
+f3 <- model_factor$new(name = "freq sample")
+f3$estim_3_points_poissonpert(
+  estim_min = 0.1,
+  estim_typical = 0.2,
+  estim_max = 2,
+  range_size = .9)
+f3$fit_dist()
+f3$get_random(8)
+f3$plot()
+
+
 

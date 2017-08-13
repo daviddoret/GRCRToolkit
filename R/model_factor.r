@@ -20,7 +20,7 @@ library(ggplot2)
 #' @export
 model_factor <- R6Class("model_factor",
                  public = list(
-                   initialize = function(name, dist, ...) {
+                   initialize = function(name, dist = NULL, ...) {
                      self$dist <- dist
                    },
                    estim_probas = NULL,
