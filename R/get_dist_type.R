@@ -43,6 +43,7 @@ get_dist_type <- function(dist_name, ...) {
          pois = "discrete",
          poisson = "discrete",
          poisson_binomial = "discrete",
+         poissonpert = "discrete",
          rademacher = "discrete"
          )
   if(is.null(output)) {

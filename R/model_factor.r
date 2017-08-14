@@ -197,7 +197,7 @@ model_factor <- R6Class("model_factor",
                      self$dist_fitted_params <- fitted
                    },
                    fit_dist_poissonpert = function() {
-                     fitted <- get.poisson.par(
+                     fitted <- get.pois.par(
                        p = self$estim_probas,
                        q = self$estim_quantiles,
                        show.output = TRUE,
@@ -288,7 +288,7 @@ model_factor <- R6Class("model_factor",
                     }
                     else if(self$dist == "poissonpert") {
                       return(
-                        rpert(n=n,
+                        rpois(n=n,
                               lambda=self$dist_fitted_params["lambda"]))
                     }
                     else if(self$dist == "betapert") {
@@ -322,11 +322,16 @@ model_factor <- R6Class("model_factor",
                           mean = self$dist_fitted_params["mean"],
                           sd = self$dist_fitted_params["sd"],
                           log.p = FALSE ))}
+                    else if (self$dist == "poissonpert") {
+                      return(
+                        ppois(
+                          q = x,
+                          lambda = self$dist_fitted_params["lambda"],
+                          log.p = FALSE ))}
                     else if (self$dist == "betapert"){
                       # re-normalize x
                       normalized_q <- (x - self$estim_quantiles[1]) /
                         (self$estim_quantiles[3] - self$estim_quantiles[1])
-
                       return(
                         pbeta(
                           q = normalized_q,
@@ -339,6 +344,16 @@ model_factor <- R6Class("model_factor",
                     }
                     else {
                       stop("distribution not implemented, sorry")}
+                  },
+                  probability_mass_function = function(x) {
+                    args <- list(self$dist_fitted_params)
+                    args[["dist_name"]] <- self$dist
+                    args[["x"]] <- c(x)
+                    print(args)
+                    return(
+                      do.call(
+                        what = probability_mass_function,
+                        args = args))
                   },
                   probability_density_function = function(x) {
                     if( self$dist == "lnorm" ) {
@@ -371,144 +386,7 @@ model_factor <- R6Class("model_factor",
                       )
                     }
                     else {
-                      stop("distribution not implemented, sorry")}},
-                  probability_density_function_plot = function() {
-
-                    # Define the plot x axis
-                    # TODO: Replace this with a function that computes
-                    # automatically a more meaningful axis than that,
-                    # taking into account situations where the point
-                    # estimates are all stuffed on the left or the right
-                    # of the distribution.
-                    x_start <- min(self$estim_quantiles) * .8
-                    x_end <- max(self$estim_quantiles) * 1.2
-
-                    # Prepare the data
-                    df <- data.frame(x=c(x_start, x_end))
-
-                    # Configure the graph
-                    g_density <- ggplot(df, aes(x)) +
-
-                    # Give a little bit of margin on the graph sides
-                    xlim(x_start, x_end) +
-                    #ylim: let it scale automatically
-
-                    # Axis titles
-                    ylab("Relative likelihood")  +
-                    xlab("Factor value")  +
-
-                    # Limit the number of digits on the vertical axis
-                    scale_y_continuous(label = function(x) { round(x,3) }) +
-
-                    # Display 3 vertical bars to highlight the 3 points of the estimate
-                    geom_vline(xintercept = self$estim_quantiles,
-                               color = model_config_get_option("plot", "pdf", "estim_interecept", "color"),
-                               size = model_config_get_option("plot", "pdf", "estim_interecept", "size")) +
-
-                    # Area plot the function
-                    stat_function(
-                      colour = model_config_get_option("plot", "pdf", "area", "color"),
-                      fun = self$probability_density_function,
-                      geom = 'area',
-                      fill = model_config_get_option("plot", "pdf", "area", "fill"),
-                      alpha = model_config_get_option("plot", "pdf", "area", "alpha"),
-                      size = model_config_get_option("plot", "pdf", "area", "size"),
-                      xlim = c(x_start, x_end)) +
-
-                    # On top of the rest, label the vertical bars
-                      # TODO: Show transparently the difference
-                      # between the original estimate and the
-                      # corresponding quantile in the distribution.
-                      # Depending on the shape of the selected
-                      # distribution and the estimates, the
-                      # difference may be very important, e.g.
-                      # if estimates are skewed to the right
-                      # and the distribution is log normal.
-                    annotate(geom = "text",
-                             x = self$estim_quantiles,
-                             y = 0,
-                             label = self$estim_labels,
-                             angle = 90,
-                             hjust = -1,
-                             vjust = -.2) +
-
-                    # And put a title on top of it
-                    ggtitle("Probability density function")
-
-                    return(g_density)
-                  },
-                  cumulative_distribution_function_plot = function() {
-
-                    # Define the plot x axis
-                    # TODO: Replace this with a function that computes
-                    # automatically a more meaningful axis than that,
-                    # taking into account situations where the point
-                    # estimates are all stuffed on the left or the right
-                    # of the distribution.
-                    x_start <- min(self$estim_quantiles) * .8
-                    x_end <- max(self$estim_quantiles) * 1.2
-
-                    # Prepare the data
-                    df <- data.frame(x=c(x_start, x_end))
-
-                    # Configure the graph
-                    g1 <- ggplot(df, aes(x)) +
-
-                    # Give a little bit of margin on the graph sides
-                    xlim(x_start, x_end) +
-                    #ylim: let it scale automatically
-
-                    # Axis titles
-                    ylab("Probability")  +
-                    xlab("Factor value")  +
-
-                    # Limit the number of digits on the vertical axis
-                    scale_y_continuous(label = function(x) { round(x,3) }) +
-
-                    # Display 3 vertical bars to highlight the 3 points of the estimate
-                    geom_vline(xintercept = self$estim_quantiles,
-                               color = model_config_get_option("plot", "cdf", "estim_interecept", "color"),
-                               size = model_config_get_option("plot", "cdf", "estim_interecept", "size")) +
-
-                    # Area plot the function
-                    stat_function(
-                      colour = model_config_get_option("plot", "cdf", "area", "color"),
-                      fun = self$cumulative_distribution_function,
-                      geom = 'area',
-                      fill = model_config_get_option("plot", "cdf", "area", "fill"),
-                      alpha = model_config_get_option("plot", "cdf", "area", "alpha"),
-                      size = model_config_get_option("plot", "cdf", "area", "size"),
-                      xlim = c(x_start, x_end)) +
-
-                    # On top of the rest, label the vertical bars
-                      # TODO: Show transparently the difference
-                      # between the original estimate and the
-                      # corresponding quantile in the distribution.
-                      # Depending on the shape of the selected
-                      # distribution and the estimates, the
-                      # difference may be very important, e.g.
-                      # if estimates are skewed to the right
-                      # and the distribution is log normal.
-                    annotate(geom = "text",
-                             x = self$estim_quantiles,
-                             y = 0,
-                             label = self$estim_labels,
-                             angle = 90,
-                             hjust = -1,
-                             vjust = -.2) +
-
-                    # And put a title on top of it
-                    ggtitle("Cumulative distribution function")
-
-                    return(g1)
-                  }
-                  ,plot = function() {
-                    g1 <- self$probability_density_function_plot()
-                    g2 <- self$cumulative_distribution_function_plot()
-                    multiplot(g1,
-                              g2)
-                              #cols=2)
-                  }
+                      stop("distribution not implemented, sorry")}}
                  ),
                  active = list(
                    dist = function(value,...) {
@@ -527,9 +405,5 @@ model_factor <- R6Class("model_factor",
                  private = list(
                    private_dist = NULL,
                    private_dist_fitted_params = NULL
-                   #private_estim_min = NULL,
-                   #private_estim_typical = NULL,
-                   #private_estim_max = NULL,
-                   #private_range_size = NULL
                  )
 )

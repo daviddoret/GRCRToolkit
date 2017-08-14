@@ -1,13 +1,17 @@
+library(ggplot2)
+library(R6)
+library(rriskDistributions)
+library(fitdistrplus)
 
 f1 <- model_factor$new(name = "impact sample")
 f1$estim_3_points_betapert(
   estim_min = 200,
-  estim_typical = 300,
+  estim_typical = 1300,
   estim_max = 1500,
   range_size = .9)
 f1$fit_dist()
 f1$get_random(8)
-f1$plot()
+plot_factor(f1)
 
 f2 <- model_factor$new(name = "norm sample", dist = "norm")
 f2$estim_n_points(
@@ -15,17 +19,18 @@ f2$estim_n_points(
   estim_probas = c(.1,.2,.5,.8,.9))
 f2$fit_dist()
 f2$get_random(8)
-f2$plot()
+plot_factor(f2)
 
 f3 <- model_factor$new(name = "freq sample")
 f3$estim_3_points_poissonpert(
-  estim_min = 0.1,
-  estim_typical = 0.2,
-  estim_max = 2,
+  estim_min = 0,
+  estim_typical = 2,
+  estim_max = 5,
   range_size = .9)
 f3$fit_dist()
 f3$get_random(8)
-f3$plot()
+f3$probability_mass_function(c(1,2,3,4))
+plot_factor(f3)
 
 
 

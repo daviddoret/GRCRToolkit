@@ -24,8 +24,9 @@ model_config_defaults <- list(
   dist_fit.beta.ncp = NULL,
   # dist_fit.beta.ncp = 0,
 
-  plot.pdf.estim_interecept.color = "dodgerblue3",
-  plot.pdf.estim_interecept.size = 0.5,
+  plot.estimates.xintercept.color = "dodgerblue3",
+  plot.estimates.xintercept.size = 0.5,
+
   plot.pdf.area.color = "#00aa00",
   plot.pdf.area.fill = "#55ff55",
   plot.pdf.area.alpha = 0.1,
@@ -36,7 +37,12 @@ model_config_defaults <- list(
   plot.cdf.area.color = "#00aa00",
   plot.cdf.area.fill = "#55ff55",
   plot.cdf.area.alpha = 0.1,
-  plot.cdf.area.size = 0.5
+  plot.cdf.area.size = 0.5,
+
+  plot.mdf.bar.color = "#00aa00",
+  plot.mdf.bar.fill = "#55ff55",
+  plot.mdf.bar.alpha = 0.1,
+  plot.mdf.bar.size = 0.5
 
 )
 
