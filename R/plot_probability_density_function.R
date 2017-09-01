@@ -13,6 +13,12 @@ pacman::p_load(ggplot2,labeling)
 #install_github("tidyverse/ggplot2")
 
 
+# FUTURE ENHANCEMENT:
+# - Add a nice cat and whisker plot
+#   showing the key moments,
+#   get inspiration from here:
+#   https://en.wikipedia.org/wiki/Probability_density_function
+
 #' plot_probability_density_function
 #'
 #' Produces a good looking graph of a probability density function.
@@ -50,14 +56,9 @@ plot_probability_density_function = function(
 
     # Give a little bit of margin on the graph sides
     xlim(x_start, x_end) +
-    #ylim: let it scale automatically
-
-    # Axis titles
-    #ylab("Relative likelihood")  +
-    #xlab("Factor value")  +
 
     # Limit the number of digits on the vertical axis
-    # scale_y_continuous(label = function(x) { round(x,3) }) +
+    scale_y_continuous(label = function(x) { round(x,3) }) +
 
     # Area plot the function
     stat_function(

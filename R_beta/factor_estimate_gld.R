@@ -25,7 +25,7 @@ factor_estimate_gld <- R6Class(
     },
     get_print = function(...) {
       return(paste0(super$get_print(), "\nFitted distribution parameters:",
-                    " λ1 = ", self$lambda1, " ,λ2 = ", self$lambda2, " ,λ3 = ", self$lambda3, " ,λ4 = ", self$lambda4))
+                    "\nλ1 = ", self$lambda1, " ,λ2 = ", self$lambda2, " ,λ3 = ", self$lambda3, " ,λ4 = ", self$lambda4))
     }
   ),
   active = list(
