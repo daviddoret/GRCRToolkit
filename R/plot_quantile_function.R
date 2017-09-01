@@ -13,7 +13,7 @@ pacman::p_load(ggplot2,labeling)
 #install_github("tidyverse/ggplot2")
 
 
-#' plot_probability_density_function
+#' plot_quantile_function
 #'
 #' Produces a good looking graph of a probability density function.
 #'
@@ -26,12 +26,12 @@ pacman::p_load(ggplot2,labeling)
 #' @return a good looking graph
 #'
 #' @examples
-#' fun <- function(x, ...) { return(dlnorm(x = x, meanlog = 100, sdlog = 20, log = FALSE))  }
-#' graph <- plot_probability_density_function(fun = fun, x_start = 10, x_end = 150)
+#' fun <- function(x, ...) { return(qlnorm(p = x, meanlog = 100, sdlog = 20, log = FALSE))  }
+#' graph <- plot_quantile_function(fun = fun, x_start = 10, x_end = 150)
 #' graph
 #'
 #' @export
-plot_probability_density_function = function(
+plot_quantile_function = function(
   fun,
   x_start,
   x_end,
@@ -40,7 +40,9 @@ plot_probability_density_function = function(
   caption = NULL, ...) {
 
   # And put a title on top of it
-  if(is.null(title)){ title <- "Probability Density Function" }
+  if(is.null(title)){ title <- "Quantile Function" }
+  if(is.null(x_start)){ x_start <- 0 }
+  if(is.null(x_end)){ x_end <- 1 }
 
   # Prepare the data
   df <- data.frame(x=c(x_start, x_end))
@@ -61,20 +63,18 @@ plot_probability_density_function = function(
 
     # Area plot the function
     stat_function(
-      colour = model_config_get_option("plot", "pdf", "area", "color"),
+      colour = model_config_get_option("plot", "qdf", "area", "color"),
       fun = fun,
-      geom = 'area',
-      fill = model_config_get_option("plot", "pdf", "area", "fill"),
-      alpha = model_config_get_option("plot", "pdf", "area", "alpha"),
-      size = model_config_get_option("plot", "pdf", "area", "size"),
+      geom = 'line',
+      size = model_config_get_option("plot", "qdf", "area", "size"),
       xlim = c(x_start, x_end)) +
 
     labs(
       title = title,
       subtitle = subtitle,
       caption = caption,
-      x = "Factor value",
-      y = "Relative likelihood") +
+      x = "Cumulative probability",
+      y = "Factor value") +
     #ggtitle(title)
 
     theme(plot.title = element_text(size = 12, face = "bold"))

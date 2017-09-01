@@ -1,4 +1,6 @@
-library(ggplot2)
+# Package preparation
+if (!require(pacman)) install.packages(pacman)
+pacman::p_load(ggplot2)
 
 #' overplot_estimates
 #'
@@ -18,13 +20,14 @@ library(ggplot2)
 #' graph_enriched <- overplot_estimates(graph=graph, estim_quantiles = c(50,90), estim_labels = c("a","b"))
 #' graph_enriched
 #'
-overplot_estimates <- function(graph, estim_quantiles, estim_labels, ...) {
+overplot_estimates <- function(graph, estim_quantiles, estim_labels, color, ...) {
+  if(is.null(color)){ color = model_config_get_option("plot", "estimates", "xintercept", "color") }
   return(
     graph +
     # Display 3 vertical bars to highlight the 3 points of the estimate
     geom_vline(
       xintercept = estim_quantiles,
-      color = model_config_get_option("plot", "estimates", "xintercept", "color"),
+      color = color,
       size = model_config_get_option("plot", "estimates", "xintercept", "size")) +
 
     # On top of the rest, label the vertical bars

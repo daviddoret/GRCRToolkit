@@ -2,6 +2,8 @@
 
 export(get_dist_type)
 export(measure)
+export(model_estimate)
+export(model_estimate_gldpert)
 export(model_factor)
 export(plot_cumulative_distribution_function)
 export(plot_probability_density_function)

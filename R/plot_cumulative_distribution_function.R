@@ -1,4 +1,6 @@
-library(ggplot2)
+# Package preparation
+if (!require(pacman)) install.packages(pacman)
+pacman::p_load(ggplot2,labeling)
 
 #' plot_cumulative_distribution_function
 #'
@@ -18,7 +20,16 @@ library(ggplot2)
 #' graph
 #'
 #' @export
-plot_cumulative_distribution_function <- function(fun, x_start, x_end, ...) {
+plot_cumulative_distribution_function <- function(
+  fun,
+  x_start,
+  x_end,
+  title = NULL,
+  subtitle = NULL,
+  caption = NULL, ...) {
+
+  # And put a title on top of it
+  if(is.null(title)){ title <- "Cumulative Distribution Function" }
 
   # Prepare the data
   df <- data.frame(x=c(x_start, x_end))
@@ -31,8 +42,8 @@ plot_cumulative_distribution_function <- function(fun, x_start, x_end, ...) {
     #ylim: let it scale automatically
 
     # Axis titles
-    ylab("Probability")  +
-    xlab("Factor value")  +
+    #ylab("Probability")  +
+    #xlab("Factor value")  +
 
     # Limit the number of digits on the vertical axis
     scale_y_continuous(label = function(x) { round(x,3) }) +
@@ -41,14 +52,21 @@ plot_cumulative_distribution_function <- function(fun, x_start, x_end, ...) {
     stat_function(
       colour = model_config_get_option("plot", "cdf", "area", "color"),
       fun = fun,
-      geom = 'area',
-      fill = model_config_get_option("plot", "cdf", "area", "fill"),
-      alpha = model_config_get_option("plot", "cdf", "area", "alpha"),
+      geom = 'line',
       size = model_config_get_option("plot", "cdf", "area", "size"),
       xlim = c(x_start, x_end)) +
 
     # And put a title on top of it
-    ggtitle("Cumulative distribution function")
+    #ggtitle("Cumulative distribution function")
+    labs(
+      title = title,
+      subtitle = subtitle,
+      caption = caption,
+      x = "Factor value",
+      y = "Cumulative probability") +
+
+    theme(plot.title = element_text(size = 12, face = "bold"))
+    #ggtitle(title)
 
   return(graph)
 }

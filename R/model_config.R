@@ -1,6 +1,10 @@
 
 model_config_defaults <- list(
 
+  # This special parameter forces the config function
+  # to output all its results to the console.
+  model_config_defaults.verbose = FALSE,
+
   # Tolerance for distribution fitting may be started
   # from a default config value but...
   # QUESTION: it could be dynamically adapted to facilitate
@@ -30,19 +34,27 @@ model_config_defaults <- list(
   plot.pdf.area.color = "#00aa00",
   plot.pdf.area.fill = "#55ff55",
   plot.pdf.area.alpha = 0.1,
-  plot.pdf.area.size = 0.5,
+  plot.pdf.area.size = 1,
 
   plot.cdf.estim_interecept.color = "dodgerblue3",
   plot.cdf.estim_interecept.size = 0.5,
   plot.cdf.area.color = "#00aa00",
-  plot.cdf.area.fill = "#55ff55",
-  plot.cdf.area.alpha = 0.1,
-  plot.cdf.area.size = 0.5,
+  plot.cdf.area.size = 1,
+
+  plot.qdf.estim_interecept.color = "dodgerblue3",
+  plot.qdf.estim_interecept.size = 0.5,
+  plot.qdf.area.color = "#00aa00",
+  plot.qdf.area.size = 1,
 
   plot.mdf.bar.color = "#00aa00",
   plot.mdf.bar.fill = "#55ff55",
   plot.mdf.bar.alpha = 0.1,
-  plot.mdf.bar.size = 0.5
+  plot.mdf.bar.size = 0.5,
+
+  model_estimate_gldpert.range_size = .9,
+
+  # Estimation method: triangular distribution + 3 points
+  triangle_3points.range = .9
 
 )
 
@@ -64,10 +76,12 @@ model_config_get_option <- function(...){
   {
     stop("No available value for the requested configuration item: ", item_key)
   }
-  else
-  {
-    message(item_key, " = ", item_value, ", default: ", item_default_value)
-  }
+  #else
+  #{
+  # TODO: Implement if verbose with recurring call,
+  #       but avoiding infinite loops
+  #  # message(item_key, " = ", item_value, ", default: ", item_default_value)
+  #}
   return (item_value)
 }
 
