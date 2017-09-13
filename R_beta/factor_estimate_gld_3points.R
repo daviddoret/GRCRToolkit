@@ -15,8 +15,9 @@ factor_estimate_gld_3points <- R6Class(
         estimation_method_name = "PERT-like 3 points estimate", ...)
     },
     fit_distribution = function(...) {
-      self$optimize_lambda1()
-
+      self$optimize_lambda1(...)
+      self$optimize_lambda4(...)
+      self$optimize_lambda3(...)
     },
     optimize_lambda1 = function(...) {
       # this parameter is obvious
@@ -113,19 +114,22 @@ factor_estimate_gld_3points <- R6Class(
 
     },
     get_print = function(...) {
-      return(paste0(super$get_print(),
-                    "\nEstimation parameters:",
-                    "\n\tmin = ", self$min_value, " (", self$min_proba, ")",
-                    " ,mode = ", self$mode_value, " (", self$mode_proba, ")",
-                    " ,max = ", self$max_value, " (", self$max_proba, ")",
-                    "\nFitted quantiles:",
-                    "\n\tmin = ", round(self$get_quantile(self$min_proba),2), " (", self$min_proba, ")",
-                    " ,mode = ", round(self$get_quantile(self$mode_proba),2), " (", self$mode_proba, ")",
-                    " ,max = ", round(self$get_quantile(self$max_proba),2), " (", self$max_proba, ")",
-                    "\nFitted probabilities:",
-                    "\n\tmin = ", self$min_value, " (", round(self$get_probability(self$min_value),2), ")",
-                    " ,mode = ", self$mode_value, " (", round(self$get_probability(self$mode_value),2), ")",
-                    " ,max = ", self$max_value, " (", round(self$get_probability(self$max_value),2), ")"
+      return(c(super$get_print(),
+               "Estimation parameters:",
+               paste0(
+                    " min = ", fn(self$min_value,2), " (", fn(self$min_proba,2), ")",
+                    " ,mode = ", fn(self$mode_value,2), " (", fn(self$mode_proba,2), ")",
+                    " ,max = ", fn(self$max_value,2), " (", fn(self$max_proba,2), ")"),
+               "Fitted quantiles:",
+               paste0(
+                    " min = ", fn(self$get_quantile(self$min_proba), 2), " (", fn(self$min_proba,2), ")",
+                    " ,mode = ", fn(self$get_quantile(self$mode_proba), 2), " (", fn(self$mode_proba,2), ")",
+                    " ,max = ", fn(self$get_quantile(self$max_proba), 2), " (", fn(self$max_proba,2), ")"),
+               "Fitted probabilities:",
+               paste0(
+                    " min = ", fn(self$min_value,2), " (", fn(self$get_probability(self$min_value), 2), ")",
+                    " ,mode = ", fn(self$mode_value,2), " (", fn(self$get_probability(self$mode_value), 2), ")",
+                    " ,max = ", fn(self$max_value,2), " (", fn(self$get_probability(self$max_value), 2), ")")
                     ))},
     reset_graph_limits = function() {
       # Set default scale margins containing all estimation parameters for pretty graph rendering.
@@ -133,8 +137,12 @@ factor_estimate_gld_3points <- R6Class(
       self$graph_value_end <- self$max_value #+ (self$max_value - self$min_value) * .05
       self$graph_probability_start <- self$min_proba / 4
       self$graph_probability_end <- self$max_proba + (1 - self$max_proba) / 4
+    },
+    simulate = function(n = NULL) {
+      if(is.null(n)) { n <- 3000 }
+      factor_value <- self$get_random(n = n)
+      self$simulation_data <- data.frame(factor_value)
     }
-
   ),
   active = list(
     min_value = function(value,...) {

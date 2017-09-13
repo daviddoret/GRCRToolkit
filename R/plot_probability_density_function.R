@@ -1,6 +1,6 @@
 # Package preparation
 if (!require(pacman)) install.packages(pacman)
-pacman::p_load(ggplot2,labeling)
+pacman::p_load(colorpsace, ggplot2,labeling)
 
 # Package tweaking to get github version of ggplot2,
 # in such a way as to benefit from the new labs function with subtitles.
@@ -59,6 +59,8 @@ plot_probability_density_function = function(
 
     # Limit the number of digits on the vertical axis
     scale_y_continuous(label = function(x) { round(x,3) }) +
+
+    # coord_trans(x="log2") +
 
     # Area plot the function
     stat_function(

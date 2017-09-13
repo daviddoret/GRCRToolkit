@@ -1,6 +1,6 @@
 # Package preparation
 if (!require(pacman)) install.packages(pacman)
-pacman::p_load(ggplot2,labeling)
+pacman::p_load(colorspace, ggplot2, labeling)
 
 # Package tweaking to get github version of ggplot2,
 # in such a way as to benefit from the new labs function with subtitles.
