@@ -31,6 +31,7 @@ factor_estimate <- R6Class(
           paste0("Distribution fit: ", self$distribution_name),
           "Moments of the fitted distribution:",
           paste0(
+            " mode = ", fn(self$dist_mode,4),
             " μ = ", fn(self$dist_mean,4),
             " ,σ = ", fn(self$dist_sd,4),
             " ,σ² = ", fn(self$dist_variance,4),
@@ -85,8 +86,8 @@ factor_estimate <- R6Class(
         vignette,
         self$graph_density(x_start = x_start, x_end = x_end),
         self$graph_probability(x_start = x_start, x_end = x_end),
-        self$graph_quantile(),
-        layout = matrix(c(1,2,3,4), nrow=4, byrow=TRUE)))
+        #self$graph_quantile(),
+        layout = matrix(c(1,2,3), nrow=3, byrow=TRUE)))
         #layout = matrix(c(1,1,1,2,3,4,2,3,4,2,3,4,2,3,4), nrow=5, byrow=TRUE)))
         #cols = 3))
     },
@@ -128,6 +129,12 @@ factor_estimate <- R6Class(
       else { private$private_graph_probability_end <- value }},
     # Standard moments of the fitted distribution
     # These are conditionnaly implemented by the subclasses
+    # if analytical solutions are available.
+    # At this level, we may only rely on optimization to
+    # estimate solutions.
+    dist_mode = function(value,...) {
+      if(missing(value)) { return(get_mode_from_pdf(pdf = self$get_density)) }
+      else { stop("This is a read-only attribute") }},
     dist_mean = function(value,...) {
       if(missing(value)) { return(NA) }
       else { stop("This is an abstract attribute, it must be implemented by a subclass") }},

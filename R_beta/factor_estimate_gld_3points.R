@@ -14,16 +14,77 @@ factor_estimate_gld_3points <- R6Class(
       super$initialize(
         estimation_method_name = "PERT-like 3 points estimate", ...)
     },
-    fit_distribution = function(...) {
-      self$optimize_lambda1(...)
-      self$optimize_lambda4(...)
-      self$optimize_lambda3(...)
+    fit_dist = function(...) {
+      self$fit_dist_step01_location(...)
+      self$fit_dist_step02_scale(...)
+      #self$calculate_lambda4(...)
+      #self$calculate_lambda3(...)
     },
-    optimize_lambda1 = function(...) {
-      # this parameter is obvious
+    fit_dist_step01_location = function(...) {
+      # first, we calculate lambda1 (PDF shape location).
       self$lambda1 <- self$mode_value
     },
-    optimize_lambda3 = function() {
+    fit_dist_step02_scale = function() {
+      # after lambda1 (location), we calculate lambda2 (PDF shape size or scale).
+      # at this point, we don't consider skewness and assume shape symmetry.
+      # lambda2 is like a "zoom" for the PDF,
+      # but this parameter's value is inversely proportional to the shape size or scale.
+      # to find an initial best match, we follow this procedure:
+      # 0). "Neutralize" skewness parameters lambda3 and lambda4 setting them to -1
+      # 1). Take an arbitrary PDF centered around 0 with lambda2 = e (and lambda3 & 4 set at - 1),
+      # 2). Find the ratio between lambda2 and the desired quantile.
+      # 3). Apply this ratio to the size / scale of the target distribution (provided in the estimation parameters).
+
+      # neutralize skewness
+      self$lambda3 <- -1
+      self$lambda4 <- -1
+
+      # because the 3 points estimates may be skewed,
+      # we choose one of the two sides.
+      # here, we decide to work with the larger side,
+      # which means we will need to skew the other side
+      # afterward.
+      left_value_range <- self$mode_value - self$min_value
+      left_value_range
+      right_value_range <- self$max_value - self$mode_value
+      right_value_range
+
+      # which side should we use?
+      side <- NULL
+      target_proba <- NULL
+      if(left_value_range > right_value_range) {
+        side <- "left"
+        target_proba <- self$min_proba
+      } else {
+        side <- "right"
+        target_proba <- 1 - self$max_proba
+      }
+      side
+
+      # if distribution was zero-centered
+      # and we wanted its size to fit,
+      # what would be the quantile value for that probability ?
+      target_value <- NULL
+      if(side == "left")
+      {
+        target_value <- - left_value_range
+      } else {
+        target_value <- - right_value_range
+      }
+
+      magic_value <- qgl(p = target_proba, lambda1 = 0, lambda2 = exp(1), lambda3 = -1, lambda4 = -1)
+
+      magic_ratio <- magic_value / target_value
+
+      magic_lambda2 = abs(exp(1) * magic_ratio)
+
+      result <- qgl(p = target_proba, lambda1 = self$mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
+      message(paste0("result: ",result))
+
+      self$lambda2 <- magic_lambda2
+
+      },
+    calculate_lambda3 = function() {
 
       # pgl does not support vectors in the lambda3 parameter,
       # (which I must say is perfectly reasonable).
@@ -68,7 +129,7 @@ factor_estimate_gld_3points <- R6Class(
       fg3$lambda3 <- optimization$estimate
 
     },
-    optimize_lambda4 = function() {
+    calculate_lambda4 = function() {
 
       # pgl does not support vectors in the lambda4 parameter,
       # (which I must say is perfectly reasonable).
