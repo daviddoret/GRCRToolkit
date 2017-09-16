@@ -14,17 +14,86 @@ factor_estimate_gld_3points <- R6Class(
       super$initialize(
         estimation_method_name = "PERT-like 3 points estimate", ...)
     },
-    fit_dist = function(...) {
-      self$fit_dist_step01_location(...)
-      self$fit_dist_step02_scale(...)
-      #self$calculate_lambda4(...)
-      #self$calculate_lambda3(...)
+    fit_dist = function(max_iteration = NULL, precision = NULL, ...) {
+
+      if(is.null(max_iteration)) { max_iteration <- 256 }
+      if(is.null(precision)) { precision <- 1 } # Expressed in quantile value.
+
+      # Unfortunately, I couldn't find an out-of-the-box optimization
+      # function that would solve this with an abritrary precision.
+      # So I quickly developed here my own. But it is probably
+      # not top-efficient so if anyone finds a cool and efficient
+      # algorithm to get this right faster, all the best.
+
+      # Some observations on GLD:
+      # When we tweak lambda4, this makes the mode to naturally drift.
+      # If we tweak it to make the right tail fatter, mode drifts to the left.
+      # If we tweak it to make the right tail thinner, mode drifts to the right.
+      # So when we tweak lambda4 searching for the right tail steepness,
+      # we must simultaneously compensate the distribution location
+      # to keep its mode at our estimated value (and other parameters stable).
+      # Similarly lambda3 make our first quantile estimate to drift as well.
+
+      # Conclusion:
+      # So I decided to develop my ad hoc optimization function
+      # using a roundtrip approach where I adapt location, scale,
+      # left skew with lambda 3, right skew with lambda 4,
+      # and turn around like this until I get a distribution
+      # that matches my estimated parameters.
+
+      # In practice it seems to work find, more extensive
+      # testing would be desirable.
+
+      for(iter in c(1 : max_iteration))
+      {
+        self$fit_dist_location(...)
+        self$fit_dist_scale(...)
+        self$fit_dist_left_skew(...)
+        self$fit_dist_right_skew(...)
+
+        iter_q1 <- self$get_quantile(self$min_proba)
+        iter_q2 <- self$get_quantile(self$max_proba)
+        iter_mode <- self$dist_mode
+
+        iter_q1_delta <- abs(iter_q1 - self$min_value)
+        iter_q2_delta <- abs(iter_q2 - self$max_value)
+        iter_mode_delta <- abs(self$dist_mode - self$mode_value)
+
+        # message(paste0("Iteration: ", iter))
+        # message(paste0("Q1: target: ", self$min_value, ", attained: ", iter_q1, ", diff: ", iter_q1_delta))
+        # message(paste0("Mode: target: ", self$mode_value, ", attained: ", iter_mode, ", diff: ", iter_mode_delta))
+        # message(paste0("Q2: target: ", self$max_value, ", attained: ", iter_q2, ", diff: ", iter_q2_delta))
+
+        if(
+          iter_q1_delta < precision
+          && iter_mode_delta < precision
+          && iter_q2_delta < precision
+        )
+        {
+          # message("Mission accomplished!")
+          return()
+        }
+      }
     },
-    fit_dist_step01_location = function(...) {
+    fit_dist_location = function(...) {
+      # move the fitted distribution to the
+      # position where its mode (peak) coincidate
+      # with the expert estimated mode.
+
       # first, we calculate lambda1 (PDF shape location).
-      self$lambda1 <- self$mode_value
+      # self$lambda1 <- self$mode_value
+
+      # Find the difference between the mode (peak)
+      # of the currently fitted distribution with
+      # the desired mode coming from the expert
+      # estimate
+      delta <- self$mode_value - self$dist_mode
+
+      # Move the fitted distribution to compensate
+      # for this difference
+      self$lambda1 <- self$lambda1 + delta
     },
-    fit_dist_step02_scale = function() {
+    fit_dist_scale = function() {
       # after lambda1 (location), we calculate lambda2 (PDF shape size or scale).
       # at this point, we don't consider skewness and assume shape symmetry.
       # lambda2 is like a "zoom" for the PDF,
@@ -36,8 +105,8 @@ factor_estimate_gld_3points <- R6Class(
       # 3). Apply this ratio to the size / scale of the target distribution (provided in the estimation parameters).
 
       # neutralize skewness
-      self$lambda3 <- -1
-      self$lambda4 <- -1
+      # self$lambda3 <- -1
+      # self$lambda4 <- -1
 
       # because the 3 points estimates may be skewed,
       # we choose one of the two sides.
@@ -59,7 +128,6 @@ factor_estimate_gld_3points <- R6Class(
         side <- "right"
         target_proba <- 1 - self$max_proba
       }
-      side
 
       # if distribution was zero-centered
       # and we wanted its size to fit,
@@ -72,10 +140,9 @@ factor_estimate_gld_3points <- R6Class(
         target_value <- - right_value_range
       }
 
+      # This is where the wizardry operates, abracadabra!!!
       magic_value <- qgl(p = target_proba, lambda1 = 0, lambda2 = exp(1), lambda3 = -1, lambda4 = -1)
-
       magic_ratio <- magic_value / target_value
-
       magic_lambda2 = abs(exp(1) * magic_ratio)
 
       result <- qgl(p = target_proba, lambda1 = self$mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
@@ -84,7 +151,7 @@ factor_estimate_gld_3points <- R6Class(
       self$lambda2 <- magic_lambda2
 
       },
-    calculate_lambda3 = function() {
+    fit_dist_left_skew = function() {
 
       # pgl does not support vectors in the lambda3 parameter,
       # (which I must say is perfectly reasonable).
@@ -129,7 +196,7 @@ factor_estimate_gld_3points <- R6Class(
       fg3$lambda3 <- optimization$estimate
 
     },
-    calculate_lambda4 = function() {
+    fit_dist_right_skew = function() {
 
       # pgl does not support vectors in the lambda4 parameter,
       # (which I must say is perfectly reasonable).
@@ -179,17 +246,17 @@ factor_estimate_gld_3points <- R6Class(
                "Estimation parameters:",
                paste0(
                     " min = ", fn(self$min_value,2), " (", fn(self$min_proba,2), ")",
-                    " ,mode = ", fn(self$mode_value,2), " (", fn(self$mode_proba,2), ")",
+                    " ,mode = ", fn(self$mode_value,2),
                     " ,max = ", fn(self$max_value,2), " (", fn(self$max_proba,2), ")"),
                "Fitted quantiles:",
                paste0(
                     " min = ", fn(self$get_quantile(self$min_proba), 2), " (", fn(self$min_proba,2), ")",
-                    " ,mode = ", fn(self$get_quantile(self$mode_proba), 2), " (", fn(self$mode_proba,2), ")",
+                    " ,mode = ", fn(self$dist_mode, 2),
                     " ,max = ", fn(self$get_quantile(self$max_proba), 2), " (", fn(self$max_proba,2), ")"),
                "Fitted probabilities:",
                paste0(
                     " min = ", fn(self$min_value,2), " (", fn(self$get_probability(self$min_value), 2), ")",
-                    " ,mode = ", fn(self$mode_value,2), " (", fn(self$get_probability(self$mode_value), 2), ")",
+                    " ,mode = ", fn(self$dist_mode, 2),
                     " ,max = ", fn(self$max_value,2), " (", fn(self$get_probability(self$max_value), 2), ")")
                     ))},
     reset_graph_limits = function() {
