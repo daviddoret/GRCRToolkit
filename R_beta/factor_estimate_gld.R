@@ -23,9 +23,9 @@ factor_estimate_gld <- R6Class(
       self$quantile_function <- function(p){return(qgl(p = p, lambda1 = self$lambda1, lambda2 = self$lambda2, lambda3 = self$lambda3, lambda4 = self$lambda4))}
       self$random_function <- function(n){return(rgl(n = n, lambda1 = self$lambda1, lambda2 = self$lambda2, lambda3 = self$lambda3, lambda4 = self$lambda4))}
     },
-    get_print = function(...) {
+    get_print_lines = function(...) {
       return(
-        c(super$get_print(),
+          c(super$get_print_lines(),
           "Fitted distribution parameters:",
           paste0(
             " λ1 = ", fn(self$lambda1,4),
@@ -48,22 +48,7 @@ factor_estimate_gld <- R6Class(
       else { private$private_lambda3 <- value }},
     lambda4 = function(value,...) {
       if(missing(value)) { return(private$private_lambda4) }
-      else { private$private_lambda4 <- value }},
-    # Override fitted distribution moments
-    # Moments of the fitted distribution:
-    # TODO: Review this section, I only get "NA"s...
-    dist_mean = function(value,...) {
-      if(missing(value)) { return(NA) } #return(gld.moments(par = c(self$lambda1, self$lambda2, self$lambda3, self$lambda4, type="fkml", ratios=TRUE))[1]) }
-      else { stop("Sorry, this attribute is read-only. Would be cool as a future enhancement? Reach out to us...") }},
-    dist_variance = function(value,...) {
-      if(missing(value)) { return(NA) }
-      else { stop("Sorry, this attribute is read-only. Would be cool as a future enhancement? Reach out to us...") }},
-    dist_skewness = function(value,...) {
-      if(missing(value)) { return(NA) }
-      else { stop("Sorry, this attribute is read-only. Would be cool as a future enhancement? Reach out to us...") }},
-    dist_kurtosis = function(value,...) {
-      if(missing(value)) { return(NA) }
-      else { stop("Sorry, this attribute is read-only. Would be cool as a future enhancement? Reach out to us...") }}
+      else { private$private_lambda4 <- value }}
   ),
   private = list(
     private_lambda1 = NULL,

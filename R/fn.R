@@ -13,7 +13,7 @@ fn <- function(x, digits = NULL) {
   x_rounded <- round(x, digits)
   x_lose_precision <- x != x_rounded
   x_tilde <- ifelse(x_lose_precision, "~", "")
-  x_formatted_number <- format(x, digits = digits, big.mark = "'", scientific = FALSE, nsmall = digits)
+  x_formatted_number <- format(x_rounded, digits = digits, big.mark = "'", scientific = FALSE, nsmall = digits)
   x_formatted_number_with_tilde <- paste0(
     x_tilde, x_formatted_number)
 

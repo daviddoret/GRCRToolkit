@@ -1,11 +1,11 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(stats)
 
-# get_mode_from_pdf
+# get_dist_mode_from_pdf
 #
 # Find the mode of a distribution using optimization techniques.
 # This is helpful when an analytic solution is not handily available.
-get_mode_from_pdf = function(pdf) {
+get_dist_mode_from_pdf = function(pdf) {
 
   # Declare the minimization function
   minimization_function <- function(x){

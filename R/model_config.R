@@ -44,6 +44,8 @@ model_config_defaults <- list(
   plot.qdf.estim_interecept.color = "dodgerblue3",
   plot.qdf.estim_interecept.size = 0.5,
   plot.qdf.area.color = "#00aa00",
+  plot.qdf.area.fill = "#55ff55",
+  plot.qdf.area.alpha = 0.1,
   plot.qdf.area.size = 1,
 
   plot.mdf.bar.color = "#00aa00",

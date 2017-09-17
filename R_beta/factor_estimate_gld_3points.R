@@ -5,6 +5,13 @@ options(digits=22)
 
 #' GLD 3 points estimate
 #'
+#' TODO:
+#' - Make lambda parameters read-only for class users
+#'   in such a way as to guarantee consistency between
+#'   the fitted distribution and the estimation parameters.
+#' - Store the simulation results in a proper local simulation
+#'   variable + implement a simulation sample size parameter.
+#' - Implement a cool summary vignette.
 #' @export
 factor_estimate_gld_3points <- R6Class(
   "factor_estimate_gld_3points",
@@ -13,7 +20,14 @@ factor_estimate_gld_3points <- R6Class(
     initialize = function(...) {
       super$initialize(
         estimation_method_name = "PERT-like 3 points estimate", ...)
-    },
+
+      # Initialize lambda parameters
+      # to avoid the presence of NULLs.
+      self$lambda1 <- 0
+      self$lambda2 <- 1
+      self$lambda3 <- -1
+      self$lambda4 <- -1
+      },
     fit_dist = function(max_iteration = NULL, precision = NULL, ...) {
 
       if(is.null(max_iteration)) { max_iteration <- 256 }
@@ -44,6 +58,13 @@ factor_estimate_gld_3points <- R6Class(
       # In practice it seems to work find, more extensive
       # testing would be desirable.
 
+      # First, we restart from a clean page:
+      self$lambda1 <- 0
+      self$lambda2 <- 1
+      self$lambda3 <- -1
+      self$lambda4 <- -1
+
+      # And then we apply our round trip approach
       for(iter in c(1 : max_iteration))
       {
         self$fit_dist_location(...)
@@ -145,6 +166,8 @@ factor_estimate_gld_3points <- R6Class(
       magic_ratio <- magic_value / target_value
       magic_lambda2 = abs(exp(1) * magic_ratio)
 
+      print(magic_lambda2)
+
       result <- qgl(p = target_proba, lambda1 = self$mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
       message(paste0("result: ",result))
 
@@ -241,8 +264,9 @@ factor_estimate_gld_3points <- R6Class(
       fg3$lambda4 <- optimization$estimate
 
     },
-    get_print = function(...) {
-      return(c(super$get_print(),
+    get_print_lines = function(...) {
+      return(
+        c(super$get_print_lines(),
                "Estimation parameters:",
                paste0(
                     " min = ", fn(self$min_value,2), " (", fn(self$min_proba,2), ")",
@@ -258,7 +282,8 @@ factor_estimate_gld_3points <- R6Class(
                     " min = ", fn(self$min_value,2), " (", fn(self$get_probability(self$min_value), 2), ")",
                     " ,mode = ", fn(self$dist_mode, 2),
                     " ,max = ", fn(self$max_value,2), " (", fn(self$get_probability(self$max_value), 2), ")")
-                    ))},
+                    ))
+    },
     reset_graph_limits = function() {
       # Set default scale margins containing all estimation parameters for pretty graph rendering.
       self$graph_value_start <- self$min_value #- (self$max_value - self$min_value) * .05
@@ -293,11 +318,11 @@ factor_estimate_gld_3points <- R6Class(
       else {
         private$private_min_proba <- value
         self$reset_graph_limits() }},
-    mode_proba = function(value,...) {
-      if(missing(value)) { return(private$private_mode_proba) }
-      else {
-        private$private_mode_proba <- value
-        self$reset_graph_limits() }},
+    #mode_proba = function(value,...) {
+    #  if(missing(value)) { return(private$private_mode_proba) }
+    #  else {
+    #    private$private_mode_proba <- value
+    #    self$reset_graph_limits() }},
     max_proba = function(value,...) {
       if(missing(value)) { return(private$private_max_proba) }
       else {
@@ -315,7 +340,7 @@ factor_estimate_gld_3points <- R6Class(
     private_mode_value = NULL,
     private_max_value = NULL,
     private_min_proba = NULL,
-    private_mode_proba = NULL,
+    #private_mode_proba = NULL,
     private_max_proba = NULL
   )
 )
