@@ -11,7 +11,6 @@ options(digits=22)
 #'   the fitted distribution and the estimation parameters.
 #' - Store the simulation results in a proper local simulation
 #'   variable + implement a simulation sample size parameter.
-#' - Implement a cool summary vignette.
 #' @export
 factor_estimate_gld_3points <- R6Class(
   "factor_estimate_gld_3points",
@@ -72,18 +71,18 @@ factor_estimate_gld_3points <- R6Class(
         self$fit_dist_left_skew(...)
         self$fit_dist_right_skew(...)
 
-        iter_q1 <- self$get_quantile(self$min_proba)
-        iter_q2 <- self$get_quantile(self$max_proba)
+        iter_q1 <- self$get_quantile(self$estimated_range_min_proba)
+        iter_q2 <- self$get_quantile(self$estimated_range_max_proba)
         iter_mode <- self$dist_mode
 
-        iter_q1_delta <- abs(iter_q1 - self$min_value)
-        iter_q2_delta <- abs(iter_q2 - self$max_value)
-        iter_mode_delta <- abs(self$dist_mode - self$mode_value)
+        iter_q1_delta <- abs(iter_q1 - self$estimated_range_min_value)
+        iter_q2_delta <- abs(iter_q2 - self$estimated_range_max_value)
+        iter_mode_delta <- abs(self$dist_mode - self$estimated_mode_value)
 
         # message(paste0("Iteration: ", iter))
-        # message(paste0("Q1: target: ", self$min_value, ", attained: ", iter_q1, ", diff: ", iter_q1_delta))
-        # message(paste0("Mode: target: ", self$mode_value, ", attained: ", iter_mode, ", diff: ", iter_mode_delta))
-        # message(paste0("Q2: target: ", self$max_value, ", attained: ", iter_q2, ", diff: ", iter_q2_delta))
+        # message(paste0("Q1: target: ", self$estimated_range_min_value, ", attained: ", iter_q1, ", diff: ", iter_q1_delta))
+        # message(paste0("Mode: target: ", self$estimated_mode_value, ", attained: ", iter_mode, ", diff: ", iter_mode_delta))
+        # message(paste0("Q2: target: ", self$estimated_range_max_value, ", attained: ", iter_q2, ", diff: ", iter_q2_delta))
 
         if(
           iter_q1_delta < precision
@@ -102,13 +101,13 @@ factor_estimate_gld_3points <- R6Class(
       # with the expert estimated mode.
 
       # first, we calculate lambda1 (PDF shape location).
-      # self$lambda1 <- self$mode_value
+      # self$lambda1 <- self$estimated_mode_value
 
       # Find the difference between the mode (peak)
       # of the currently fitted distribution with
       # the desired mode coming from the expert
       # estimate
-      delta <- self$mode_value - self$dist_mode
+      delta <- self$estimated_mode_value - self$dist_mode
 
       # Move the fitted distribution to compensate
       # for this difference
@@ -134,9 +133,9 @@ factor_estimate_gld_3points <- R6Class(
       # here, we decide to work with the larger side,
       # which means we will need to skew the other side
       # afterward.
-      left_value_range <- self$mode_value - self$min_value
+      left_value_range <- self$estimated_mode_value - self$estimated_range_min_value
       left_value_range
-      right_value_range <- self$max_value - self$mode_value
+      right_value_range <- self$estimated_range_max_value - self$estimated_mode_value
       right_value_range
 
       # which side should we use?
@@ -144,10 +143,10 @@ factor_estimate_gld_3points <- R6Class(
       target_proba <- NULL
       if(left_value_range > right_value_range) {
         side <- "left"
-        target_proba <- self$min_proba
+        target_proba <- self$estimated_range_min_proba
       } else {
         side <- "right"
-        target_proba <- 1 - self$max_proba
+        target_proba <- 1 - self$estimated_range_max_proba
       }
 
       # if distribution was zero-centered
@@ -166,10 +165,9 @@ factor_estimate_gld_3points <- R6Class(
       magic_ratio <- magic_value / target_value
       magic_lambda2 = abs(exp(1) * magic_ratio)
 
-      print(magic_lambda2)
-
-      result <- qgl(p = target_proba, lambda1 = self$mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
-      message(paste0("result: ",result))
+      result <- qgl(p = target_proba, lambda1 = self$estimated_mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
+      # message(paste0("result: ",result))
+      # TODO: Add some result quality check here.
 
       self$lambda2 <- magic_lambda2
 
@@ -183,7 +181,7 @@ factor_estimate_gld_3points <- R6Class(
       flat_function <- function(x){
         if(x >= 0) { return(Inf)  }
         return(pgl(
-          q = self$min_value,
+          q = self$estimated_range_min_value,
           lambda1 = self$lambda1,
           lambda2 = self$lambda2,
           lambda3 = x,
@@ -197,7 +195,7 @@ factor_estimate_gld_3points <- R6Class(
           abs(
             vapply(x, flat_function, 0)
             -
-              fg3$min_proba
+              self$estimated_range_min_proba
           )
           # nlm prefers to reduce high numbers
           # so I artificially increase the output
@@ -212,8 +210,8 @@ factor_estimate_gld_3points <- R6Class(
       optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128)
 
       # TODO: We should test the result against a tolerance threshold.
-      #fg3$get_probability(fg3$max_value)
-      #fg3$get_quantile(fg3$max_proba)
+      #fg3$get_probability(fg3$estimated_range_max_value)
+      #fg3$get_quantile(fg3$estimated_range_max_proba)
 
       # And we retrieve its output.
       fg3$lambda3 <- optimization$estimate
@@ -228,7 +226,7 @@ factor_estimate_gld_3points <- R6Class(
       flat_function <- function(x){
         if(x >= 0) { return(Inf)  }
         return(pgl(
-          q = self$max_value,
+          q = self$estimated_range_max_value,
           lambda1 = self$lambda1,
           lambda2 = self$lambda2,
           lambda3 = self$lambda3,
@@ -242,7 +240,7 @@ factor_estimate_gld_3points <- R6Class(
           abs(
             vapply(x, flat_function, 0)
             -
-              fg3$max_proba
+              fg3$estimated_range_max_proba
           )
           # nlm prefers to reduce high numbers
           # so I artificially increase the output
@@ -257,8 +255,8 @@ factor_estimate_gld_3points <- R6Class(
       optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128)
 
       # TODO: We should test the result against a tolerance threshold.
-      #fg3$get_probability(fg3$max_value)
-      #fg3$get_quantile(fg3$max_proba)
+      #fg3$get_probability(fg3$estimated_range_max_value)
+      #fg3$get_quantile(fg3$estimated_range_max_proba)
 
       # And we retrieve its output.
       fg3$lambda4 <- optimization$estimate
@@ -269,78 +267,73 @@ factor_estimate_gld_3points <- R6Class(
         c(super$get_print_lines(),
                "Estimation parameters:",
                paste0(
-                    " min = ", fn(self$min_value,2), " (", fn(self$min_proba,2), ")",
-                    " ,mode = ", fn(self$mode_value,2),
-                    " ,max = ", fn(self$max_value,2), " (", fn(self$max_proba,2), ")"),
+                    " min = ", fn(self$estimated_range_min_value,2), " (", fn(self$estimated_range_min_proba,2), ")",
+                    " ,mode = ", fn(self$estimated_mode_value,2),
+                    " ,max = ", fn(self$estimated_range_max_value,2), " (", fn(self$estimated_range_max_proba,2), ")"),
                "Fitted quantiles:",
                paste0(
-                    " min = ", fn(self$get_quantile(self$min_proba), 2), " (", fn(self$min_proba,2), ")",
+                    " min = ", fn(self$get_quantile(self$estimated_range_min_proba), 2), " (", fn(self$estimated_range_min_proba,2), ")",
                     " ,mode = ", fn(self$dist_mode, 2),
-                    " ,max = ", fn(self$get_quantile(self$max_proba), 2), " (", fn(self$max_proba,2), ")"),
+                    " ,max = ", fn(self$get_quantile(self$estimated_range_max_proba), 2), " (", fn(self$estimated_range_max_proba,2), ")"),
                "Fitted probabilities:",
                paste0(
-                    " min = ", fn(self$min_value,2), " (", fn(self$get_probability(self$min_value), 2), ")",
+                    " min = ", fn(self$estimated_range_min_value,2), " (", fn(self$get_probability(self$estimated_range_min_value), 2), ")",
                     " ,mode = ", fn(self$dist_mode, 2),
-                    " ,max = ", fn(self$max_value,2), " (", fn(self$get_probability(self$max_value), 2), ")")
+                    " ,max = ", fn(self$estimated_range_max_value,2), " (", fn(self$get_probability(self$estimated_range_max_value), 2), ")")
                     ))
     },
     reset_graph_limits = function() {
       # Set default scale margins containing all estimation parameters for pretty graph rendering.
-      self$graph_value_start <- self$min_value #- (self$max_value - self$min_value) * .05
-      self$graph_value_end <- self$max_value #+ (self$max_value - self$min_value) * .05
-      self$graph_probability_start <- self$min_proba / 4
-      self$graph_probability_end <- self$max_proba + (1 - self$max_proba) / 4
-    },
-    simulate = function(n = NULL) {
-      if(is.null(n)) { n <- 3000 }
-      factor_value <- self$get_random(n = n)
-      self$simulation_data <- data.frame(factor_value)
+      self$graph_value_start <- self$estimated_range_min_value
+      self$graph_value_end <- self$estimated_range_max_value
+      self$graph_probability_start <- self$estimated_range_min_proba / 4
+      self$graph_probability_end <- self$estimated_range_max_proba + (1 - self$estimated_range_max_proba) / 4
     }
   ),
   active = list(
-    min_value = function(value,...) {
-      if(missing(value)) { return(private$private_min_value) }
+    estimated_range_min_value = function(value,...) {
+      if(missing(value)) { return(private$private_estimated_range_min_value) }
       else {
-        private$private_min_value <- value
+        private$private_estimated_range_min_value <- value
         self$reset_graph_limits() }},
-    mode_value = function(value,...) {
-      if(missing(value)) { return(private$private_mode_value) }
+    estimated_mode_value = function(value,...) {
+      if(missing(value)) { return(private$private_estimated_mode_value) }
       else {
-        private$private_mode_value <- value
+        private$private_estimated_mode_value <- value
         self$reset_graph_limits() }},
-    max_value = function(value,...) {
-      if(missing(value)) { return(private$private_max_value) }
+    estimated_range_max_value = function(value,...) {
+      if(missing(value)) { return(private$private_estimated_range_max_value) }
       else {
-        private$private_max_value <- value
+        private$private_estimated_range_max_value <- value
         self$reset_graph_limits() }},
-    min_proba = function(value,...) {
-      if(missing(value)) { return(private$private_min_proba) }
+    estimated_range_min_proba = function(value,...) {
+      if(missing(value)) { return(private$private_estimated_range_min_proba) }
       else {
-        private$private_min_proba <- value
+        private$private_estimated_range_min_proba <- value
         self$reset_graph_limits() }},
     #mode_proba = function(value,...) {
     #  if(missing(value)) { return(private$private_mode_proba) }
     #  else {
     #    private$private_mode_proba <- value
     #    self$reset_graph_limits() }},
-    max_proba = function(value,...) {
-      if(missing(value)) { return(private$private_max_proba) }
+    estimated_range_max_proba = function(value,...) {
+      if(missing(value)) { return(private$private_estimated_range_max_proba) }
       else {
-        private$private_max_proba <- value
+        private$private_estimated_range_max_proba <- value
         self$reset_graph_limits() }},
     range_size_proba = function(value,...) {
-      if(missing(value)) { return(self$max_proba - self$min_proba) }
+      if(missing(value)) { return(self$estimated_range_max_proba - self$estimated_range_min_proba) }
       else {
-        self$min_proba <- (1 - value) / 2
-        self$max_proba <- 1 - (1 - value) / 2
+        self$estimated_range_min_proba <- (1 - value) / 2
+        self$estimated_range_max_proba <- 1 - (1 - value) / 2
         self$reset_graph_limits() }}
   ),
   private = list(
-    private_min_value = NULL,
-    private_mode_value = NULL,
-    private_max_value = NULL,
-    private_min_proba = NULL,
+    private_estimated_range_min_value = NULL,
+    private_estimated_mode_value = NULL,
+    private_estimated_range_max_value = NULL,
+    private_estimated_range_min_proba = NULL,
     #private_mode_proba = NULL,
-    private_max_proba = NULL
+    private_estimated_range_max_proba = NULL
   )
 )

@@ -105,11 +105,21 @@ factor_estimate <- R6Class(
         self$graph_sample_with_outliers(),
         self$graph_sample_without_outliers(),
         layout = matrix(c(1,2,3,4,5,6), nrow=2, byrow=TRUE)))
-        #layout = matrix(c(1,1,1,2,3,4,2,3,4,2,3,4,2,3,4), nrow=5, byrow=TRUE)))
-        #cols = 3))
     },
     simulate = function(n = NULL) {
-        stop("This is an abstract method, it should be implemented and overriden by the subclass")
+      # The simulate method may be overridden by a subclass.
+      # This may be required to populate richer data frames
+      # with complementary columns. I was thinking of this
+      # approach to implement the frequency x impact factor
+      # where the frequency factor generates a vector of
+      # frequencies and where the impact factor will need to
+      # call (frequecy number) times the random function
+      # and sum the result. In this situation it is desirable
+      # to keep the individual impacts in an "individual impacts"
+      # column in the data frame and use the standard factor_value column
+      # for the final factor results.
+      factor_value <- self$get_random(n = n)
+      private$private_simulation_sample <- data.frame(factor_value = factor_value)
     }
   ),
   active = list(
@@ -173,9 +183,13 @@ factor_estimate <- R6Class(
     dist_kurtosis = function(value,...) {
       if(missing(value)) { return(NA) }
       else { stop("This is an abstract attribute, it must be implemented by a subclass") }},
-    simulation_data = function(value,...) {
-      if(missing(value)) { return(private$private_simulation_data) }
-      else { private$private_simulation_data <- value }}
+    simulation_sample = function(value,...) {
+      # Returns a data frame with the simulation sample data.
+      # The data frame mandatorily contains a column "factor_value" with
+      # the resulting factor values.
+      # The data frame may contain other columns with complementary information.
+      if(missing(value)) { return(private$private_simulation_sample) }
+      else { private$private_simulation_sample <- value }}
   ),
   private = list(
     private_estimation_method_name = NA,
@@ -191,6 +205,6 @@ factor_estimate <- R6Class(
     private_graph_value_end = NA,
     private_graph_probability_start = NA,
     private_graph_probability_end = NA,
-    private_simulation_data = NA
+    private_simulation_sample = NA
   )
 )
