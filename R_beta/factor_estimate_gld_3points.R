@@ -86,8 +86,9 @@ factor_estimate_gld_3points <- R6Class(
       if(simulate) { self$simulate(...) }
 
       },
-    fit_dist = function(max_iteration = NULL, precision = NULL, ...) {
+    fit_dist = function(max_iteration = NULL, precision = NULL, verbosity = NULL, ...) {
 
+      if(is.null(verbosity)) { verbosity <- 0 }
       if(is.null(max_iteration)) { max_iteration <- 256 }
       if(is.null(precision)) { precision <- 1 } # Expressed in quantile value.
 
@@ -122,18 +123,18 @@ factor_estimate_gld_3points <- R6Class(
       self$lambda3 <- -1
       self$lambda4 <- -1
 
-      self$fit_dist_location(...)
-      self$fit_dist_scale(...)
+      self$fit_dist_location(verbosity = verbosity, ...)
+      self$fit_dist_scale(verbosity = verbosity, ...)
 
       # And then we apply our round trip approach
       for(iter in c(1 : max_iteration))
       {
-        self$fit_dist_location(...)
-        #self$fit_dist_scale(...)
-        self$fit_dist_left_skew(...)
+        self$fit_dist_location(verbosity = verbosity, ...)
+        #self$fit_dist_scale(verbosity = verbosity, ...)
+        self$fit_dist_left_skew(verbosity = verbosity, ...)
 
-        self$fit_dist_location(...)
-        self$fit_dist_right_skew(...)
+        self$fit_dist_location(verbosity = verbosity, ...)
+        self$fit_dist_right_skew(verbosity = verbosity, ...)
 
         iter_q1 <- self$get_quantile(self$estimated_range_min_proba)
         iter_q2 <- self$get_quantile(self$estimated_range_max_proba)
@@ -155,17 +156,19 @@ factor_estimate_gld_3points <- R6Class(
         )
         {
           # message("Mission accomplished!")
-          self$fit_dist_location(...)
           return()
         }
       }
-      self$fit_dist_location(...)
+      # At least, get the mode right:
+      self$fit_dist_location(verbosity = verbosity, ...)
       warning("Couldn't make it within desired precision, sorry!")
     },
-    fit_dist_location = function(...) {
+    fit_dist_location = function(verbosity = NULL, ...) {
       # move the fitted distribution to the
       # position where its mode (peak) coincidate
       # with the expert estimated mode.
+
+      if(is.null(verbosity)) { verbosity <- 0 }
 
       # first, we calculate lambda1 (PDF shape location).
       # self$lambda1 <- self$estimated_mode_value
@@ -175,12 +178,16 @@ factor_estimate_gld_3points <- R6Class(
       # the desired mode coming from the expert
       # estimate
       delta <- self$estimated_mode_value - self$dist_mode
+      new_lambda1 <- self$lambda1 + delta
+
+      if(verbosity > 0) { message(paste0("lambda1: ",self$lambda1, " --> ", new_lambda1)) }
 
       # Move the fitted distribution to compensate
       # for this difference
-      self$lambda1 <- self$lambda1 + delta
+      self$lambda1 <- new_lambda1
+
     },
-    fit_dist_scale = function() {
+    fit_dist_scale = function(verbosity = NULL, ...) {
       # after lambda1 (location), we calculate lambda2 (PDF shape size or scale).
       # at this point, we don't consider skewness and assume shape symmetry.
       # lambda2 is like a "zoom" for the PDF,
@@ -200,6 +207,9 @@ factor_estimate_gld_3points <- R6Class(
       # here, we decide to work with the larger side,
       # which means we will need to skew the other side
       # afterward.
+
+      if(is.null(verbosity)) { verbosity <- 0 }
+
       left_value_range <- self$estimated_mode_value - self$estimated_range_min_value
       left_value_range
       right_value_range <- self$estimated_range_max_value - self$estimated_mode_value
@@ -236,17 +246,25 @@ factor_estimate_gld_3points <- R6Class(
       # message(paste0("result: ",result))
       # TODO: Add some result quality check here.
 
+      if(verbosity > 0) { message(paste0("lambda2: ",self$lambda2, " --> ", magic_lambda2)) }
+
       self$lambda2 <- magic_lambda2
 
       },
-    fit_dist_left_skew = function() {
+    fit_dist_left_skew = function(verbosity = NULL, ...) {
+
+      if(is.null(verbosity)) { verbosity <- 0 }
 
       # pgl does not support vectors in the lambda3 parameter,
       # (which I must say is perfectly reasonable).
       # So I declare a flat scalar version and take this opportunity
       # to throw away positive values (nlm optimizer doesn't support bounds either).
       flat_function <- function(x){
-        if(x >= 0) { return(Inf)  }
+        if(x >= 0)
+        {
+          warning("x >= 0")
+          return(Inf)
+        }
         return(pgl(
           q = self$estimated_range_min_value,
           lambda1 = self$lambda1,
@@ -269,29 +287,53 @@ factor_estimate_gld_3points <- R6Class(
           # of my minimization function by a factor
           # that guarantees precise enough results.
           * 1000000
+          # * 1000
         )
       }
 
       # Then we run the optimization.
       # TODO: Study nlm options in greater details.
-      optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128)
+      optimization <- nlm(
+        minimization_function,
+        -1,
+        ndigit = 22,
+        iterlim = 128,
+        print.level = verbosity,
+        verbosity = verbosity)
 
       # TODO: We should test the result against a tolerance threshold.
       #self$get_probability(self$estimated_range_max_value)
       #self$get_quantile(self$estimated_range_max_proba)
 
-      # And we retrieve its output.
-      self$lambda3 <- optimization$estimate
-
+      if(!is.null(optimization$estimate))
+      {
+        new_lambda3 <- optimization$estimate
+        if(verbosity > 0) { message(paste0("lambda3: ",self$lambda3, " --> ", new_lambda3)) }
+        # And we retrieve its output.
+        self$lambda3 <- new_lambda3
+      }
+      else
+      {
+        if(verbosity > 0)
+        {
+          warning("nlm returns NULL")
+          self
+        }
+      }
     },
-    fit_dist_right_skew = function() {
+    fit_dist_right_skew = function(verbosity = NULL, ...) {
+
+      if(is.null(verbosity)) { verbosity <- 0 }
 
       # pgl does not support vectors in the lambda4 parameter,
       # (which I must say is perfectly reasonable).
       # So I declare a flat scalar version and take this opportunity
       # to throw away positive values (nlm optimizer doesn't support bounds either).
-      flat_function <- function(x){
-        if(x >= 0) { return(Inf)  }
+      flat_function <- function(x, ...){
+        if(x >= 0) {
+          warning("x >= 0")
+          return(Inf)
+          }
         return(pgl(
           q = self$estimated_range_max_value,
           lambda1 = self$lambda1,
@@ -302,7 +344,7 @@ factor_estimate_gld_3points <- R6Class(
 
       # Then I declare a minimization function
       # that will vectorize the call to flat_function with vapply.
-      minimization_function <- function(x, ...){
+      minimization_function <- function(x, verbosity = NULL, ...){
         return(
           abs(
             vapply(x, flat_function, 0)
@@ -314,20 +356,39 @@ factor_estimate_gld_3points <- R6Class(
           # of my minimization function by a factor
           # that guarantees precise enough results.
           * 1000000
+          # * 1000
         )
       }
 
       # Then we run the optimization.
       # TODO: Study nlm options in greater details.
-      optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128)
+      optimization <- nlm(
+        minimization_function,
+        -1,
+        ndigit = 22,
+        iterlim = 128,
+        print.level = verbosity,
+        verbosity = verbosity)
 
       # TODO: We should test the result against a tolerance threshold.
       #self$get_probability(self$estimated_range_max_value)
       #self$get_quantile(self$estimated_range_max_proba)
 
-      # And we retrieve its output.
-      self$lambda4 <- optimization$estimate
-
+      if(!is.null(optimization$estimate))
+      {
+        new_lambda4 <- optimization$estimate
+        if(verbosity > 0) { message(paste0("lambda4: ",self$lambda4, " --> ", new_lambda4)) }
+        # And we retrieve its output.
+        self$lambda4 <- new_lambda4
+      }
+      else
+      {
+        if(verbosity > 0)
+        {
+          warning("nlm returns NULL")
+          self
+        }
+      }
     },
     get_print_lines = function(...) {
       return(
