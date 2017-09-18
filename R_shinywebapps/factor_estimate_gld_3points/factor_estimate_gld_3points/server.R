@@ -32,7 +32,10 @@ shinyServer(function(input, output) {
 
   output$plot_density <- renderPlot({
 
+    factor_estimate_1$estimated_range_min_value <- input$estimated_range_min_value
     factor_estimate_1$estimated_mode_value <- input$estimated_mode_value
+    factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
+
     print(input$estimated_mode_value)
     suppressWarnings(factor_estimate_1$fit_dist())
     factor_estimate_1$graph_density()
@@ -41,7 +44,10 @@ shinyServer(function(input, output) {
 
   output$plot_quantile <- renderPlot({
 
+    factor_estimate_1$estimated_range_min_value <- input$estimated_range_min_value
     factor_estimate_1$estimated_mode_value <- input$estimated_mode_value
+    factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
+
     print(input$estimated_mode_value)
     factor_estimate_1$fit_dist()
     factor_estimate_1$graph_quantile()

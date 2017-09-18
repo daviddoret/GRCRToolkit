@@ -28,6 +28,63 @@ factor_estimate_gld <- R6Class(
       self$quantile_function <- function(p){return(qgl(p = p, lambda1 = self$lambda1, lambda2 = self$lambda2, lambda3 = self$lambda3, lambda4 = self$lambda4))}
       self$random_function <- function(n){return(rgl(n = n, lambda1 = self$lambda1, lambda2 = self$lambda2, lambda3 = self$lambda3, lambda4 = self$lambda4))}
     },
+    check_state_consistency = function(output_format = NULL,...) {
+      # Informs us if the object state is consistent / logical.
+      # This makes it possible to prevent useless calls to expensive functions
+      # that may output multitude of warnings and errors when we know
+      # from the beginning that this parameterization is doomed to failure.
+      # Returns TRUE if parameters are consistent.
+      # Returns a descriptive
+      if(is.null(output_format)) { output_format = "boolean" }
+      consistency_error_count <- super$check_state_consistency(output_format = "int")
+      consistency_report <- super$check_state_consistency(output_format = "report")
+
+      # Check if all mandatory parameters have been defined.
+      if(is.na(self$lambda1)) {
+        consistency_error_count <- consistency_error_count + 1
+        consistency_report <- paste0(c(consistency_report, "λ1 is missing."), sep="\n")
+      }
+      if(is.na(self$lambda2)) {
+        consistency_error_count <- consistency_error_count + 1
+        consistency_report <- paste0(c(consistency_report, "λ2 is missing."), sep="\n")
+      }
+      if(is.na(self$lambda3)) {
+        consistency_error_count <- consistency_error_count + 1
+        consistency_report <- paste0(c(consistency_report, "λ3 is missing."), sep="\n")
+      }
+      if(is.na(self$lambda4)) {
+        consistency_error_count <- consistency_error_count + 1
+        consistency_report <- paste0(c(consistency_report, "λ4 is missing."), sep="\n")
+      }
+
+      # Check consistency between parameters.
+      if(self$lambda3 >= 0) {
+        consistency_error_count <- consistency_error_count + 1
+        consistency_report <- paste0(c(consistency_report, "λ3 >= 0"), sep="\n")
+      }
+      if(self$lambda4 >= 0) {
+        consistency_error_count <- consistency_error_count + 1
+        consistency_report <- paste0(c(consistency_report, "λ4 >= 0"), sep="\n")
+      }
+
+      # And eventually output the conclusion in the desired format.
+      if(output_format == "boolean")
+      {
+        return(consistency_error_count == 0)
+      }
+      else if(output_format == "int")
+      {
+        return(consistency_error_count)
+      }
+      else if(output_format == "report")
+      {
+        return(consistency_report)
+      }
+      else
+      {
+        stop("Sorry, this output format is not supported.")
+      }
+    },
     get_print_lines = function(...) {
       return(
           c(super$get_print_lines(),

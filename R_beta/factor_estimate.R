@@ -20,6 +20,34 @@ factor_estimate <- R6Class(
       self$estimation_method_name <- estimation_method_name
       self$distribution_name <- distribution_name
       },
+    check_state_consistency = function(output_format = NULL,...) {
+      # Informs us if the object state is consistent / logical.
+      if(is.null(output_format)) { output_format = "boolean" }
+      consistency_error_count <- 0
+      consistency_report <- NULL
+
+      # Check if all mandatory parameters have been defined.
+      # N/A
+
+      # And eventually output the conclusion in the desired format.
+      # And eventually output the conclusion in the desired format.
+      if(output_format == "boolean")
+      {
+        return(consistency_error_count == 0)
+      }
+      else if(output_format == "int")
+      {
+        return(consistency_error_count)
+      }
+      else if(output_format == "report")
+      {
+        return(consistency_report)
+      }
+      else
+      {
+        stop("Sorry, this output format is not supported.")
+      }
+    },
     get_print_lines = function(...) {
       return
         c(
@@ -49,23 +77,42 @@ factor_estimate <- R6Class(
     get_random = function(n, ...) { return(self$random_function(n, ...)) },
     graph_density = function(x_start = NULL, x_end = NULL)
       {
-      if(is.null(x_start)) { x_start <- self$graph_value_start }
-      if(is.null(x_end)) { x_end <- self$graph_value_end }
-      return(
-        plot_probability_density_function(
-          fun = self$density_function,
-          x_start = x_start,
-          x_end = x_end)) },
+      if(self$check_state_consistency())
+      {
+        if(is.null(x_start)) { x_start <- self$graph_value_start }
+        if(is.null(x_end)) { x_end <- self$graph_value_end }
+        return(
+          plot_probability_density_function(
+            fun = self$density_function,
+            x_start = x_start,
+            x_end = x_end))
+      }
+      else
+      {
+        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+      }
+      },
     graph_probability = function(x_start = NULL, x_end = NULL)
       {
+      if(self$check_state_consistency())
+      {
+
       if(is.null(x_start)) { x_start <- self$graph_value_start }
       if(is.null(x_end)) { x_end <- self$graph_value_end }
       return(
         plot_cumulative_distribution_function(
           fun = self$probability_function,
           x_start = x_start,
-          x_end = x_end)) },
+          x_end = x_end))
+      }
+      else
+      {
+        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+      }
+      },
     graph_quantile = function(x_start = NULL, x_end = NULL)
+      {
+      if(self$check_state_consistency())
       {
       if(is.null(x_start)) { x_start <- 0 }
       if(is.null(x_end)) { x_end <- 1 }
@@ -73,9 +120,18 @@ factor_estimate <- R6Class(
         plot_quantile_function(
           fun = self$quantile_function,
           x_start = x_start,
-          x_end = x_end)) },
+          x_end = x_end))
+      }
+      else
+      {
+        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+      }
+    },
     graph_sample_without_outliers = function(x_start = NULL, x_end = NULL, title = NULL)
     {
+      if(self$check_state_consistency())
+      {
+
       sample <- self$get_random(1000)
       if(is.null(x_start)) { x_start <- self$graph_value_start }
       if(is.null(x_end)) { x_end <- self$graph_value_end }
@@ -84,14 +140,27 @@ factor_estimate <- R6Class(
           sample = sample,
           title = "Sample histogram without outliers",
           x_start = x_start,
-          x_end = x_end)) },
+          x_end = x_end))       }
+      else
+      {
+        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+      }
+    },
     graph_sample_with_outliers = function(title = NULL)
     {
+      if(self$check_state_consistency())
+      {
+
       sample <- self$get_random(1000)
       return(
         plot_sample(
           sample = sample,
-          title = "Sample histogram with outliers")) },
+          title = "Sample histogram with outliers"))       }
+      else
+      {
+        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+      }
+    },
     plot_vignette = function(...) {
       # Plots a textual summary description of this factor.
       return(plot_vignette(title="Summary", text=self$get_print_lines()))
