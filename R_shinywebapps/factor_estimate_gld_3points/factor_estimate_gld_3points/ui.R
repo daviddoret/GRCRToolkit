@@ -43,7 +43,22 @@ shinyUI(fluidPage(
                     min = 0,
                     max = 1000000000,
                     step = 100000,
-                    width = "100%")
+                    width = "100%"),
+      numericInput(inputId = "estimated_range_min_proba",
+                   label = "Est. range max value",
+                   value = .05,
+                   min = 0,
+                   max = 1,
+                   step = .01,
+                   width = "100%"),
+      numericInput(inputId = "estimated_range_max_proba",
+                   label = "Est. range max value",
+                   value = .95,
+                   min = 0,
+                   max = 1,
+                   step = .95,
+                   width = "100%")
+
     ),
 
     # Show a plot of the generated distribution

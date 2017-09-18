@@ -447,18 +447,22 @@ factor_estimate_gld_3points <- R6Class(
         consistency_report <- paste0(c(consistency_report, "est. range max proba. is missing"), sep="\n")
       }
 
-      # Check consistency between parameters.
-      if(self$estimated_range_min_value > self$estimated_mode_value) {
-        consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "est. range min value > est. mode value"), sep="\n")
-      }
-      if(self$estimated_mode_value > self$estimated_range_max_value) {
-        consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c("est. mode value > est. range max value"), sep="\n")
-      }
-      if(self$estimated_range_min_proba >= self$estimated_range_max_proba) {
-        consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c("est. range min proba. >= est. range max proba."), sep="\n")
+      if(consistency_error_count == 0)
+      {
+        # If all parameters are present,
+        # we can check consistency between parameters.
+        if(self$estimated_range_min_value > self$estimated_mode_value) {
+          consistency_error_count <- consistency_error_count + 1
+          consistency_report <- paste0(c(consistency_report, "est. range min value > est. mode value"), sep="\n")
+        }
+        if(self$estimated_mode_value > self$estimated_range_max_value) {
+          consistency_error_count <- consistency_error_count + 1
+          consistency_report <- paste0(c("est. mode value > est. range max value"), sep="\n")
+        }
+        if(self$estimated_range_min_proba >= self$estimated_range_max_proba) {
+          consistency_error_count <- consistency_error_count + 1
+          consistency_report <- paste0(c("est. range min proba. >= est. range max proba."), sep="\n")
+        }
       }
 
       # And eventually output the conclusion in the desired format.
@@ -479,12 +483,12 @@ factor_estimate_gld_3points <- R6Class(
         stop("Sorry, this output format is not supported.")
       }
     },
-    reset_graph_limits = function() {
+    reset_plot_limits = function() {
       # Set default scale margins containing all estimation parameters for pretty graph rendering.
-      self$graph_value_start <- self$estimated_range_min_value
-      self$graph_value_end <- self$estimated_range_max_value
-      self$graph_probability_start <- self$estimated_range_min_proba / 4
-      self$graph_probability_end <- self$estimated_range_max_proba + (1 - self$estimated_range_max_proba) / 4
+      self$plot_value_start <- self$estimated_range_min_value
+      self$plot_value_end <- self$estimated_range_max_value
+      self$plot_probability_start <- self$estimated_range_min_proba / 4
+      self$plot_probability_end <- self$estimated_range_max_proba + (1 - self$estimated_range_max_proba) / 4
     }
   ),
   active = list(
@@ -498,17 +502,24 @@ factor_estimate_gld_3points <- R6Class(
       }
       else { stop("This is a read-only attribute") }},
     estimated_range_min_value = function(value,...) {
-      if(missing(value)) { return(private$private_estimated_range_min_value) }
+      if(missing(value)) {
+        if(is.null(private$private_estimated_range_min_value)) {
+          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
+          private$private_estimated_range_min_value <- NA }
+        return(private$private_estimated_range_min_value)
+        }
       else {
+        # We only do something if something changes... This is important for Shiny apps, etc. to avoid recomputing everything when recomputing is not required
+        if(is.na(self$estimated_range_min_value) | value != self$estimated_range_min_value)
+        {
         private$private_estimated_range_min_value <- value
-        self$reset_graph_limits() }},
+        if(self$check_state_consistency()) { self$fit_dist() }
+        self$reset_plot_limits() }}},
     estimated_mode_value = function(value,...) {
       if(missing(value)) {
-        if(length(private$private_estimated_mode_value) == 0)
-        {
+        if(is.null(private$private_estimated_mode_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
-          private$private_estimated_mode_value <- NA
-        }
+          private$private_estimated_mode_value <- NA }
         return(private$private_estimated_mode_value)
         }
       else {
@@ -516,31 +527,48 @@ factor_estimate_gld_3points <- R6Class(
         if(is.na(self$estimated_mode_value) | value != self$estimated_mode_value)
           {
           private$private_estimated_mode_value <- value
-          self$reset_graph_limits()
+          if(self$check_state_consistency()) { self$fit_dist() }
+          self$reset_plot_limits()
           }
         }
       },
     estimated_range_max_value = function(value,...) {
-      if(missing(value)) { return(private$private_estimated_range_max_value) }
+      if(missing(value)) {
+        if(is.null(private$private_estimated_range_max_value)) {
+          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
+          private$private_estimated_range_max_value <- NA }
+        return(private$private_estimated_range_max_value) }
       else {
-        private$private_estimated_range_max_value <- value
-        self$reset_graph_limits() }},
+        # We only do something if something changes... This is important for Shiny apps, etc. to avoid recomputing everything when recomputing is not required
+        if(is.na(self$estimated_range_max_value) | value != self$estimated_range_max_value)
+        {
+          private$private_estimated_range_max_value <- value
+          if(self$check_state_consistency()) { self$fit_dist() }
+          self$reset_plot_limits() }}},
     estimated_range_min_proba = function(value,...) {
-      if(missing(value)) { return(private$private_estimated_range_min_proba) }
+      if(missing(value)) {
+        if(is.null(private$private_estimated_range_min_proba)) {
+          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
+          private$private_estimated_range_min_proba <- NA }
+        return(private$private_estimated_range_min_proba) }
       else {
-        if(value <= 0){
-          stop("estimated_range_min_proba <= 0")
-          }
-        private$private_estimated_range_min_proba <- value
-        self$reset_graph_limits() }},
+        if(is.na(self$estimated_range_min_proba) | value != self$estimated_range_min_proba)
+        {
+          private$private_estimated_range_min_proba <- value
+          if(self$check_state_consistency()) { self$fit_dist() }
+          self$reset_plot_limits() }}},
     estimated_range_max_proba = function(value,...) {
-      if(missing(value)) { return(private$private_estimated_range_max_proba) }
+      if(missing(value)) {
+        if(is.null(private$private_estimated_range_max_proba)) {
+          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
+          private$private_estimated_range_max_proba <- NA }
+          return(private$private_estimated_range_max_proba) }
       else {
-        if(value <= 0){
-          stop("estimated_range_max_proba <= 0")
-        }
-        private$private_estimated_range_max_proba <- value
-        self$reset_graph_limits() }},
+        if(is.na(self$estimated_range_max_proba) | value != self$estimated_range_max_proba)
+        {
+          private$private_estimated_range_max_proba <- value
+          if(self$check_state_consistency()) { self$fit_dist() }
+          self$reset_plot_limits() }}},
     estimated_range_size_proba = function(value,...) {
       # This is a shortcut parameter to estimated range min / max.
       # It computes a centered estimated range.
@@ -551,7 +579,7 @@ factor_estimate_gld_3points <- R6Class(
         }
         self$estimated_range_min_proba <- (1 - value) / 2
         self$estimated_range_max_proba <- 1 - (1 - value) / 2
-        self$reset_graph_limits() }}
+        self$reset_plot_limits() }}
   ),
   private = list(
     private_estimated_range_min_value = NULL,

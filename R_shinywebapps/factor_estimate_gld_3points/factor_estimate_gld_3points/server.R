@@ -36,9 +36,11 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_mode_value <- input$estimated_mode_value
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
 
-    print(input$estimated_mode_value)
-    suppressWarnings(factor_estimate_1$fit_dist())
-    factor_estimate_1$graph_density()
+    factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
+    factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+
+    #factor_estimate_1$fit_dist()
+    factor_estimate_1$plot_density()
 
   })
 
@@ -48,9 +50,11 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_mode_value <- input$estimated_mode_value
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
 
-    print(input$estimated_mode_value)
-    factor_estimate_1$fit_dist()
-    factor_estimate_1$graph_quantile()
+    factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
+    factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+
+    #factor_estimate_1$fit_dist()
+    factor_estimate_1$plot_quantile()
 
   })
 

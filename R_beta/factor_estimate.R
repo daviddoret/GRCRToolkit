@@ -75,12 +75,12 @@ factor_estimate <- R6Class(
     get_probability = function(q, ...) { return(self$probability_function(q, ...)) },
     get_quantile = function(p, ...) { return(self$quantile_function(p, ...)) },
     get_random = function(n, ...) { return(self$random_function(n, ...)) },
-    graph_density = function(x_start = NULL, x_end = NULL)
+    plot_density = function(x_start = NULL, x_end = NULL)
       {
       if(self$check_state_consistency())
       {
-        if(is.null(x_start)) { x_start <- self$graph_value_start }
-        if(is.null(x_end)) { x_end <- self$graph_value_end }
+        if(is.null(x_start)) { x_start <- self$plot_value_start }
+        if(is.null(x_end)) { x_end <- self$plot_value_end }
         return(
           plot_probability_density_function(
             fun = self$density_function,
@@ -92,13 +92,13 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
       },
-    graph_probability = function(x_start = NULL, x_end = NULL)
+    plot_probability = function(x_start = NULL, x_end = NULL)
       {
       if(self$check_state_consistency())
       {
 
-      if(is.null(x_start)) { x_start <- self$graph_value_start }
-      if(is.null(x_end)) { x_end <- self$graph_value_end }
+      if(is.null(x_start)) { x_start <- self$plot_value_start }
+      if(is.null(x_end)) { x_end <- self$plot_value_end }
       return(
         plot_cumulative_distribution_function(
           fun = self$probability_function,
@@ -110,7 +110,7 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
       },
-    graph_quantile = function(x_start = NULL, x_end = NULL)
+    plot_quantile = function(x_start = NULL, x_end = NULL)
       {
       if(self$check_state_consistency())
       {
@@ -127,14 +127,14 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
     },
-    graph_sample_without_outliers = function(x_start = NULL, x_end = NULL, title = NULL)
+    plot_sample_without_outliers = function(x_start = NULL, x_end = NULL, title = NULL)
     {
       if(self$check_state_consistency())
       {
 
       sample <- self$get_random(1000)
-      if(is.null(x_start)) { x_start <- self$graph_value_start }
-      if(is.null(x_end)) { x_end <- self$graph_value_end }
+      if(is.null(x_start)) { x_start <- self$plot_value_start }
+      if(is.null(x_end)) { x_end <- self$plot_value_end }
       return(
         plot_sample(
           sample = sample,
@@ -146,7 +146,7 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
     },
-    graph_sample_with_outliers = function(title = NULL)
+    plot_sample_with_outliers = function(title = NULL)
     {
       if(self$check_state_consistency())
       {
@@ -165,17 +165,17 @@ factor_estimate <- R6Class(
       # Plots a textual summary description of this factor.
       return(plot_vignette(title="Summary", text=self$get_print_lines()))
     },
-    graph_all = function(x_start = NULL, x_end = NULL) {
-      if(is.null(x_start)) { x_start <- self$graph_value_start }
-      if(is.null(x_end)) { x_end <- self$graph_value_end }
+    plot_all = function(x_start = NULL, x_end = NULL) {
+      if(is.null(x_start)) { x_start <- self$plot_value_start }
+      if(is.null(x_end)) { x_end <- self$plot_value_end }
 
       return(multiplot(
         self$plot_vignette(),
-        self$graph_density(x_start = x_start, x_end = x_end),
-        self$graph_probability(x_start = x_start, x_end = x_end),
-        self$graph_quantile(),
-        self$graph_sample_with_outliers(),
-        self$graph_sample_without_outliers(),
+        self$plot_density(x_start = x_start, x_end = x_end),
+        self$plot_probability(x_start = x_start, x_end = x_end),
+        self$plot_quantile(),
+        self$plot_sample_with_outliers(),
+        self$plot_sample_without_outliers(),
         layout = matrix(c(1,2,3,4,5,6), nrow=2, byrow=TRUE)))
     },
     simulate = function(n = NULL) {
@@ -218,18 +218,18 @@ factor_estimate <- R6Class(
       if(missing(value)) { return(private$private_random_function) }
       else { private$private_random_function <- value }},
     # Beautiful graph preferences
-    graph_value_start = function(value,...) {
-      if(missing(value)) { return(private$private_graph_value_start) }
-      else { private$private_graph_value_start <- value }},
-    graph_value_end = function(value,...) {
-      if(missing(value)) { return(private$private_graph_value_end) }
-      else { private$private_graph_value_end <- value }},
-    graph_probability_start = function(value,...) {
-      if(missing(value)) { return(private$private_graph_probability_start) }
-      else { private$private_graph_probability_start <- value }},
-    graph_probability_end = function(value,...) {
-      if(missing(value)) { return(private$private_graph_probability_end) }
-      else { private$private_graph_probability_end <- value }},
+    plot_value_start = function(value,...) {
+      if(missing(value)) { return(private$private_plot_value_start) }
+      else { private$private_plot_value_start <- value }},
+    plot_value_end = function(value,...) {
+      if(missing(value)) { return(private$private_plot_value_end) }
+      else { private$private_plot_value_end <- value }},
+    plot_probability_start = function(value,...) {
+      if(missing(value)) { return(private$private_plot_probability_start) }
+      else { private$private_plot_probability_start <- value }},
+    plot_probability_end = function(value,...) {
+      if(missing(value)) { return(private$private_plot_probability_end) }
+      else { private$private_plot_probability_end <- value }},
     # Standard moments of the fitted distribution
     # These are conditionnaly implemented by the subclasses
     # if analytical solutions are available.
@@ -300,10 +300,10 @@ factor_estimate <- R6Class(
     # Limits for good-looking graph rendering.
     # Sub-classes implementing estimation methods
     # have the responsibility to set their values.
-    private_graph_value_start = NA,
-    private_graph_value_end = NA,
-    private_graph_probability_start = NA,
-    private_graph_probability_end = NA,
+    private_plot_value_start = NA,
+    private_plot_value_end = NA,
+    private_plot_probability_start = NA,
+    private_plot_probability_end = NA,
     private_simulation_sample = NA
   )
 )
