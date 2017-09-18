@@ -6,6 +6,11 @@ pacman::p_load(R6,gld)
 #' such as the 3 points estimate which is going to be the first
 #' implementation.
 #'
+#' For the time being, I only support the FMKH parameterization. If
+#' other parameterizations become necessary in the future, these will
+#' require specifically dedicated R6 classes because the way we tweak
+#' lambda parameters here is strongly linked to FMKH logic.
+#'
 #' TODO:
 #' - data validation and general help to friendly manage lambda parameters
 #'

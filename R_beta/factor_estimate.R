@@ -25,16 +25,19 @@ factor_estimate <- R6Class(
         c(
           paste0("Estimation method: ", self$estimation_method_name),
           paste0("Fitted distribution: ", self$distribution_name),
+          paste0(
+            " mode = ", fn(self$dist_mode,2),
+            " ,γ1 = ", fn(self$dist_skewness,4),
+            " ,κ = ", fn(self$dist_kurtosis,4)),
           "Simulation sample:",
           paste0(
-            " mode = ", fn(self$dist_mode,4),
-            " μ = ", fn(self$dist_mean,4),
-            " ,σ = ", fn(self$dist_sd,4)),
+            " n = ", fn(self$simulation_sample_size,0),
+            " ,min = ", fn(self$simulation_sample_min,2),
+            " ,max = ", fn(self$simulation_sample_max,2)),
           paste0(
-            " ,σ² = ", fn(self$dist_variance,4),
-            " ,γ1 = ", fn(self$dist_skewness,4),
-            " ,κ = ", fn(self$dist_kurtosis,4))
-          )
+            " μ = ", fn(self$simulation_sample_mean,2),
+            " ,sd = ", fn(self$simulation_sample_sd,2),
+            " ,var = ", fn(self$simulation_sample_variance,0)))
     },
     print = function(...) {
       cat(paste0(self$get_print_lines(), collapse = "\n"))
@@ -118,6 +121,10 @@ factor_estimate <- R6Class(
       # to keep the individual impacts in an "individual impacts"
       # column in the data frame and use the standard factor_value column
       # for the final factor results.
+      if(is.null(n)) { n = 10000 }
+      if(n <= 0) {
+        stop("n <= 0")
+      }
       factor_value <- self$get_random(n = n)
       private$private_simulation_sample <- data.frame(factor_value = factor_value)
     }
@@ -162,19 +169,34 @@ factor_estimate <- R6Class(
     dist_mode = function(value,...) {
       if(missing(value)) { return(get_dist_mode_from_pdf(pdf = self$get_density)) }
       else { stop("This is a read-only attribute") }},
-    dist_mean = function(value,...) {
+    simulation_sample_mean = function(value,...) {
       if(missing(value)) {
-        return(mean(x = self$get_random(n = 1000)))
+        return(mean(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
-    dist_sd = function(value,...) {
+    simulation_sample_sd = function(value,...) {
       if(missing(value)) {
-        return(sd(x = self$get_random(n = 1000)))
+        return(sd(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
-    dist_variance = function(value, ...) {
+    simulation_sample_variance = function(value, ...) {
       if(missing(value)) {
-        return(var(x = self$get_random(n = 1000)))
+        return(var(self$simulation_sample$factor_value))
+      }
+      else { stop("This is a read-only attribute") }},
+    simulation_sample_size = function(value,...) {
+      if(missing(value)) {
+        return(length(self$simulation_sample$factor_value))
+      }
+      else { stop("This is a read-only attribute") }},
+    simulation_sample_min = function(value,...) {
+      if(missing(value)) {
+        return(min(self$simulation_sample$factor_value))
+      }
+      else { stop("This is a read-only attribute") }},
+    simulation_sample_max = function(value,...) {
+      if(missing(value)) {
+        return(max(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
     dist_skewness = function(value,...) {

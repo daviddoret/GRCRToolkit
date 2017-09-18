@@ -5,6 +5,11 @@ options(digits=22)
 
 #' GLD 3 points estimate
 #'
+#' For the time being, I only support GLD's FMKH parameterization.
+#' If other parameterizations become necessary / interesting in the future,
+#' these will require specifically dedicated R6 classes,
+#' because the way we tweak lambda parameters here is strongly linked to FMKH logic.
+#'
 #' TODO:
 #' - Make lambda parameters read-only for class users
 #'   in such a way as to guarantee consistency between
@@ -16,7 +21,16 @@ factor_estimate_gld_3points <- R6Class(
   "factor_estimate_gld_3points",
   inherit = factor_estimate_gld,
   public = list(
-    initialize = function(...) {
+    initialize = function(
+      estimated_range_min_value = NULL,
+      estimated_mode_value = NULL,
+      estimated_range_max_value = NULL,
+      estimated_range_min_proba = NULL,
+      estimated_range_max_proba = NULL,
+      estimated_range_size = NULL,
+      fit_dist = NULL, # Triggers distribution fitting immediately.
+      simulate = NULL, # Triggers simulation immediately.
+      ...) {
       super$initialize(
         estimation_method_name = "PERT-like 3 points estimate", ...)
 
@@ -26,6 +40,51 @@ factor_estimate_gld_3points <- R6Class(
       self$lambda2 <- 1
       self$lambda3 <- -1
       self$lambda4 <- -1
+
+      if(estimated_range_min_value >= estimated_mode_value){
+        stop("estimated_range_min_value >= estimated_mode_value")
+      }
+      if(estimated_mode_value >= estimated_range_max_value){
+        stop("estimated_mode_value >= estimated_range_max_value")
+      }
+
+      self$estimated_range_min_value <- estimated_range_min_value
+      self$estimated_mode_value <- estimated_mode_value
+      self$estimated_range_max_value <- estimated_range_max_value
+
+      if(is.null(estimated_range_size))
+        {
+          # Parameterization #1: precise range estimate with min and max.
+          if(is.null(estimated_range_min_proba)) {
+            estimated_range_min_proba <- .05 # TODO: replace with a default configuration setting
+            }
+          if(is.null(estimated_range_max_proba)) {
+            estimated_range_max_proba <- .95 # TODO: replace with a default configuration setting
+            }
+          if(estimated_range_min_proba >= estimated_range_max_proba){
+            stop("!estimated_range_min_proba < estimated_range_max_proba")
+            }
+
+          self$estimated_range_min_proba <- estimated_range_min_proba
+          self$estimated_range_max_proba <- estimated_range_max_proba
+        }
+      else
+        {
+          # Parameterization #2 (default): symmetric range estimate defined by size.
+          # This is a shortcut that computes a centered estimated range.
+          if(is.null(estimated_range_size)) {
+            estimated_range_size <- .9 # TODO: replace with a default configuration setting
+          }
+
+          self$estimated_range_size <- estimated_range_size
+        }
+
+      if(is.null(fit_dist)) { fit_dist <- TRUE }
+      if(fit_dist) { self$fit_dist(...) }
+
+      if(is.null(simulate)) { simulate <- TRUE }
+      if(simulate) { self$simulate(...) }
+
       },
     fit_dist = function(max_iteration = NULL, precision = NULL, ...) {
 
@@ -210,11 +269,11 @@ factor_estimate_gld_3points <- R6Class(
       optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128)
 
       # TODO: We should test the result against a tolerance threshold.
-      #fg3$get_probability(fg3$estimated_range_max_value)
-      #fg3$get_quantile(fg3$estimated_range_max_proba)
+      #self$get_probability(self$estimated_range_max_value)
+      #self$get_quantile(self$estimated_range_max_proba)
 
       # And we retrieve its output.
-      fg3$lambda3 <- optimization$estimate
+      self$lambda3 <- optimization$estimate
 
     },
     fit_dist_right_skew = function() {
@@ -240,7 +299,7 @@ factor_estimate_gld_3points <- R6Class(
           abs(
             vapply(x, flat_function, 0)
             -
-              fg3$estimated_range_max_proba
+              self$estimated_range_max_proba
           )
           # nlm prefers to reduce high numbers
           # so I artificially increase the output
@@ -255,11 +314,11 @@ factor_estimate_gld_3points <- R6Class(
       optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128)
 
       # TODO: We should test the result against a tolerance threshold.
-      #fg3$get_probability(fg3$estimated_range_max_value)
-      #fg3$get_quantile(fg3$estimated_range_max_proba)
+      #self$get_probability(self$estimated_range_max_value)
+      #self$get_quantile(self$estimated_range_max_proba)
 
       # And we retrieve its output.
-      fg3$lambda4 <- optimization$estimate
+      self$lambda4 <- optimization$estimate
 
     },
     get_print_lines = function(...) {
@@ -291,6 +350,22 @@ factor_estimate_gld_3points <- R6Class(
     }
   ),
   active = list(
+    parameter_consistency = function(...) {
+      # Informs us if the current parameters are consistent / logical.
+      # This makes it possible to prevent useless calls to expensive functions
+      # that may output multitude of warnings and errors when we know
+      # from the beginning that this parameterization is doomed to failure.
+      # Returns TRUE if parameters are consistent.
+      # Returns a descriptive
+      consistency_report <- ""
+      if(self$estimated_range_min_value > self$estimated_mode_value) {
+        consistency_report <- paste0(c(consistency_report, "The estimated range minimum value is greater than the estimated mode value."), sep="\n")
+      }
+      if(self$estimated_range_mode_value > self$estimated_range_max_value) {
+        consistency_report <- paste0(c("The estimated mode value is greater than the estimated range max value."), sep="\n")
+      }
+      return(consistency_report)
+    },
     estimated_range_min_value = function(value,...) {
       if(missing(value)) { return(private$private_estimated_range_min_value) }
       else {
@@ -299,8 +374,17 @@ factor_estimate_gld_3points <- R6Class(
     estimated_mode_value = function(value,...) {
       if(missing(value)) { return(private$private_estimated_mode_value) }
       else {
-        private$private_estimated_mode_value <- value
-        self$reset_graph_limits() }},
+        # We only do something if something changes...
+        # This is important for Shiny apps, etc.
+        # to avoid recomputing everything
+        # when recomputing is not required
+        if(value != private$private_estimated_mode_value)
+          {
+          private$private_estimated_mode_value <- value
+          self$reset_graph_limits()
+          }
+        }
+      },
     estimated_range_max_value = function(value,...) {
       if(missing(value)) { return(private$private_estimated_range_max_value) }
       else {
@@ -309,21 +393,27 @@ factor_estimate_gld_3points <- R6Class(
     estimated_range_min_proba = function(value,...) {
       if(missing(value)) { return(private$private_estimated_range_min_proba) }
       else {
+        if(value <= 0){
+          stop("estimated_range_min_proba <= 0")
+          }
         private$private_estimated_range_min_proba <- value
         self$reset_graph_limits() }},
-    #mode_proba = function(value,...) {
-    #  if(missing(value)) { return(private$private_mode_proba) }
-    #  else {
-    #    private$private_mode_proba <- value
-    #    self$reset_graph_limits() }},
     estimated_range_max_proba = function(value,...) {
       if(missing(value)) { return(private$private_estimated_range_max_proba) }
       else {
+        if(value <= 0){
+          stop("estimated_range_max_proba <= 0")
+        }
         private$private_estimated_range_max_proba <- value
         self$reset_graph_limits() }},
-    range_size_proba = function(value,...) {
+    estimated_range_size_proba = function(value,...) {
+      # This is a shortcut parameter to estimated range min / max.
+      # It computes a centered estimated range.
       if(missing(value)) { return(self$estimated_range_max_proba - self$estimated_range_min_proba) }
       else {
+        if(value <= 0){
+          stop("estimated_range_size_proba <= 0")
+        }
         self$estimated_range_min_proba <- (1 - value) / 2
         self$estimated_range_max_proba <- 1 - (1 - value) / 2
         self$reset_graph_limits() }}
@@ -333,7 +423,6 @@ factor_estimate_gld_3points <- R6Class(
     private_estimated_mode_value = NULL,
     private_estimated_range_max_value = NULL,
     private_estimated_range_min_proba = NULL,
-    #private_mode_proba = NULL,
     private_estimated_range_max_proba = NULL
   )
 )
