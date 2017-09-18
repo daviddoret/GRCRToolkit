@@ -118,7 +118,7 @@ factor_estimate_gld_3points <- R6Class(
       # testing would be desirable.
 
       # First, we restart from a clean page:
-      self$lambda1 <- 0
+      self$lambda1 <- self$estimated_mode_value
       self$lambda2 <- 1
       self$lambda3 <- -1
       self$lambda4 <- -1
@@ -180,7 +180,11 @@ factor_estimate_gld_3points <- R6Class(
       delta <- self$estimated_mode_value - self$dist_mode
       new_lambda1 <- self$lambda1 + delta
 
-      if(verbosity > 0) { message(paste0("lambda1: ",self$lambda1, " --> ", new_lambda1)) }
+      if(verbosity > 0) {
+        message(paste0("lambda1: ",self$lambda1, " --> ", new_lambda1,
+                       " estimated_mode_value: ",self$estimated_mode_value,
+                       " dist_mode: ", self$dist_mode))
+        }
 
       # Move the fitted distribution to compensate
       # for this difference
@@ -242,7 +246,7 @@ factor_estimate_gld_3points <- R6Class(
       magic_ratio <- magic_value / target_value
       magic_lambda2 = abs(exp(1) * magic_ratio)
 
-      result <- qgl(p = target_proba, lambda1 = self$estimated_mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
+      # result <- qgl(p = target_proba, lambda1 = self$estimated_mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
       # message(paste0("result: ",result))
       # TODO: Add some result quality check here.
 
@@ -484,6 +488,15 @@ factor_estimate_gld_3points <- R6Class(
     }
   ),
   active = list(
+    dist_mode = function(value,...) {
+      if(missing(value))
+      {
+        return(get_dist_mode_from_pdf(
+          pdf = self$get_density,
+          search_range_start = self$estimated_range_min_value,
+          search_range_end = self$estimated_range_max_value))
+      }
+      else { stop("This is a read-only attribute") }},
     estimated_range_min_value = function(value,...) {
       if(missing(value)) { return(private$private_estimated_range_min_value) }
       else {

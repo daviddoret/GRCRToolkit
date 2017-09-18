@@ -5,7 +5,7 @@ pacman::p_load(stats)
 #
 # Find the mode of a distribution using optimization techniques.
 # This is helpful when an analytic solution is not handily available.
-get_dist_mode_from_pdf = function(pdf, precision = NULL, verbosity = NULL, ...) {
+get_dist_mode_from_pdf = function(pdf, search_range_start, search_range_end, precision = NULL, verbosity = NULL, ...) {
 
   if(is.null(precision)) { precision <- 1 }
   if(is.null(verbosity)) { verbosity <- 0 }
@@ -20,7 +20,7 @@ get_dist_mode_from_pdf = function(pdf, precision = NULL, verbosity = NULL, ...) 
 #  # Run the optimization
 #  optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128, print.level = verbosity)
 
-  optimization <- optimize(pdf, c(-10000,10000), maximum = TRUE, tol = 1)
+  optimization <- optimize(pdf, c(search_range_start,search_range_end), maximum = TRUE, tol = 1)
 
   if(is.null(optimization$maximum))
   {

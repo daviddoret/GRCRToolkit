@@ -236,7 +236,15 @@ factor_estimate <- R6Class(
     # At this level, we may only rely on optimization to
     # estimate solutions.
     dist_mode = function(value,...) {
-      if(missing(value)) { return(get_dist_mode_from_pdf(pdf = self$get_density)) }
+      if(missing(value))
+      {
+        stop("Should be implemented by the subclass")
+        # The new approach relying on optimize require a range
+        # to be searched to find the maxima in the PDF.
+        # We may implement here a best effort but then
+        # optimize() may or may not be the right solution.
+        # return(get_dist_mode_from_pdf(pdf = self$get_density))
+        }
       else { stop("This is a read-only attribute") }},
     simulation_sample_mean = function(value,...) {
       if(missing(value)) {
