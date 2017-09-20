@@ -19,3 +19,5 @@ fg4$simulate()
 #fg4$lambda3 <- 45
 fg4$plot_density(x_start = -1500, x_end = +6000)
 fg4
+fg4$get_simulation_sample_random(n=10)
+

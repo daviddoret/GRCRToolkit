@@ -75,6 +75,23 @@ factor_estimate <- R6Class(
     get_probability = function(q, ...) { return(self$probability_function(q, ...)) },
     get_quantile = function(p, ...) { return(self$quantile_function(p, ...)) },
     get_random = function(n, ...) { return(self$random_function(n, ...)) },
+    get_simulation_sample_head = function(n, ...) {
+      extract <- head(self$simulation_sample[order(self$simulation_sample$factor_value), ], n = n)
+      #rownames(extract) <- 1:n
+      return(extract)
+    },
+    get_simulation_sample_tail = function(n, ...) {
+      extract <- tail(self$simulation_sample[order(self$simulation_sample$factor_value), ], n = n)
+      #rownames(extract) <- 1:n
+      return(extract)
+    },
+    get_simulation_sample_random = function(n, ...) {
+      # IDEA: First, sort the full simulation, store their relative positions
+      #       and return the item respective positions.
+      extract <- self$simulation_sample[sample(nrow(self$simulation_sample), n), ]
+      rownames(extract) <- 1:n
+      return(extract)
+    },
     plot_density = function(x_start = NULL, x_end = NULL)
       {
       if(self$check_state_consistency())
@@ -127,26 +144,26 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
     },
-    plot_sample_without_outliers = function(x_start = NULL, x_end = NULL, title = NULL)
-    {
-      if(self$check_state_consistency())
-      {
-
-      sample <- self$get_random(1000)
-      if(is.null(x_start)) { x_start <- self$plot_value_start }
-      if(is.null(x_end)) { x_end <- self$plot_value_end }
-      return(
-        plot_sample(
-          sample = sample,
-          title = "Sample histogram without outliers",
-          x_start = x_start,
-          x_end = x_end))       }
-      else
-      {
-        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
-      }
-    },
-    plot_sample_with_outliers = function(title = NULL)
+    # plot_sample_without_outliers = function(x_start = NULL, x_end = NULL, title = NULL)
+    # {
+    #   if(self$check_state_consistency())
+    #   {
+    #
+    #   sample <- self$get_random(1000)
+    #   if(is.null(x_start)) { x_start <- self$plot_value_start }
+    #   if(is.null(x_end)) { x_end <- self$plot_value_end }
+    #   return(
+    #     plot_sample(
+    #       sample = sample,
+    #       title = "Sample histogram without outliers",
+    #       x_start = x_start,
+    #       x_end = x_end))       }
+    #   else
+    #   {
+    #     return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+    #   }
+    # },
+    plot_simulation_sample = function(title = NULL)
     {
       if(self$check_state_consistency())
       {
@@ -174,8 +191,8 @@ factor_estimate <- R6Class(
         self$plot_density(x_start = x_start, x_end = x_end),
         self$plot_probability(x_start = x_start, x_end = x_end),
         self$plot_quantile(),
-        self$plot_sample_with_outliers(),
-        self$plot_sample_without_outliers(),
+        self$plot_simulation_sample(),
+        #self$plot_sample_without_outliers(),
         layout = matrix(c(1,2,3,4,5,6), nrow=2, byrow=TRUE)))
     },
     simulate = function(n = NULL) {
