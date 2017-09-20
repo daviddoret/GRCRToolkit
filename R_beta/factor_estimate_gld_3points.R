@@ -41,12 +41,12 @@ factor_estimate_gld_3points <- R6Class(
       self$lambda3 <- -1
       self$lambda4 <- -1
 
-      if(estimated_range_min_value >= estimated_mode_value){
-        stop("estimated_range_min_value >= estimated_mode_value")
-      }
-      if(estimated_mode_value >= estimated_range_max_value){
-        stop("estimated_mode_value >= estimated_range_max_value")
-      }
+      #if(estimated_range_min_value >= estimated_mode_value){
+      #  stop("estimated_range_min_value >= estimated_mode_value")
+      #}
+      #if(estimated_mode_value >= estimated_range_max_value){
+      #  stop("estimated_mode_value >= estimated_range_max_value")
+      #}
 
       self$estimated_range_min_value <- estimated_range_min_value
       self$estimated_mode_value <- estimated_mode_value
@@ -579,41 +579,13 @@ factor_estimate_gld_3points <- R6Class(
         }
         self$estimated_range_min_proba <- (1 - value) / 2
         self$estimated_range_max_proba <- 1 - (1 - value) / 2
-        self$reset_plot_limits() }},
-    limit_min = function(value,...) {
-      if(missing(value)) {
-        if(is.null(private$private_limit_min)) {
-          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
-          private$private_limit_min <- NA }
-        return(private$private_limit_min) }
-      else {
-        if(is.na(self$limit_min) | value != self$limit_min)
-        {
-          private$private_limit_min <- value
-          # No need to re-fit the distribution.
-          # TODO: Re-populate the simulation sample.
-        }}},
-    limit_max = function(value,...) {
-      if(missing(value)) {
-        if(is.null(private$private_limit_max)) {
-          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
-          private$private_limit_max <- NA }
-        return(private$private_limit_max) }
-      else {
-        if(is.na(self$limit_max) | value != self$limit_max)
-        {
-          private$private_limit_max <- value
-          # No need to re-fit the distribution.
-          # TODO: Re-populate the simulation sample.
-        }}}
+        self$reset_plot_limits() }}
   ),
   private = list(
     private_estimated_range_min_value = NA,
     private_estimated_mode_value = NA,
     private_estimated_range_max_value = NA,
     private_estimated_range_min_proba = NA,
-    private_estimated_range_max_proba = NA,
-    private_limit_min = NA,
-    private_limit_max = NA
+    private_estimated_range_max_proba = NA
   )
 )

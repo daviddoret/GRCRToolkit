@@ -74,7 +74,17 @@ factor_estimate <- R6Class(
     get_density = function(x, ...) { return(self$density_function(x, ...)) },
     get_probability = function(q, ...) { return(self$probability_function(q, ...)) },
     get_quantile = function(p, ...) { return(self$quantile_function(p, ...)) },
-    get_random = function(n, ...) { return(self$random_function(n, ...)) },
+    get_random = function(n, ...)
+      {
+        random_sample <- self$random_function(n, ...)
+        if(!is.na(self$limit_min_value)){
+          random_sample <- pmax(random_sample, rep(self$limit_min_value, times = n))
+        }
+        if(!is.na(self$limit_max_value)){
+          random_sample <- pmin(random_sample, rep(self$limit_max_value, times = n))
+        }
+      return(random_sample)
+      },
     get_simulation_sample_head = function(n, ...) {
       extract <- head(self$simulation_sample[order(self$simulation_sample$factor_value), ], n = n)
       #rownames(extract) <- 1:n
@@ -225,6 +235,32 @@ factor_estimate <- R6Class(
     density_function = function(value,...) {
       if(missing(value)) { return(private$private_density_function) }
       else { private$private_density_function <- value }},
+    limit_min_value = function(value,...) {
+      if(missing(value)) {
+        if(is.null(private$private_limit_min_value)) {
+          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
+          private$private_limit_min_value <- NA }
+        return(private$private_limit_min_value) }
+      else {
+        if(is.na(self$limit_min_value) | value != self$limit_min_value)
+        {
+          private$private_limit_min_value <- value
+          # No need to re-fit the distribution.
+          # TODO: Re-populate the simulation sample.
+        }}},
+    limit_max_value = function(value,...) {
+      if(missing(value)) {
+        if(is.null(private$private_limit_max_value)) {
+          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
+          private$private_limit_max_value <- NA }
+        return(private$private_limit_max_value) }
+      else {
+        if(is.na(self$limit_max_value) | value != self$limit_max_value)
+        {
+          private$private_limit_max_value <- value
+          # No need to re-fit the distribution.
+          # TODO: Re-populate the simulation sample.
+        }}},
     probability_function = function(value,...) {
       if(missing(value)) { return(private$private_probability_function) }
       else { private$private_probability_function <- value }},
@@ -321,6 +357,8 @@ factor_estimate <- R6Class(
     private_plot_value_end = NA,
     private_plot_probability_start = NA,
     private_plot_probability_end = NA,
-    private_simulation_sample = NA
+    private_simulation_sample = NA,
+    private_limit_min_value = NA,
+    private_limit_max_value = NA
   )
 )

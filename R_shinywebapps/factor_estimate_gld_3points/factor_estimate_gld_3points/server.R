@@ -64,6 +64,8 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
 
     factor_estimate_1$plot_simulation_sample()
 
@@ -76,6 +78,8 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
 
     print(factor_estimate_1)
 
@@ -87,6 +91,9 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
+
     factor_estimate_1$fit_dist()
     factor_estimate_1$simulate()
     factor_estimate_1$get_simulation_sample_head(n = input$simulation_sample_sample_size)
@@ -98,6 +105,9 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
+
     factor_estimate_1$fit_dist()
     factor_estimate_1$simulate()
     factor_estimate_1$get_simulation_sample_tail(n = input$simulation_sample_sample_size)
@@ -109,6 +119,9 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
+
     factor_estimate_1$fit_dist()
     factor_estimate_1$simulate()
     factor_estimate_1$get_simulation_sample_random(n = input$simulation_sample_sample_size)

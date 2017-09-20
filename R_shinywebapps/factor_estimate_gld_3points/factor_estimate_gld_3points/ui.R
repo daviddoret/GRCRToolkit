@@ -13,14 +13,30 @@ library(shiny)
 shinyUI(fluidPage(
   titlePanel("Factor estimate using GLD and 3 points"),
   # Sidebar with a slider input for number of bins
-  sidebarLayout(
-    sidebarPanel(
-          numericInput(inputId = "estimated_range_min_value", label = "Est. range min value", value = 100000, min = 0, max = 1000000000, step = 100000, width = "100%"),
-          numericInput(inputId = "estimated_mode_value", label = "Estimated mode", value = 200000, min = 0, max = 1000000000, step = 100000, width = "100%"),
-          numericInput(inputId = "estimated_range_max_value", label = "Est. range max value", value = 300000, min = 0, max = 1000000000, step = 100000, width = "100%"),
-          numericInput(inputId = "estimated_range_min_proba", label = "Est. range max value", value = .05, min = 0, max = 1, step = .01, width = "100%"),
-          numericInput(inputId = "estimated_range_max_proba", label = "Est. range max value", value = .95, min = 0, max = 1, step = .95, width = "100%")
+
+  fluidRow(
+  column(width=4,
+    wellPanel(
+      tags$h3("PERT-like 3 points estimate"),
+      tags$p("Type in your min/max range estimate for the given confidence interval and the typical value (mode)"),
+      fluidRow(
+        column(width=4, numericInput(inputId = "estimated_range_min_value", label = "Min.", value = 100000, min = 0, max = 1000000000, step = 100000, width = "100%")),
+        column(width=4, numericInput(inputId = "estimated_mode_value", label = "Mode", value = 200000, min = 0, max = 1000000000, step = 100000, width = "100%")),
+        column(width=4, numericInput(inputId = "estimated_range_max_value", label = "Max.", value = 300000, min = 0, max = 1000000000, step = 100000, width = "100%"))
           ),
+      tags$p("Type in the confidence interval for the above estimate"),
+      fluidRow(
+        column(width=4, numericInput(inputId = "estimated_range_min_proba", label = "Min.", value = .05, min = 0, max = 1, step = .01, width = "100%")),
+        column(width=4, numericInput(inputId = "estimated_range_max_proba", label = "Max.", value = .95, min = 0, max = 1, step = .95, width = "100%"))
+          ),
+      tags$p("You may type in limits. For loss events, the minimum should be set to 0 (excluding opportunities or positive risks) or the minimum financial loss being considered a loss as per the organization's risk management policy. The maximum should be set to the highest possible risk, usually equaly to the company's equity value"),
+      fluidRow(
+        column(width=4, numericInput(inputId = "limit_min_value", label = "Min.", value = 0, min = 0, max = 1, step = .01, width = "100%")),
+        column(width=4, numericInput(inputId = "limit_max_value", label = "Max.", value = 500000, min = 0, max = 1, step = .95, width = "100%"))
+          )
+      )
+    ),
+    column(width=8,
     mainPanel(
       tabsetPanel(
       tabPanel("Fitted Distribution",
@@ -57,4 +73,4 @@ shinyUI(fluidPage(
                        ),
                        tableOutput("table_simulation_sample_random")))
       )
-    )))))
+    ))))))
