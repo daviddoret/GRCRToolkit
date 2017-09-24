@@ -2,23 +2,6 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(colorpsace, ggplot2,labeling)
 
-# Package tweaking to get github version of ggplot2,
-# in such a way as to benefit from the new labs function with subtitles.
-#install.packages("devtools")
-#pacman::p_load(devtools,colorspace,assertthat)
-#install.packages(c("RColorBrewer", "stringr", "dichromat", "munsell", "plyr", "colorspace"))
-#install.packages("scales")
-#dev_mode(TRUE)
-#install_github("hadley/scales")
-#install_github("tidyverse/ggplot2")
-
-
-# FUTURE ENHANCEMENT:
-# - Add a nice cat and whisker plot
-#   showing the key moments,
-#   get inspiration from here:
-#   https://en.wikipedia.org/wiki/Probability_density_function
-
 #' plot_probability_density_function
 #'
 #' Produces a good looking graph of a probability density function.
@@ -48,7 +31,7 @@ plot_probability_density_function = function(
   # And put a title on top of it
   if(is.null(title)){ title <- "Probability Density Function" }
 
-  # Prepare the data
+  # Prepare a data frame for the GGPlot plot
   df <- data.frame(x=c(x_start, x_end))
 
   # Configure the graph
@@ -59,8 +42,6 @@ plot_probability_density_function = function(
 
     # Limit the number of digits on the vertical axis
     scale_y_continuous(label = function(x) { round(x,3) }) +
-
-    # coord_trans(x="log2") +
 
     # Area plot the function
     stat_function(
@@ -78,7 +59,6 @@ plot_probability_density_function = function(
       caption = caption,
       x = "Factor value",
       y = "Relative likelihood") +
-    #ggtitle(title)
 
     theme(plot.title = element_text(size = 12, face = "bold"))
 

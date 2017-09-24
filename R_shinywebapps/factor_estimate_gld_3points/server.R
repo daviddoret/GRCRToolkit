@@ -29,7 +29,12 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
 
-    factor_estimate_1$plot_density()
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
+
+    factor_estimate_1$fit_dist()
+    factor_estimate_1$simulate()
+    factor_estimate_1$plot_density(x_start = input$x_start, x_end = input$x_end)
 
   })
 
@@ -41,6 +46,11 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
 
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
+
+    factor_estimate_1$fit_dist()
+    factor_estimate_1$simulate()
     factor_estimate_1$plot_quantile()
 
   })
@@ -53,7 +63,12 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
 
-    factor_estimate_1$plot_probability()
+    factor_estimate_1$limit_min_value <- input$limit_min_value
+    factor_estimate_1$limit_max_value <- input$limit_max_value
+
+    factor_estimate_1$fit_dist()
+    factor_estimate_1$simulate()
+    factor_estimate_1$plot_probability(x_start = input$x_start, x_end = input$x_end)
 
   })
 
@@ -64,9 +79,12 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+
     factor_estimate_1$limit_min_value <- input$limit_min_value
     factor_estimate_1$limit_max_value <- input$limit_max_value
 
+    factor_estimate_1$fit_dist()
+    factor_estimate_1$simulate()
     factor_estimate_1$plot_simulation_sample()
 
   })
@@ -78,19 +96,24 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+
     factor_estimate_1$limit_min_value <- input$limit_min_value
     factor_estimate_1$limit_max_value <- input$limit_max_value
 
+    factor_estimate_1$fit_dist()
+    factor_estimate_1$simulate()
     print(factor_estimate_1)
 
   })
 
   output$table_simulation_sample_head <- renderTable({
+
     factor_estimate_1$estimated_range_min_value <- input$estimated_range_min_value
     factor_estimate_1$estimated_mode_value <- input$estimated_mode_value
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+
     factor_estimate_1$limit_min_value <- input$limit_min_value
     factor_estimate_1$limit_max_value <- input$limit_max_value
 
@@ -105,6 +128,7 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+
     factor_estimate_1$limit_min_value <- input$limit_min_value
     factor_estimate_1$limit_max_value <- input$limit_max_value
 
@@ -119,6 +143,7 @@ shinyServer(function(input, output) {
     factor_estimate_1$estimated_range_max_value <- input$estimated_range_max_value
     factor_estimate_1$estimated_range_min_proba <- input$estimated_range_min_proba
     factor_estimate_1$estimated_range_max_proba <- input$estimated_range_max_proba
+
     factor_estimate_1$limit_min_value <- input$limit_min_value
     factor_estimate_1$limit_max_value <- input$limit_max_value
 

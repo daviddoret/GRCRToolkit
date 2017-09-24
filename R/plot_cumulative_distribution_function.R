@@ -6,7 +6,7 @@ pacman::p_load(colorspace, ggplot2, labeling)
 #'
 #' Produces a good looking graph of a cumulative distribution function.
 #'
-#' @param fun a parameterized cumulative distribution function receiving a single x parameter
+#' @param fun a pre-parameterized cumulative distribution function receiving a single x parameter
 #'
 #' @param x_start the left most position that will be displayed on the x axis
 #'
@@ -28,10 +28,10 @@ plot_cumulative_distribution_function <- function(
   subtitle = NULL,
   caption = NULL, ...) {
 
-  # And put a title on top of it
+  # Default title
   if(is.null(title)){ title <- "Cumulative Distribution Function" }
 
-  # Prepare the data
+  # Prepare the plot data frame
   df <- data.frame(x=c(x_start, x_end))
 
   # Configure the graph
@@ -40,10 +40,6 @@ plot_cumulative_distribution_function <- function(
     # Give a little bit of margin on the graph sides
     xlim(x_start, x_end) +
     #ylim: let it scale automatically
-
-    # Axis titles
-    #ylab("Probability")  +
-    #xlab("Factor value")  +
 
     # Limit the number of digits on the vertical axis
     scale_y_continuous(label = function(x) { round(x,3) }) +
@@ -56,8 +52,7 @@ plot_cumulative_distribution_function <- function(
       size = model_config_get_option("plot", "cdf", "area", "size"),
       xlim = c(x_start, x_end)) +
 
-    # And put a title on top of it
-    #ggtitle("Cumulative distribution function")
+    # Add title, substitle, caption and scale titles
     labs(
       title = title,
       subtitle = subtitle,
@@ -65,8 +60,8 @@ plot_cumulative_distribution_function <- function(
       x = "Factor value",
       y = "Cumulative probability") +
 
+    # Apply some general theme to make it good looking
     theme(plot.title = element_text(size = 12, face = "bold"))
-    #ggtitle(title)
 
   return(graph)
 }

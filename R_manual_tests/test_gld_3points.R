@@ -24,7 +24,9 @@ fg4$get_random(5)
 #fg4$estimated_mode_value > fg4$estimated_range_max_value
 #fg4$estimated_mode_value <- -5000
 #fg4$lambda3 <- 45
-fg4$plot_density(x_start = -1500, x_end = +6000)
+
+
+fg4$plot_density()
 fg4
 fg4$get_simulation_sample_random(n=10)
 

@@ -191,7 +191,7 @@ factor_estimate_gld_3points <- R6Class(
       self$lambda1 <- new_lambda1
 
     },
-    fit_dist_scale = function(verbosity = NULL, ...) {
+    fit_dist_scale = function(scaling_side = NULL, verbosity = NULL, ...) {
       # after lambda1 (location), we calculate lambda2 (PDF shape size or scale).
       # at this point, we don't consider skewness and assume shape symmetry.
       # lambda2 is like a "zoom" for the PDF,
@@ -202,9 +202,17 @@ factor_estimate_gld_3points <- R6Class(
       # 2). Find the ratio between lambda2 and the desired quantile.
       # 3). Apply this ratio to the size / scale of the target distribution (provided in the estimation parameters).
 
-      # neutralize skewness
-      # self$lambda3 <- -1
-      # self$lambda4 <- -1
+      # scaling_side: default: "small". other possible value: "big". this parameter
+      # tells us if we initialize lambda2 from the "small" side of a skewed distribution
+      # or the "big" side. if the distribution is symetric, this parameter will have
+      # no meaningful influence.
+      if(is.null(scaling_side)) { scaling_side <- "small" }
+      # OBSERVATION: when fitting the distribution from the small size, I get
+      # excellent and consistent results. when we approach fitting from the big side,
+      # we tend to fail to fit the distribution properly if the skewness is too large.
+      # it would be great to analyse the causes of this difference in greater details.
+      # it may be caused by number precision issues whereby too steep a curve would
+      # require hyper precise number optimization.
 
       # because the 3 points estimates may be skewed,
       # we choose one of the two sides.
@@ -215,20 +223,34 @@ factor_estimate_gld_3points <- R6Class(
       if(is.null(verbosity)) { verbosity <- 0 }
 
       left_value_range <- self$estimated_mode_value - self$estimated_range_min_value
-      left_value_range
+      #left_value_range
       right_value_range <- self$estimated_range_max_value - self$estimated_mode_value
-      right_value_range
+      #right_value_range
 
       # which side should we use?
       side <- NULL
       target_proba <- NULL
       if(left_value_range > right_value_range) {
-        side <- "left"
-        target_proba <- self$estimated_range_min_proba
+        if(scaling_side == "small") {
+          side <- "right"
+          target_proba <- 1 - self$estimated_range_max_proba
+        }
+        else
+        {
+          side <- "left"
+          target_proba <- self$estimated_range_min_proba
+        }
       } else {
+        if(scaling_side == "small") {
+            side <- "left"
+            target_proba <- self$estimated_range_min_proba
+          }
+        else
+          {
         side <- "right"
         target_proba <- 1 - self$estimated_range_max_proba
-      }
+          }
+        }
 
       # if distribution was zero-centered
       # and we wanted its size to fit,
@@ -482,6 +504,95 @@ factor_estimate_gld_3points <- R6Class(
       {
         stop("Sorry, this output format is not supported.")
       }
+    },
+    plot_density = function(x_start = NULL, x_end = NULL, ...) {
+      # Override the super-class method to append the limits and point estimates.
+
+      if(is.null(x_start) | is.null(x_end))
+      {
+        x_start <- min(self$estimated_range_min_value, self$limit_min_value)
+        x_end <- max(self$estimated_range_max_value, self$limit_max_value)
+        margin <- (x_end - x_start) * .1 # Add a visual 10% margin
+        x_start <- x_start - margin
+        x_end <- x_end + margin
+      }
+
+      # Get the original PDF plot
+      plot_01 <- super$plot_density(x_start = x_start, x_end = x_end)
+
+      # Prepare a vector with the 3 points estimates
+      estimates <- c(self$estimated_range_min_value,
+                           self$estimated_mode_value,
+                           self$estimated_range_max_value)
+
+      # Enrich the graph with the estimates represented as vertical lines
+      plot_01 <- overplot_vertical_lines(plot_01, x_values = estimates, color = "blue", alpha = .2, ...)
+
+      limits_values <- c()
+      if(!is.na(self$limit_min_value))
+      {
+        limits_values <- c(limits_values, self$limit_min_value)
+      }
+      if(!is.na(self$limit_max_value))
+      {
+        limits_values <- c(limits_values, self$limit_max_value)
+      }
+
+      # Enrich the graph with the estimates represented as vertical lines
+      if(!is.na(self$limit_min_value) | !is.na(self$limit_max_value))
+      {
+        plot_01 <- overplot_vertical_lines(plot_01, x_values = limits_values, x_labels = NULL, color = "red", alpha = .2, ...)
+      }
+
+      return(plot_01)
+    },
+    plot_probability = function(x_start = NULL, x_end = NULL, ...) {
+      # Override the super-class method to append the limits and point estimates.
+
+      if(is.null(x_start) | is.null(x_end))
+      {
+        x_start <- min(self$estimated_range_min_value, self$limit_min_value)
+        x_end <- max(self$estimated_range_max_value, self$limit_max_value)
+        margin <- (x_end - x_start) * .1 # Add a visual 10% margin
+        x_start <- x_start - margin
+        x_end <- x_end + margin
+      }
+
+      # Get the original CPF plot
+      plot_01 <- super$plot_probability(x_start = x_start, x_end = x_end)
+
+      # Prepare a vector with the 3 points estimates
+      x_estimates <- c(self$estimated_range_min_value,
+                     self$estimated_mode_value,
+                     self$estimated_range_max_value)
+
+      # Enrich the graph with the estimates represented as vertical lines
+      plot_01 <- overplot_vertical_lines(plot_01, x_values = x_estimates, color = "blue", alpha = .2, ...)
+
+      x_limits_values <- c()
+      if(!is.na(self$limit_min_value))
+      {
+        x_limits_values <- c(x_limits_values, self$limit_min_value)
+      }
+      if(!is.na(self$limit_max_value))
+      {
+        x_limits_values <- c(x_limits_values, self$limit_max_value)
+      }
+
+      # Enrich the graph with the estimates represented as vertical lines
+      if(!is.na(self$limit_min_value) | !is.na(self$limit_max_value))
+      {
+        plot_01 <- overplot_vertical_lines(plot_01, x_values = x_limits_values, x_labels = NULL, color = "red", alpha = .2, ...)
+      }
+
+      # Prepare a vector with the 3 points estimates
+      y_estimates <- c(self$estimated_range_min_proba,
+                       self$estimated_range_max_proba)
+
+      # Enrich the graph with the estimates represented as vertical lines
+      plot_01 <- overplot_horizontal_lines(plot_01, y_values = y_estimates, color = "blue", alpha = .2, ...)
+
+      return(plot_01)
     },
     reset_plot_limits = function() {
       # Set default scale margins containing all estimation parameters for pretty graph rendering.

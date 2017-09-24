@@ -20,9 +20,9 @@ shinyUI(fluidPage(
       tags$h3("PERT-like 3 points estimate"),
       tags$p("Type in your min/max range estimate for the given confidence interval and the typical value (mode)"),
       fluidRow(
-        column(width=4, numericInput(inputId = "estimated_range_min_value", label = "Min.", value = 100000, min = 0, max = 1000000000, step = 100000, width = "100%")),
-        column(width=4, numericInput(inputId = "estimated_mode_value", label = "Mode", value = 200000, min = 0, max = 1000000000, step = 100000, width = "100%")),
-        column(width=4, numericInput(inputId = "estimated_range_max_value", label = "Max.", value = 300000, min = 0, max = 1000000000, step = 100000, width = "100%"))
+        column(width=4, numericInput(inputId = "estimated_range_min_value", label = "Min.", value = 200, min = 0, max = 1000000000, step = 1, width = "100%")),
+        column(width=4, numericInput(inputId = "estimated_mode_value", label = "Mode", value = 300, min = 0, max = 1000000000, step = 1, width = "100%")),
+        column(width=4, numericInput(inputId = "estimated_range_max_value", label = "Max.", value = 400, min = 0, max = 1000000000, step = 1, width = "100%"))
           ),
       tags$p("Type in the confidence interval for the above estimate"),
       fluidRow(
@@ -31,8 +31,13 @@ shinyUI(fluidPage(
           ),
       tags$p("You may type in limits. For loss events, the minimum should be set to 0 (excluding opportunities or positive risks) or the minimum financial loss being considered a loss as per the organization's risk management policy. The maximum should be set to the highest possible risk, usually equaly to the company's equity value"),
       fluidRow(
-        column(width=4, numericInput(inputId = "limit_min_value", label = "Min.", value = 0, min = 0, max = 1, step = .01, width = "100%")),
-        column(width=4, numericInput(inputId = "limit_max_value", label = "Max.", value = 500000, min = 0, max = 1, step = .95, width = "100%"))
+        column(width=4, numericInput(inputId = "limit_min_value", label = "Min.", value = 100, min = 0, max = 1000000000, step = 1, width = "100%")),
+        column(width=4, numericInput(inputId = "limit_max_value", label = "Max.", value = 500, min = 0, max = 1000000000, step = 1, width = "100%"))
+          ),
+      tags$p("Graph navigation"),
+      fluidRow(
+        column(width=4, numericInput(inputId = "x_start", label = "X start", value = 0, min = 0, max = 1, step = 1, width = "100%")),
+        column(width=4, numericInput(inputId = "x_end", label = "X end", value = 600, min = 0, max = 1000000000, step = 1, width = "100%"))
           )
       )
     ),
