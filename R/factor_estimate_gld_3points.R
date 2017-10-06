@@ -293,7 +293,7 @@ factor_estimate_gld_3points <- R6Class(
       flat_function <- function(x){
         if(x >= 0)
         {
-          warning("x >= 0")
+          if(verbosity > 0) { warning("x >= 0") }
           return(Inf)
         }
         return(pgl(
@@ -324,7 +324,17 @@ factor_estimate_gld_3points <- R6Class(
 
       # Then we run the optimization.
       # TODO: Study nlm options in greater details.
-      optimization <- nlm(
+      nlm_wrapper <- NULL
+      if(verbosity == 0) {
+        nlm_wrapper <- function(...) {
+          suppressWarnings(nlm(...))
+        }
+      }
+      else
+      {
+        nlm_wrapper <- nlm
+      }
+      optimization <- nlm_wrapper(
         minimization_function,
         -1,
         ndigit = 22,
@@ -362,7 +372,7 @@ factor_estimate_gld_3points <- R6Class(
       # to throw away positive values (nlm optimizer doesn't support bounds either).
       flat_function <- function(x, ...){
         if(x >= 0) {
-          warning("x >= 0")
+          if(verbosity > 0) { warning("x >= 0") }
           return(Inf)
           }
         return(pgl(
@@ -393,7 +403,17 @@ factor_estimate_gld_3points <- R6Class(
 
       # Then we run the optimization.
       # TODO: Study nlm options in greater details.
-      optimization <- nlm(
+      nlm_wrapper <- NULL
+      if(verbosity == 0) {
+        nlm_wrapper <- function(...) {
+          suppressWarnings(nlm(...))
+        }
+      }
+      else
+      {
+        nlm_wrapper <- nlm
+      }
+      optimization <- nlm_wrapper(
         minimization_function,
         -1,
         ndigit = 22,
@@ -414,11 +434,7 @@ factor_estimate_gld_3points <- R6Class(
       }
       else
       {
-        if(verbosity > 0)
-        {
-          warning("nlm returns NULL")
-          self
-        }
+        if(verbosity > 0) { warning("nlm returns NULL") }
       }
     },
     get_print_lines = function(...) {

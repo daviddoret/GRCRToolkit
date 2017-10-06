@@ -40,9 +40,20 @@ get_dist_mode_from_pdf = function(
 #  # Run the optimization
 #  optimization <- nlm(minimization_function, -1, ndigit = 22, iterlim = 128, print.level = verbosity)
 
-  optimization <- optimize(
-    pdf,
-    c(search_range_start,search_range_end),
+  optimize_wrapper <- NULL
+  if(verbosity == 0) {
+    optimize_wrapper <- function(...) {
+      suppressWarnings(optimize(...))
+    }
+  }
+  else
+  {
+    optimize_wrapper <- optimize
+  }
+
+  optimization <- optimize_wrapper(
+    f = pdf,
+    interval = c(search_range_start,search_range_end),
     maximum = TRUE,
     tol = 1)
 
