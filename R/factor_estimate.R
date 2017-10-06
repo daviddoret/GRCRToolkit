@@ -1,14 +1,11 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(R6,ggplot2)
 
-#' The factor_estimate class provides an inheritance model
-#' for effective factor estimation approaches.
-#' This class should be inherited from but not instanciated from (ie it is abstract).
+#' The factor_estimate class provides an inheritance model for effective factor estimation approaches.
+#' This class should be inherited from but not instanciated from (ie it is "abstract").
 #'
 #' TODO:
 #' - Glue code with model_factor.
-#' - Implement SAMPLE var, sd, median, etc.
-#'   Re-implement mode from the SAMPLE this this in summary statistics.
 #'
 #' @export
 factor_estimate <- R6Class(
@@ -62,15 +59,15 @@ factor_estimate <- R6Class(
           paste0("Fitted distribution: ", self$distribution_name),
           paste0(
             " mode = ", fn(self$dist_mode,2),
-            " ,γ1 = ", fn(self$dist_skewness,4),
-            " ,κ = ", fn(self$dist_kurtosis,4)),
+            " ,\U3b3 = ", fn(self$dist_skewness,4), # Unicode 3b3 = greek small letter gamma
+            " ,\U3ba = ", fn(self$dist_kurtosis,4)), # Unicode 3ba = greek small letter kappa
           "Simulation sample:",
           paste0(
             " n = ", fn(self$simulation_sample_size,0),
             " ,min = ", fn(self$simulation_sample_min,2),
             " ,max = ", fn(self$simulation_sample_max,2)),
           paste0(
-            " μ = ", fn(self$simulation_sample_mean,2),
+            " \U3bc = ", fn(self$simulation_sample_mean,2), # Unicode 3bc = greek small letter mu
             " ,sd = ", fn(self$simulation_sample_sd,2),
             " ,var = ", fn(self$simulation_sample_variance,0)))
     },

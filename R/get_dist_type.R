@@ -7,7 +7,7 @@
 #' is far from satisfactory. I just implemented a few names that I
 #' immediately needed + a few that I grabbed from wikipedia below.
 #'
-#' Future improvements:
+#' Future enhancements:
 #' - Provide support for all well-known distributions.
 #' - Find a more elegant way to manage distribution aliases, shortened versions, etc.
 #'

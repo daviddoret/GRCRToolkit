@@ -47,14 +47,14 @@ factor_estimate_poisson <- R6Class(
       # Check if all mandatory parameters have been defined.
       if(is.na(self$lambda)) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "λ is missing."), sep="\n")
+        consistency_report <- paste0(c(consistency_report, "\U3bb is missing."), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
       else
       {
         # Lambda must be greater than 0.
         if(self$lambda <= 0) {
           consistency_error_count <- consistency_error_count + 1
-          consistency_report <- paste0(c(consistency_report, "λ <= 0"), sep="\n")
+          consistency_report <- paste0(c(consistency_report, "\U3bb <= 0"), sep = "\n") # Unicode 3bb = 	greek small letter lamda
         }
       }
 
@@ -80,7 +80,7 @@ factor_estimate_poisson <- R6Class(
       return(
           c(super$get_print_lines(),
           "Distribution parameters:",
-          paste0(" λ = ", fn(self$lambda,4)),
+          paste0(" \U3bb = ", fn(self$lambda,4)),  # Unicode 3bb = 	greek small letter lamda
           "Complementary parameters:",
           paste0(" time interval = ", self$time_interval_friendly_name)))
     }

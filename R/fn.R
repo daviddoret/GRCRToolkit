@@ -1,9 +1,20 @@
-# fn = format number
-# a shortcut function to make the string manipulation strings less verbose
-#
-# TODO: This function is very procedural and is probably
-# inefficient performance wise. Rewrite it.
-#
+if (!require(pacman)) install.packages(pacman)
+
+#' fn = format number
+#'
+#' A shortcut function to make the string manipulation strings less verbose.
+#' TODO: This function is very procedural and is probably inefficient performance wise. Rewrite it.
+#'
+#' @param x a vector of numbers
+#'
+#' @param digits the number of digits to be displayed
+#'
+#' @return nicely formatted numbers
+#'
+#' @examples
+#' fn(c(10.555,3.14),2)
+#'
+#' @export
 fn <- function(x, digits = NULL) {
   # Reasonable default number of digits when not specified.
   if(is.null(digits)) { digits = 2 }

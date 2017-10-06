@@ -1,7 +1,9 @@
 # Package preparation
 #if (!require(pacman)) install.packages(pacman)
 #pacman::p_load(colorpsace, ggplot2,labeling)
-require(colorspace, ggplot2, labeling)
+if (!require(pacman)) install.packages(pacman)
+pacman::p_load(colorspace, ggplot2, labeling)
+
 
 #' plot_probability_mass_function
 #'

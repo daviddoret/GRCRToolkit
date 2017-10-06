@@ -1,3 +1,6 @@
+if (!require(pacman)) install.packages(pacman)
+pacman::p_load(colorspace, ggplot2, labeling)
+
 #' plot_factor
 #'
 #' Produces a good looking multi-graph visual representation of a model factor.

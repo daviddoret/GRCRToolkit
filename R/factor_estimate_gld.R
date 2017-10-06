@@ -19,9 +19,15 @@ factor_estimate_gld <- R6Class(
   "factor_estimate_gld",
   inherit = factor_estimate,
   public = list(
-    initialize = function(...) {
+    initialize = function(
+      limit_min_value = NULL,
+      limit_max_value = NULL,
+      ...) {
       super$initialize(
-        distribution_name = "Generalized Lambda (aka Tukey Lambda)", ...)
+        distribution_name = "Generalized Lambda (aka Tukey Lambda)",
+        limit_min_value = limit_min_value,
+        limit_max_value = limit_max_value,
+        ...)
       #super$distribution_name <- "GLD"
       self$density_function <- function(
         x, lambda1 = NULL, lambda2 = NULL, lambda3 = NULL, lambda4 = NULL, ...){
@@ -78,29 +84,29 @@ factor_estimate_gld <- R6Class(
       # Check if all mandatory parameters have been defined.
       if(is.na(self$lambda1)) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "λ1 is missing."), sep="\n")
+        consistency_report <- paste0(c(consistency_report, "\U3bb1 is missing."), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
       if(is.na(self$lambda2)) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "λ2 is missing."), sep="\n")
+        consistency_report <- paste0(c(consistency_report, "\U3bb2 is missing."), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
       if(is.na(self$lambda3)) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "λ3 is missing."), sep="\n")
+        consistency_report <- paste0(c(consistency_report, "\U3bb3 is missing."), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
       if(is.na(self$lambda4)) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "λ4 is missing."), sep="\n")
+        consistency_report <- paste0(c(consistency_report, "\U3bb4 is missing."), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
 
       # Check consistency between parameters.
       if(self$lambda3 >= 0) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "λ3 >= 0"), sep="\n")
+        consistency_report <- paste0(c(consistency_report, "\U3bb3 >= 0"), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
       if(self$lambda4 >= 0) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "λ4 >= 0"), sep="\n")
+        consistency_report <- paste0(c(consistency_report, "\U3bb4 >= 0"), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
 
       # And eventually output the conclusion in the desired format.
@@ -126,10 +132,10 @@ factor_estimate_gld <- R6Class(
           c(super$get_print_lines(),
           "Fitted distribution parameters:",
           paste0(
-            " λ1 = ", fn(self$lambda1,4),
-            " ,λ2 = ", fn(self$lambda2,4),
-            " ,λ3 = ", fn(self$lambda3,4),
-            " ,λ4 = ", fn(self$lambda4,4)
+            " \U3bb1 = ", fn(self$lambda1,4), # Unicode 3bb = 	greek small letter lamda
+            " ,\U3bb2 = ", fn(self$lambda2,4),
+            " ,\U3bb3 = ", fn(self$lambda3,4),
+            " ,\U3bb4 = ", fn(self$lambda4,4)
             )))
     }
   ),

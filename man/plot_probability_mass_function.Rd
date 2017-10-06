@@ -4,7 +4,8 @@
 \alias{plot_probability_mass_function}
 \title{plot_probability_mass_function}
 \usage{
-plot_probability_mass_function(fun, x_start, x_end, ...)
+plot_probability_mass_function(fun, x_start, x_end, title = NULL,
+  subtitle = NULL, caption = NULL, ...)
 }
 \arguments{
 \item{fun}{a parameterized probability mass function receiving a single x parameter}

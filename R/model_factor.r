@@ -1,8 +1,5 @@
-library(R6)
-library(rriskDistributions)
-library(fitdistrplus)
-#library(GRCRToolkit)
-library(ggplot2)
+if (!require(pacman)) install.packages(pacman)
+pacman::p_load(R6)
 
 #' model_factor
 #'

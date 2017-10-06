@@ -4,7 +4,8 @@
 \alias{plot_probability_density_function}
 \title{plot_probability_density_function}
 \usage{
-plot_probability_density_function(fun, x_start, x_end, ...)
+plot_probability_density_function(fun, x_start, x_end, title = NULL,
+  subtitle = NULL, caption = NULL, ...)
 }
 \arguments{
 \item{fun}{a parameterized probability density function receiving a single x parameter}

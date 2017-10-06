@@ -4,10 +4,11 @@
 \alias{plot_cumulative_distribution_function}
 \title{plot_cumulative_distribution_function}
 \usage{
-plot_cumulative_distribution_function(fun, x_start, x_end, ...)
+plot_cumulative_distribution_function(fun, x_start, x_end, title = NULL,
+  subtitle = NULL, caption = NULL, ...)
 }
 \arguments{
-\item{fun}{a parameterized cumulative distribution function receiving a single x parameter}
+\item{fun}{a pre-parameterized cumulative distribution function receiving a single x parameter}
 
 \item{x_start}{the left most position that will be displayed on the x axis}
 

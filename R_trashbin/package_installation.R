@@ -16,17 +16,17 @@
 #devtools::install_github('wch/R6', build_vignettes = FALSE)
 #remove.packages("R6", lib="~/R/win-library/3.3")
 #remove.packages("R6", lib="C:/Program Files/Microsoft/R Client/R_SERVER/library")
-
+#install.packages("testthat")
 
 #unloadNamespace("R6")
-#Error in unloadNamespace("R6") : 
-#  l'espace de noms 'R6' est importé par 'mrsdeploy', 'CompatibilityAPI' et ne peut, donc, pas être déchargé
+#Error in unloadNamespace("R6") :
+#  l'espace de noms 'R6' est import? par 'mrsdeploy', 'CompatibilityAPI' et ne peut, donc, pas ?tre d?charg?
 #> unloadNamespace("mrsdeploy")
 #> unloadNamespace("CompatibilityAPI")
-#Error in unloadNamespace("CompatibilityAPI") : 
-#l'espace de noms 'CompatibilityAPI' est importé par 'RevoScaleR' et ne peut, donc, pas être déchargé
+#Error in unloadNamespace("CompatibilityAPI") :
+#l'espace de noms 'CompatibilityAPI' est import? par 'RevoScaleR' et ne peut, donc, pas ?tre d?charg?
 #> unloadNamespace("RevoScaleR")
-#Error: le package ''RevoScaleR' est nécessaire pour 'MicrosoftML' et n'est donc pas détachable
+#Error: le package ''RevoScaleR' est n?cessaire pour 'MicrosoftML' et n'est donc pas d?tachable
 #> unloadNamespace("MicrosoftML")
 #> unloadNamespace("RevoScaleR")
 #> unloadNamespace("CompatibilityAPI")

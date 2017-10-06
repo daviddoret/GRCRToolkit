@@ -1,6 +1,7 @@
 # Package preparation
 if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorpsace, ggplot2,labeling)
+pacman::p_load(colorspace, ggplot2, labeling)
+
 
 # FUTURE ENHANCEMENT:
 # - Add a nice cat and whisker plot

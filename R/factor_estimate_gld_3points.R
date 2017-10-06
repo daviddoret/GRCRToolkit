@@ -28,11 +28,16 @@ factor_estimate_gld_3points <- R6Class(
       estimated_range_min_proba = NULL,
       estimated_range_max_proba = NULL,
       estimated_range_size = NULL,
+      limit_min_value = NULL,
+      limit_max_value = NULL,
       fit_dist = NULL, # Triggers distribution fitting immediately.
       simulate = NULL, # Triggers simulation immediately.
       ...) {
       super$initialize(
-        estimation_method_name = "PERT-like 3 points estimate", ...)
+        estimation_method_name = "PERT-like 3 points estimate",
+        limit_min_value = limit_min_value,
+        limit_max_value = limit_max_value,
+        ...)
 
       # Initialize lambda parameters
       # to avoid the presence of NULLs.
