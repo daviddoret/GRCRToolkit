@@ -12,9 +12,15 @@ factor_estimate_poisson <- R6Class(
   public = list(
     initialize = function(
       lambda = NULL,
-      time_interval_friendly_name = NULL, ...) {
+      time_interval_friendly_name = NULL,
+      limit_min_value = NA,
+      limit_max_value = NA,
+      ...) {
       super$initialize(
-        distribution_name = "Poisson", ...)
+        distribution_name = "Poisson",
+        limit_min_value = limit_min_value,
+        limit_max_value = limit_max_value,
+        ...)
 
       if(is.null(lambda)) { lambda <- NA }
       if(is.null(time_interval_friendly_name)) { time_interval_friendly_name <- NA }

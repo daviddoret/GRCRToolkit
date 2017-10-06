@@ -26,7 +26,8 @@ plot_probability_density_function = function(
   x_end,
   title = NULL,
   subtitle = NULL,
-  caption = NULL, ...) {
+  caption = NULL,
+  ...) {
 
   # And put a title on top of it
   if(is.null(title)){ title <- "Probability Density Function" }

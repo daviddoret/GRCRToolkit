@@ -1,6 +1,7 @@
 # Package preparation
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorpsace, ggplot2,labeling)
+#if (!require(pacman)) install.packages(pacman)
+#pacman::p_load(colorpsace, ggplot2,labeling)
+require(colorspace, ggplot2, labeling)
 
 #' plot_probability_mass_function
 #'
@@ -24,7 +25,13 @@ plot_probability_mass_function <- function(
   fun,
   x_start,
   x_end,
+  title = NULL,
+  subtitle = NULL,
+  caption = NULL,
   ...) {
+
+  # And put a title on top of it
+  if(is.null(title)){ title <- "Probability Mass Function" }
 
   # Prepare the data
   df <- data.frame(x=c(x_start:x_end))
@@ -33,23 +40,31 @@ plot_probability_mass_function <- function(
   graph <- ggplot(df, aes(x, y=fun(x))) +
 
     # X-axis limits are inclusive (in my mind)
-    xlim(x_start - 1, x_end + 1) +
-
-    # Axis titles
-    ylab("Relative likelihood")  +
+    xlim(x_start, x_end) +
 
     # Limit the number of digits on the vertical axis
     scale_y_continuous(label = function(x) { round(x,3) }) +
 
+    # scale_x_discrete(labels = df$x) +
+
     # Area plot the function
-    geom_bar(
+    #geom_bar(
+    geom_histogram(
       alpha = model_config_get_option("plot", "mdf", "bar", "alpha"),
       colour = model_config_get_option("plot", "mdf", "bar", "color"),
-      fill = model_config_get_option("plot", "mdf", "bar", "fill"),
-      stat = "identity") +
+      fill = model_config_get_option("plot", "mdf", "bar", "fill")
+      #statbin = 50,
+      #stat = "identity") +
+    )
 
-    # And put a title on top of it
-    ggtitle("Probability mass function")
+    labs(
+      title = title,
+      subtitle = subtitle,
+      caption = caption,
+      x = "Factor value",
+      y = "Probability") +
+
+    theme(plot.title = element_text(size = 12, face = "bold"))
 
   return(graph)
 

@@ -16,9 +16,16 @@ factor_estimate <- R6Class(
   public = list(
     initialize = function(
       estimation_method_name = NULL,
-      distribution_name = NULL, ...) {
+      distribution_name = NULL,
+      limit_min_value = NA,
+      limit_max_value = NA,
+      ...) {
+      if(is.null(limit_min_value)) { limit_min_value <- NA }
+      if(is.null(limit_max_value)) { limit_max_value <- NA }
       self$estimation_method_name <- estimation_method_name
       self$distribution_name <- distribution_name
+      self$limit_min_value <- limit_min_value
+      self$limit_max_value <- limit_max_value
       },
     check_state_consistency = function(output_format = NULL,...) {
       # Informs us if the object state is consistent / logical.
@@ -99,7 +106,7 @@ factor_estimate <- R6Class(
       # IDEA: First, sort the full simulation, store their relative positions
       #       and return the item respective positions.
       extract <- self$simulation_sample[sample(nrow(self$simulation_sample), n), ]
-      rownames(extract) <- 1:n
+      #rownames(extract) <- 1:n
       return(extract)
     },
     plot_density = function(x_start = NULL, x_end = NULL)
@@ -119,6 +126,23 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
       },
+    plot_mass = function(x_start = NULL, x_end = NULL)
+    {
+      if(self$check_state_consistency())
+      {
+        if(is.null(x_start)) { x_start <- self$plot_value_start }
+        if(is.null(x_end)) { x_end <- self$plot_value_end }
+        return(
+          plot_probability_mass_function(
+            fun = self$density_function,
+            x_start = x_start,
+            x_end = x_end))
+      }
+      else
+      {
+        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+      }
+    },
     plot_probability = function(x_start = NULL, x_end = NULL)
       {
       if(self$check_state_consistency())
@@ -154,25 +178,6 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
     },
-    # plot_sample_without_outliers = function(x_start = NULL, x_end = NULL, title = NULL)
-    # {
-    #   if(self$check_state_consistency())
-    #   {
-    #
-    #   sample <- self$get_random(1000)
-    #   if(is.null(x_start)) { x_start <- self$plot_value_start }
-    #   if(is.null(x_end)) { x_end <- self$plot_value_end }
-    #   return(
-    #     plot_sample(
-    #       sample = sample,
-    #       title = "Sample histogram without outliers",
-    #       x_start = x_start,
-    #       x_end = x_end))       }
-    #   else
-    #   {
-    #     return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
-    #   }
-    # },
     plot_simulation_sample = function(title = NULL)
     {
       if(self$check_state_consistency())
@@ -242,7 +247,11 @@ factor_estimate <- R6Class(
           private$private_limit_min_value <- NA }
         return(private$private_limit_min_value) }
       else {
-        if(is.na(self$limit_min_value) | value != self$limit_min_value)
+        if(is.null(value)) { value <- NA }
+        if(
+          ( is.na(value) & !is.na(self$limit_min_value) ) |
+          ( !is.na(value) & is.na(self$limit_min_value) ) |
+          ( !is.na(value) & !is.na(self$limit_min_value) & value != self$limit_min_value ) )
         {
           private$private_limit_min_value <- value
           # No need to re-fit the distribution.
@@ -255,7 +264,11 @@ factor_estimate <- R6Class(
           private$private_limit_max_value <- NA }
         return(private$private_limit_max_value) }
       else {
-        if(is.na(self$limit_max_value) | value != self$limit_max_value)
+        if(is.null(value)) { value <- NA }
+        if(
+          ( is.na(value) & !is.na(self$limit_max_value) ) |
+          ( !is.na(value) & is.na(self$limit_max_value) ) |
+          ( !is.na(value) & !is.na(self$limit_max_value) & value != self$limit_max_value ) )
         {
           private$private_limit_max_value <- value
           # No need to re-fit the distribution.
@@ -291,7 +304,8 @@ factor_estimate <- R6Class(
     dist_mode = function(value,...) {
       if(missing(value))
       {
-        stop("Should be implemented by the subclass")
+        warning("Should be implemented by the subclass")
+        return(NA)
         # The new approach relying on optimize require a range
         # to be searched to find the maxima in the PDF.
         # We may implement here a best effort but then
