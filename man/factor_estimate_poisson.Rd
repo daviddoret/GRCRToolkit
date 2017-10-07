@@ -3,9 +3,7 @@
 \docType{data}
 \name{factor_estimate_poisson}
 \alias{factor_estimate_poisson}
-\title{An abstract class for a Poisson-based factor estimates.
-Subclasses may inherit from it to implement various estimation techniques,
-such as the 3 points estimate which is the first planned implementation.}
+\title{factor_estimate_poisson}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
 factor_estimate_poisson

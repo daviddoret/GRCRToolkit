@@ -1,6 +1,8 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(R6)
 
+#' factor_estimate_poisson
+#'
 #' An abstract class for a Poisson-based factor estimates.
 #' Subclasses may inherit from it to implement various estimation techniques,
 #' such as the 3 points estimate which is the first planned implementation.
