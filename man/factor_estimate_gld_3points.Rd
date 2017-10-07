@@ -3,7 +3,7 @@
 \docType{data}
 \name{factor_estimate_gld_3points}
 \alias{factor_estimate_gld_3points}
-\title{GLD 3 points estimate}
+\title{factor_estimate_gld_3points: GLD 3 points estimate}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
 factor_estimate_gld_3points
@@ -15,12 +15,10 @@ these will require specifically dedicated R6 classes,
 because the way we tweak lambda parameters here is strongly linked to FMKH logic.
 }
 \details{
-TODO:
+Future enhancements:
 - Make lambda parameters read-only for class users
   in such a way as to guarantee consistency between
   the fitted distribution and the estimation parameters.
-- Store the simulation results in a proper local simulation
-  variable + implement a simulation sample size parameter.
 }
 \keyword{datasets}
 

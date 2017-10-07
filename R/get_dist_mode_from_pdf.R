@@ -1,11 +1,15 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(stats)
 
+options(digits = 22)
+
 #' get_dist_mode_from_pdf
 #'
 #' Shortcut function to find the mode of an arbitrary probability density function (PDF).
 #' Uses optimization, i.e. may lead to imprecise results with exotic input functions.
 #' It is helpful when an analytic solution is not handily available.
+#'
+#' Works only for continuous distribution functions.
 #'
 #' @param pdf the input probability density function (PDF)
 #'
@@ -23,12 +27,12 @@ get_dist_mode_from_pdf = function(
   pdf,
   search_range_start,
   search_range_end,
-  precision = NULL,
+  tolerance = NULL,
   verbosity = NULL,
   ...) {
 
-  if(is.null(precision)) { precision <- 1 }
-  if(is.null(verbosity)) { verbosity <- 0 }
+  if (is.null(tolerance)) { tolerance <- .00000001 } #.Machine$double.eps * ^ 0.25 }
+  if (is.null(verbosity)) { verbosity <- 0 }
 
 #  # Declare the minimization function
 #  minimization_function <- function(x){
@@ -55,7 +59,8 @@ get_dist_mode_from_pdf = function(
     f = pdf,
     interval = c(search_range_start,search_range_end),
     maximum = TRUE,
-    tol = 1)
+    tol = tolerance,
+    ...)
 
   if(is.null(optimization$maximum))
   {

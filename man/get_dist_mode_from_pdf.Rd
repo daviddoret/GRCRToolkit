@@ -5,7 +5,7 @@
 \title{get_dist_mode_from_pdf}
 \usage{
 get_dist_mode_from_pdf(pdf, search_range_start, search_range_end,
-  precision = NULL, verbosity = NULL, ...)
+  tolerance = NULL, verbosity = NULL, ...)
 }
 \arguments{
 \item{pdf}{the input probability density function (PDF)}
@@ -21,6 +21,9 @@ the estimated mode
 Shortcut function to find the mode of an arbitrary probability density function (PDF).
 Uses optimization, i.e. may lead to imprecise results with exotic input functions.
 It is helpful when an analytic solution is not handily available.
+}
+\details{
+Works only for continuous distribution functions.
 }
 \examples{
 get_dist_mode_from_pdf(function(x){return(dnorm(x = x, mean = 17, sd = 5))}, -100, 100)

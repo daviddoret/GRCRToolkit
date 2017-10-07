@@ -6,44 +6,56 @@ options(digits = 22)
 #' Poisson Range (2 points) estimate
 #'
 #' @export
+#'
+#'
 factor_estimate_poisson_mode <- R6Class(
   "factor_estimate_poisson_mode",
   inherit = factor_estimate_poisson,
   public = list(
     initialize = function(
-      estimated_mode = NULL,
+      estimated_mode_value = NULL,
       time_interval_friendly_name = NULL,
+      limit_min_value = NULL,
+      limit_max_value = NULL,
+      fit_dist = NULL, # Triggers distribution fitting immediately.
+      simulate = NULL, # Triggers simulation immediately.
       ...) {
 
+      # Default values
+      if (is.null(estimated_mode_value)) { estimated_mode_value <- NA }
+      if (is.null(fit_dist)) { fit_dist <- TRUE }
+      if (is.null(simulate)) { simulate <- TRUE }
+
       super$initialize(
-        estimation_method_name = "Mode estimate", ...)
+        estimation_method_name = "Mode estimate",
+        limit_min_value = limit_min_value,
+        limit_max_value = limit_max_value,
+        ...)
 
       # Initialize lambda parameters
       # to avoid the presence of NULLs.
       self$lambda <- NA
-
-      self$estimated_mode <- estimated_mode
+      self$estimated_mode_value <- estimated_mode_value
 
       if (fit_dist) { self$fit_dist(...) }
-
       if (simulate) { self$simulate(...) }
 
       },
     fit_dist = function(...) {
-      fit_poisson_mode(estimated_mode = self$estimated_mode)
+      self$lambda <- fit_poisson_mode(estimated_mode_value = self$estimated_mode_value, ...)
       },
     get_print_lines = function(...) {
       return(
         c(super$get_print_lines(),
                "Estimation parameters:",
                paste0(
-                    " mode = ", fn(self$estimated_mode,2),
+                    " mode = ", fn(self$estimated_mode_value,2)),
                     "Fitted quantiles:",
                paste0(
-                    " mode = ", fn(self$dist_mode, 2),
+                    " mode = ", fn(self$dist_mode, 2)),
                "Fitted probabilities:",
                paste0(
-                    " ,mode = ", fn(self$dist_mode, 2)
+                    " ,mode = ", fn(self$dist_mode, 2))
                     ))
     },
     check_state_consistency = function(output_format = NULL, ...) {
@@ -58,23 +70,16 @@ factor_estimate_poisson_mode <- R6Class(
       consistency_report <- super$check_state_consistency(output_format = "report")
 
       # Check if all mandatory parameters have been defined.
-      if (is.na(self$estimated_range_min_value)) {
+      if (is.na(self$estimated_mode_value)) {
         consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "est. range min value is missing."), sep = "\n")
-      }
-      if (is.na(self$estimated_range_max_value)) {
-        consistency_error_count <- consistency_error_count + 1
-        consistency_report <- paste0(c(consistency_report, "est. range max value is missing"), sep = "\n")
+        consistency_report <- paste0(c(consistency_report, "estimated mode value is missing."), sep = "\n")
       }
 
       if (consistency_error_count == 0)
       {
         # If all parameters are present,
         # we can check consistency between parameters.
-        if (self$estimated_range_min_proba >= self$estimated_range_max_proba) {
-          consistency_error_count <- consistency_error_count + 1
-          consistency_report <- paste0(c("est. range min proba. >= est. range max proba."), sep = "\n")
-        }
+        # N/A
       }
 
       # And eventually output the conclusion in the desired format.
@@ -110,9 +115,8 @@ factor_estimate_poisson_mode <- R6Class(
       # Get the original PDF plot
       plot_01 <- super$plot_density(x_start = x_start, x_end = x_end)
 
-      # Prepare a vector with the 3 points estimates
-      estimates <- c(self$estimated_range_min_value,
-                           self$estimated_range_max_value)
+      # Prepare a vector with the estimation parameters
+      estimates <- c(self$estimated_mode_value)
 
       # Enrich the graph with the estimates represented as vertical lines
       plot_01 <- overplot_vertical_lines(plot_01, x_values = estimates, color = "blue", alpha = .2, ...)
@@ -181,39 +185,17 @@ factor_estimate_poisson_mode <- R6Class(
       plot_01 <- overplot_horizontal_lines(plot_01, y_values = y_estimates, color = "blue", alpha = .2, ...)
 
       return(plot_01)
-    },
-    reset_plot_limits = function() {
-      # Set default scale margins containing all estimation parameters for pretty graph rendering.
-      self$plot_value_start <- self$estimated_range_min_value
-      self$plot_value_end <- self$estimated_range_max_value
-      self$plot_probability_start <- self$estimated_range_min_proba / 4
-      self$plot_probability_end <- self$estimated_range_max_proba + (1 - self$estimated_range_max_proba) / 4
     }
   ),
   active = list(
     dist_mode = function(value,...) {
       if (missing(value))
       {
-        return(get_dist_mode_from_pdf(
-          pdf = self$get_density,
-          search_range_start = self$estimated_range_min_value,
-          search_range_end = self$estimated_range_max_value))
+        # Estimated mode = lambda = fitted distribution mode
+        # So this function is ridiculously trivial
+        return(self$estimated_mode_value)
       }
       else {stop("This is a read-only attribute")}},
-    estimated_range_min_value = function(value,...) {
-      if (missing(value)) {
-        if (is.null(private$private_estimated_range_min_value)) {
-          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
-          private$private_estimated_range_min_value <- NA }
-        return(private$private_estimated_range_min_value)
-        }
-      else {
-        # We only do something if something changes... This is important for Shiny apps, etc. to avoid recomputing everything when recomputing is not required
-        if (is.na(self$estimated_range_min_value) | value != self$estimated_range_min_value)
-        {
-        private$private_estimated_range_min_value <- value
-        if (self$check_state_consistency()) { self$fit_dist() }
-        self$reset_plot_limits() }}},
     estimated_mode_value = function(value,...) {
       if (missing(value)) {
         if (is.null(private$private_estimated_mode_value)) {
@@ -227,64 +209,11 @@ factor_estimate_poisson_mode <- R6Class(
           {
           private$private_estimated_mode_value <- value
           if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits()
           }
         }
-      },
-    estimated_range_max_value = function(value,...) {
-      if (missing(value)) {
-        if (is.null(private$private_estimated_range_max_value)) {
-          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
-          private$private_estimated_range_max_value <- NA }
-        return(private$private_estimated_range_max_value) }
-      else {
-        # We only do something if something changes... This is important for Shiny apps, etc. to avoid recomputing everything when recomputing is not required
-        if (is.na(self$estimated_range_max_value) | value != self$estimated_range_max_value)
-        {
-          private$private_estimated_range_max_value <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits() }}},
-    estimated_range_min_proba = function(value,...) {
-      if (missing(value)) {
-        if (is.null(private$private_estimated_range_min_proba)) {
-          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
-          private$private_estimated_range_min_proba <- NA }
-        return(private$private_estimated_range_min_proba) }
-      else {
-        if (is.na(self$estimated_range_min_proba) | value != self$estimated_range_min_proba)
-        {
-          private$private_estimated_range_min_proba <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits() }}},
-    estimated_range_max_proba = function(value,...) {
-      if (missing(value)) {
-        if (is.null(private$private_estimated_range_max_proba)) {
-          # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
-          private$private_estimated_range_max_proba <- NA }
-          return(private$private_estimated_range_max_proba) }
-      else {
-        if (is.na(self$estimated_range_max_proba) | value != self$estimated_range_max_proba)
-        {
-          private$private_estimated_range_max_proba <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits() }}},
-    estimated_range_size_proba = function(value,...) {
-      # This is a shortcut parameter to estimated range min / max.
-      # It computes a centered estimated range.
-      if (missing(value)) { return(self$estimated_range_max_proba - self$estimated_range_min_proba) }
-      else {
-        if (value <= 0){
-          stop("estimated_range_size_proba <= 0")
-        }
-        self$estimated_range_min_proba <- (1 - value) / 2
-        self$estimated_range_max_proba <- 1 - (1 - value) / 2
-        #self$reset_plot_limits()
-        }}
+      }
   ),
   private = list(
-    private_estimated_range_min_value = NA,
-    private_estimated_range_max_value = NA,
-    private_estimated_range_min_proba = NA,
-    private_estimated_range_max_proba = NA
+    private_estimated_mode_value = NA
   )
 )
