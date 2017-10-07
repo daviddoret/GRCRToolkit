@@ -3,19 +3,18 @@ pacman::p_load(testthat, GRCRToolkit, random)
 
 context("factor_estimate_gld_3points")
 
-test_that("check a known example", {
+test_that("a known simple example yields a precise mode", {
   fe1 <- factor_estimate_gld_3points$new(
     limit_min_value = 10,
     estimated_range_min_value = 100,
     estimated_mode_value = 120,
     estimated_range_max_value = 200,
     limit_max_value = 10000,
-    estimated_range_min_proba = .05,
-    estimated_range_max_proba = .95)
+    estimated_range_size_proba = .9)
   expect_equal(fn(fe1$dist_mode,0), "~120")
 })
 
-test_that("check a few pseudo random samples", {
+test_that("a few pseudo random samples yield precise modes", {
   for(iteration in 1:16) {
     limit_min_value <- rand$get(max = 1000)
     estimated_range_min_value <- limit_min_value + rand$get(max = 1000)
@@ -26,8 +25,7 @@ test_that("check a few pseudo random samples", {
       estimated_range_min_value = estimated_range_min_value,
       estimated_mode_value = estimated_mode_value,
       estimated_range_max_value = estimated_range_max_value,
-      estimated_range_min_proba = .05,
-      estimated_range_max_proba = .95,
+      estimated_range_size_proba = .9,
       limit_min_value = limit_min_value,
       limit_max_value = limit_max_value)
 

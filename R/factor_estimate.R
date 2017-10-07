@@ -311,32 +311,38 @@ factor_estimate <- R6Class(
         }
       else { stop("This is a read-only attribute") }},
     simulation_sample_mean = function(value,...) {
-      if(missing(value)) {
+      if (missing(value)) {
+        if (is.na(self$simulation_sample)) { return(NA) }
         return(mean(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
     simulation_sample_sd = function(value,...) {
       if(missing(value)) {
+        if (is.na(self$simulation_sample)) { return(NA) }
         return(sd(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
     simulation_sample_variance = function(value, ...) {
       if(missing(value)) {
+        if (is.na(self$simulation_sample)) { return(NA) }
         return(var(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
     simulation_sample_size = function(value,...) {
       if(missing(value)) {
+        if (is.na(self$simulation_sample)) { return(NA) }
         return(length(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
     simulation_sample_min = function(value,...) {
       if(missing(value)) {
+        if (is.na(self$simulation_sample)) { return(NA) }
         return(min(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
     simulation_sample_max = function(value,...) {
       if(missing(value)) {
+        if (is.na(self$simulation_sample)) { return(NA) }
         return(max(self$simulation_sample$factor_value))
       }
       else { stop("This is a read-only attribute") }},
@@ -351,8 +357,12 @@ factor_estimate <- R6Class(
       # The data frame mandatorily contains a column "factor_value" with
       # the resulting factor values.
       # The data frame may contain other columns with complementary information.
-      if(missing(value)) { return(private$private_simulation_sample) }
-      else { private$private_simulation_sample <- value }}
+      if (missing(value)) {
+        return(private$private_simulation_sample)
+        }
+      else {
+        private$private_simulation_sample <- value }
+      }
   ),
   private = list(
     private_estimation_method_name = NA,

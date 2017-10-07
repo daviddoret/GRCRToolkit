@@ -25,9 +25,7 @@ factor_estimate_gld_3points <- R6Class(
       estimated_range_min_value = NULL,
       estimated_mode_value = NULL,
       estimated_range_max_value = NULL,
-      estimated_range_min_proba = NULL,
-      estimated_range_max_proba = NULL,
-      estimated_range_size = NULL,
+      estimated_range_size_proba = NULL,
       limit_min_value = NULL,
       limit_max_value = NULL,
       fit_dist = NULL, # Triggers distribution fitting immediately.
@@ -57,45 +55,23 @@ factor_estimate_gld_3points <- R6Class(
       self$estimated_mode_value <- estimated_mode_value
       self$estimated_range_max_value <- estimated_range_max_value
 
-      if(is.null(estimated_range_size))
-        {
-          # Parameterization #1: precise range estimate with min and max.
-          if(is.null(estimated_range_min_proba)) {
-            estimated_range_min_proba <- .05 # TODO: replace with a default configuration setting
-            }
-          if(is.null(estimated_range_max_proba)) {
-            estimated_range_max_proba <- .95 # TODO: replace with a default configuration setting
-            }
-          if(estimated_range_min_proba >= estimated_range_max_proba){
-            stop("!estimated_range_min_proba < estimated_range_max_proba")
-            }
+      if (is.null(estimated_range_size_proba)) {
+        estimated_range_size_proba <- .9 # TODO: replace with a default configuration setting
+      }
+      self$estimated_range_size_proba <- estimated_range_size_proba
 
-          self$estimated_range_min_proba <- estimated_range_min_proba
-          self$estimated_range_max_proba <- estimated_range_max_proba
-        }
-      else
-        {
-          # Parameterization #2 (default): symmetric range estimate defined by size.
-          # This is a shortcut that computes a centered estimated range.
-          if(is.null(estimated_range_size)) {
-            estimated_range_size <- .9 # TODO: replace with a default configuration setting
-          }
+      if (is.null(fit_dist)) { fit_dist <- TRUE }
+      if (fit_dist) { self$fit_dist(...) }
 
-          self$estimated_range_size <- estimated_range_size
-        }
-
-      if(is.null(fit_dist)) { fit_dist <- TRUE }
-      if(fit_dist) { self$fit_dist(...) }
-
-      if(is.null(simulate)) { simulate <- TRUE }
-      if(simulate) { self$simulate(...) }
+      if (is.null(simulate)) { simulate <- TRUE }
+      if (simulate) { self$simulate(...) }
 
       },
     fit_dist = function(max_iteration = NULL, precision = NULL, verbosity = NULL, ...) {
 
-      if(is.null(verbosity)) { verbosity <- 0 }
-      if(is.null(max_iteration)) { max_iteration <- 256 }
-      if(is.null(precision)) { precision <- 1 } # Expressed in quantile value.
+      if (is.null(verbosity)) { verbosity <- 0 }
+      if (is.null(max_iteration)) { max_iteration <- 256 }
+      if (is.null(precision)) { precision <- 1 } # Expressed in quantile value.
 
       # Unfortunately, I couldn't find an out-of-the-box optimization
       # function that would solve this with an abritrary precision.
