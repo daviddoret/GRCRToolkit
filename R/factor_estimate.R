@@ -1,13 +1,24 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(R6,ggplot2)
 
-#' The factor_estimate class provides an inheritance model for effective factor estimation approaches.
-#' This class should be inherited from but not instanciated from (ie it is "abstract").
+#' factor_estimate
 #'
-#' TODO:
-#' - Glue code with model_factor.
+#' A risk model "factor estimate".
+#' A "factor estimate" is an abstraction that separates the factor estimation method from the model factors.
+#' This approach makes it possible to work separately on the risk model and on the best possible estimation methods to estimate the model factors.
+#' \code{factor_estimate} is an "abstract" class that shouldn't be used directly.
+#' Instead, use the specialized classes that inherits from it.
 #'
+#' @docType class
 #' @export
+#' @keywords data
+#' @return An instance of the factor_estimate \code{\link{R6Class}}.
+#' @examples
+#' fe1 <- factor_estimate$new()
+#' @section Inherits:
+#' \describe{
+#'   \item{This is a root class.}{}
+#' }
 factor_estimate <- R6Class(
   "factor_estimate",
   public = list(

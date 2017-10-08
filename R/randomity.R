@@ -3,17 +3,26 @@ pacman::p_load(R6,random)
 
 #' randomity
 #'
-#' A helper class that generates pseudo random numbers with high entropy.
+#' A helper class that generates pseudo random numbers with high entropy. Do not use this class directly: instead, use the global object \code{rand} that is already instanciated.
 #'
-#' Future enhancements:
-#' - Add entropy from local system time
-#' - Add entropy from local system information
-#'
+#' @docType class
+#' @export
+#' @keywords data
+#' @return Object of \code{\link{R6Class}} with properties and methods for pseudo random number generation.
+#' @format \code{\link{R6Class}} object.
 #' @examples
 #' test <- randomity$new()
 #' test$get(n = 32, min = 0, max = 10)
-#'
-#' @export
+#' @section Methods:
+#' \describe{
+#'   \item{\code{new()}}{Create a new object of this class.}
+#'   \item{\code{get(n,min,max,verbosity)}}{Generate \code{n} pseudo random numbers with values between \code{min} and \code{max}.}
+#' }
+#' @section Future enhancements:
+#' \describe{
+#'   \item{- Add entropy from local system time}{}
+#'   \item{- Add entropy from local system information}{}
+#' }
 randomity <- R6Class(
   "randomity",
   public = list(
@@ -21,7 +30,6 @@ randomity <- R6Class(
       #self$reseed()
     },
     get = function(n = NULL, min = NULL, max = NULL, verbosity = NULL) {
-
       if (is.null(n)) { n <- 1 }
       if (is.null(min)) { min <- 0 }
       if (is.null(max)) { max <- 1 }

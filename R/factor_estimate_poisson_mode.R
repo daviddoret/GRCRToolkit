@@ -3,11 +3,25 @@ pacman::p_load(R6)
 
 options(digits = 22)
 
-#' Poisson Range (2 points) estimate
+#' factor_estimate_poisson_mode
 #'
+#' A risk model factor estimate.
+#' Based on a Poisson distribution, ideal for event frequency modelling.
+#' The estimation is based on the distribution mode.
+#'
+#' @docType class
 #' @export
-#'
-#'
+#' @keywords data
+#' @return Object of \code{\link{R6Class}} with properties and methods for simple integration in a risk model.
+#' @format \code{\link{R6Class}} object.
+#' @examples
+#' factor_estimate_poisson_mode$new(estimated_mode_value = 100)
+#' @field dist_mode The mode of the fitted distribution.
+#' @section Methods:
+#' \describe{
+#'   \item{\code{new(estimated_mode_value,time_interval_friendly_name)}}{This method is used to create a new object of this class with \code{estimated_mode_value} as the estimated mode.}
+#'   \item{\code{plot_density()}}{Plot the PDF.}
+#' }
 factor_estimate_poisson_mode <- R6Class(
   "factor_estimate_poisson_mode",
   inherit = factor_estimate_poisson,
