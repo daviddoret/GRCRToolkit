@@ -24,6 +24,13 @@ Instead, use the specialized classes that inherits from it.
   \item{This is a root class.}{}
 }
 }
+
+\section{Methods}{
+
+\describe{
+  \item{get_random(n = 1, output_class = "vector")}{ Returns a random sample of size \code{n}. Returns a vector by default. If \code{output_class} = "data.frame", returns a data.frame with a column "factor_value". This second parameterization may be enriched by R6 subclasses to provide additional columns with complementary information. }
+}
+}
 \examples{
 fe1 <- factor_estimate$new()
 }

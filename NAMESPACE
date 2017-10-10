@@ -2,6 +2,7 @@
 
 export(factor_estimate)
 export(factor_estimate_composite)
+export(factor_estimate_composite_custsom)
 export(factor_estimate_gld)
 export(factor_estimate_gld_3points)
 export(factor_estimate_poisson)

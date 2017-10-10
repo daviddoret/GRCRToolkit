@@ -30,13 +30,19 @@ options(digits = 22)
 #'   limit_min_value = 0,
 #'   limit_max_value = 200)
 #'fe1$plot_density()
+#' @field estimated_range_min_value The lower value of the 3 points estimate.
+#' @field estimated_mode_value The "typical" value of the 3 points estimate.
+#' @field estimated_range_max_value The upper value of the 3 points estimate.
+#' @field estimated_range_size_proba Default: .9. Possible values: 0 < x < 1. The size of the probabilistic range estimate. The default .9 leaves .05 on both sides of the distribution.
+#' @field limit_min_value A strict lower limit. 0 if you don't consider positive risks.
+#' @field limit_max_value A strict upper limit. May be the company stock value if you don't consider externalities.
 #' @section Inherits:
 #' \describe{
 #'   \item{\code{\link{factor_estimate_gld}}}{}
 #' }
 #' @section Methods:
 #' \describe{
-#'   \item{\code{new(estimated_range_min_value, estimated_mode_value, estimated_range_max_value, estimated_range_size_proba, limit_min_value, limit_max_value)}}{This method is used to create a new object of this class.}
+#'   \item{\code{new(estimated_range_min_value, estimated_mode_value, estimated_range_max_value, estimated_range_size_proba, limit_min_value, limit_max_value)}}{Create a new object of this class.}
 #'   \item{\code{plot_density()}}{Plot the PDF.}
 #' }
 factor_estimate_gld_3points <- R6Class(

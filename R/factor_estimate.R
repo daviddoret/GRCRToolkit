@@ -19,6 +19,10 @@ pacman::p_load(R6,ggplot2)
 #' \describe{
 #'   \item{This is a root class.}{}
 #' }
+#' @section Methods:
+#' \describe{
+#'   \item{get_random(n = 1, output_class = "vector")}{ Returns a random sample of size \code{n}. Returns a vector by default. If \code{output_class} = "data.frame", returns a data.frame with a column "factor_value". This second parameterization may be enriched by R6 subclasses to provide additional columns with complementary information. }
+#' }
 factor_estimate <- R6Class(
   "factor_estimate",
   public = list(
@@ -89,16 +93,26 @@ factor_estimate <- R6Class(
     get_density = function(x, ...) { return(self$density_function(x, ...)) },
     get_probability = function(q, ...) { return(self$probability_function(q, ...)) },
     get_quantile = function(p, ...) { return(self$quantile_function(p, ...)) },
-    get_random = function(n, ...)
+    get_random = function(n = NULL, output_class = NULL, ...)
       {
+        # Default values
+        if (is_nanull(n)) { n <- 1 }
+        if (is_nanull(output_class)) { output_class <- "vector" }
+
         random_sample <- self$random_function(n, ...)
-        if(!is.na(self$limit_min_value)){
+        if (!is.na(self$limit_min_value)) {
           random_sample <- pmax(random_sample, rep(self$limit_min_value, times = n))
         }
-        if(!is.na(self$limit_max_value)){
+        if (!is.na(self$limit_max_value)) {
           random_sample <- pmin(random_sample, rep(self$limit_max_value, times = n))
         }
-      return(random_sample)
+
+        if (output_class == "vector") {
+          return(random_sample)
+        }
+        if (output_class == "data.frame") {
+          return(data.frame(factor_value = random_sample))
+        }
       },
     get_simulation_sample_head = function(n, ...) {
       extract <- head(self$simulation_sample[order(self$simulation_sample$factor_value), ], n = n)

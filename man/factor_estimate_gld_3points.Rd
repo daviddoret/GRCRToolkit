@@ -25,6 +25,21 @@ Future enhancements:
   in such a way as to guarantee consistency between
   the fitted distribution and the estimation parameters.
 }
+\section{Fields}{
+
+\describe{
+\item{\code{estimated_range_min_value}}{The lower value of the 3 points estimate.}
+
+\item{\code{estimated_mode_value}}{The "typical" value of the 3 points estimate.}
+
+\item{\code{estimated_range_max_value}}{The upper value of the 3 points estimate.}
+
+\item{\code{estimated_range_size_proba}}{Default: .9. Possible values: 0 < x < 1. The size of the probabilistic range estimate. The default .9 leaves .05 on both sides of the distribution.}
+
+\item{\code{limit_min_value}}{A strict lower limit. 0 if you don't consider positive risks.}
+
+\item{\code{limit_max_value}}{A strict upper limit. May be the company stock value if you don't consider externalities.}
+}}
 \section{Inherits}{
 
 \describe{
@@ -35,7 +50,7 @@ Future enhancements:
 \section{Methods}{
 
 \describe{
-  \item{\code{new(estimated_range_min_value, estimated_mode_value, estimated_range_max_value, estimated_range_size_proba, limit_min_value, limit_max_value)}}{This method is used to create a new object of this class.}
+  \item{\code{new(estimated_range_min_value, estimated_mode_value, estimated_range_max_value, estimated_range_size_proba, limit_min_value, limit_max_value)}}{Create a new object of this class.}
   \item{\code{plot_density()}}{Plot the PDF.}
 }
 }
@@ -46,7 +61,7 @@ fe1 <- factor_estimate_gld_3points$new(
   estimated_range_max_value = 100,
   estimated_range_size_proba = .9,
   limit_min_value = 0,
-  limit_max_value = 10000)
+  limit_max_value = 200)
 fe1$plot_density()
 }
 \keyword{data}

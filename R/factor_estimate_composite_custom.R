@@ -1,42 +1,49 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(R6,gld)
 
-#' factor_estimate_composite
+#' factor_estimate_composite_custom
 #'
-#' This class represents a risk model "composite factor estimate".\cr
-#' A "composite factor estimate" is a factor estimation method that is based on:\cr
+#' This class represents a risk model "composite factor estimate with custom logic".\cr
+#' A "composite factor estimate with custom logic" is a factor estimation method that is based on:\cr
 #'  \itemize{
-#'   \item a set of \code{dependent_factors} (aka sub-factors)
+#'   \item a set of \code{dependent_factors} (aka sub-factors),
+#'   \item a \code{random_function} that applies arbitrary logic on the input \code{dependent_factors} to model the factor's random variable.
 #'   }
 #' The \code{dependent_factors} may in their turn be estimated with arbitrary estimation methods.\cr
-#' \code{factor_estimate_composite} is an "abstract" class that shouldn't be used directly.
-#' Instead, use the specialized classes that inherits from it.
 #'
 #' @docType class
 #' @export
 #' @keywords data
 #' @return An instance of the factor_estimate_composite \code{\link{R6Class}}.
 #' @examples
-#' fe1 <- factor_estimate_composite$new()
+#' fe1 <- factor_estimate_composite_custom$new()
 #' @section Inherits:
 #' \describe{
 #'   \item{\code{\link{factor_estimate}}}{}
 #' }
-factor_estimate_composite <- R6Class(
-  "factor_estimate_composite",
-  inherit = factor_estimate,
+factor_estimate_composite_custsom <- R6Class(
+  "factor_estimate_composite_custom",
+  inherit = factor_estimate_composite,
   public = list(
     initialize = function(
       limit_min_value = NULL,
       limit_max_value = NULL,
+      random_function = NULL,
       ...) {
-
+      # Default values
+      if(is_nanull(random_function)) {
+        random_function <- function(n, ...){
+          warning("Sorry, this function is not available.")
+          return(NA)
+        }
+      }
       # Call the constructor of the parent class
       super$initialize(
-        distribution_name = "Composite",
+        estimation_method_name = "Custom Logic",
         limit_min_value = limit_min_value,
         limit_max_value = limit_max_value,
         ...)
+      self$random_function <- random_function
     },
     check_state_consistency = function(output_format = NULL, ...) {
         return(stop("Not implemented"))

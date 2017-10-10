@@ -12,9 +12,12 @@ factor_estimate_composite
 An instance of the factor_estimate_composite \code{\link{R6Class}}.
 }
 \description{
-A risk model "composite factor estimate".
-A "composite factor estimate" is a factor estimation method that is based on \code{n} sub-factors.
-The sub-factors may in their turn be estimated with arbitrary estimation methods.
+This class represents a risk model "composite factor estimate".\cr
+A "composite factor estimate" is a factor estimation method that is based on:\cr
+ \itemize{
+  \item a set of \code{dependent_factors} (aka sub-factors)
+  }
+The \code{dependent_factors} may in their turn be estimated with arbitrary estimation methods.\cr
 \code{factor_estimate_composite} is an "abstract" class that shouldn't be used directly.
 Instead, use the specialized classes that inherits from it.
 }
