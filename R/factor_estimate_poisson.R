@@ -33,7 +33,9 @@ factor_estimate_poisson <- R6Class(
       self$density_function <- function(x){return(dpois(x = x, lambda = self$lambda))}
       self$probability_function <- function(q){return(ppois(q = q, lambda = self$lambda))}
       self$quantile_function <- function(p){return(qpois(p = p, lambda = self$lambda))}
-      self$random_function <- function(n){return(rpois(n = n, lambda = self$lambda))}
+      self$random_function <- function(n, ...){
+        return(rpois(n = n, lambda = self$lambda))
+        }
     },
     check_state_consistency = function(output_format = NULL,...) {
       # Informs us if the object state is consistent / logical.

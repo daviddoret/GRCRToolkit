@@ -2,7 +2,6 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(colorspace, ggplot2, labeling)
 
-
 plot_sample = function(
   sample,
   title = NULL,
@@ -11,15 +10,18 @@ plot_sample = function(
   x_start = NULL,
   x_end = NULL,
   bins = NULL,
+  x_scale_type = NULL,
+  y_scale_type = NULL,
   ...) {
 
-  # And put a title on top of it
-  if(is.null(title)){ title <- "Sample Histogram" }
-
-  if(is.null(bins)){ bins <- 100 }
+  # Default values
+  if (is_nanull(title)) { title <- "Sample Histogram" }
+  if (is_nanull(bins)) { bins <- 100 }
+  if (is_nanull(x_scale_type)) { x_scale_type <- "default" }
+  if (is_nanull(y_scale_type)) { y_scale_type <- "default" }
 
   # Prepare the data
-  df <- data.frame(x=sample)
+  df <- data.frame(x = sample)
 
   # Configure the graph
   graph <- ggplot(df, aes(x)) +
@@ -46,12 +48,19 @@ plot_sample = function(
       x = "Factor value",
       y = "Number") +
     #ggtitle(title)
-
     theme(plot.title = element_text(size = 12, face = "bold"))
 
-  if(!is.null(x_start) & !is.null(x_end))
+  if (!is.null(x_start) & !is.null(x_end))
   {
     graph <- graph + xlim(x_start, x_end)
+  }
+
+  if (x_scale_type == "log10" ) {
+    graph <- graph + scale_x_log10()
+  }
+
+  if (y_scale_type == "log10" ) {
+    graph <- graph + scale_y_log10()
   }
 
   return(graph)

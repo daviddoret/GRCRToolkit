@@ -39,7 +39,7 @@ factor_estimate_composite <- R6Class(
         ...)
     },
     check_state_consistency = function(output_format = NULL, ...) {
-        return(stop("Not implemented"))
+      super$check_state_consistency(output_format = output_format, ...)
     },
     get_print_lines = function(...) {
       return(

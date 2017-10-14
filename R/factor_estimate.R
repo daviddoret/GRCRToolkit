@@ -12,7 +12,7 @@ pacman::p_load(R6,ggplot2)
 #' @docType class
 #' @export
 #' @keywords data
-#' @return An instance of the factor_estimate \code{\link{R6Class}}.
+#' @return An instance of the \code{factor_estimate} \code{\link{R6Class}}.
 #' @examples
 #' fe1 <- factor_estimate$new()
 #' @section Inherits:
@@ -99,20 +99,39 @@ factor_estimate <- R6Class(
         if (is_nanull(n)) { n <- 1 }
         if (is_nanull(output_class)) { output_class <- "vector" }
 
-        random_sample <- self$random_function(n, ...)
+        random_sample <- self$random_function(
+          n = n,
+          output_class = output_class,
+          ...)
+
         if (!is.na(self$limit_min_value)) {
-          random_sample <- pmax(random_sample, rep(self$limit_min_value, times = n))
+          if (is.vector(random_sample)) {
+            random_sample <- pmax(random_sample, rep(self$limit_min_value, times = n))
+            }
+          if (is.data.frame(random_sample)) {
+            random_sample$factor_value <- pmax(random_sample$factor_value, rep(self$limit_min_value, times = n))
+            }
         }
         if (!is.na(self$limit_max_value)) {
-          random_sample <- pmin(random_sample, rep(self$limit_max_value, times = n))
+          if (is.vector(random_sample)) {
+            random_sample <- pmin(random_sample, rep(self$limit_max_value, times = n))
+          }
+          if (is.data.frame(random_sample)) {
+            random_sample$factor_value <- pmin(random_sample$factor_value, rep(self$limit_max_value, times = n))
+          }
         }
 
-        if (output_class == "vector") {
-          return(random_sample)
+        if (is.vector(random_sample) & output_class == "data.frame") {
+          # Ideally, random_functions should support the parameter output_class
+          # output vectors by default but support data.frames as well.
+          # But just in case someone forgets about this, we can make
+          # a best effort here to repair the bug.
+          # This approach is justified if we consider to add more
+          # supported classes in the future, to avoid the need to adapt
+          # all existing random_functions.
+          random_sample <- data.frame(factor_value = random_sample)
         }
-        if (output_class == "data.frame") {
-          return(data.frame(factor_value = random_sample))
-        }
+        return(random_sample)
       },
     get_simulation_sample_head = function(n, ...) {
       extract <- head(self$simulation_sample[order(self$simulation_sample$factor_value), ], n = n)
@@ -200,19 +219,40 @@ factor_estimate <- R6Class(
         return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
       }
     },
-    plot_simulation_sample = function(title = NULL)
+    plot_simulation_sample = function(
+      title = NULL,
+      subtitle = NULL,
+      caption = NULL,
+      x_start = NULL,
+      x_end = NULL,
+      bins = NULL,
+      n = NULL,
+      x_scale_type = NULL,
+      y_scale_type = NULL)
     {
-      if(self$check_state_consistency())
+      if (is_nanull(title)) { title <- "Simulation sample histogram" }
+      if (is_nanull(bins)) { bins <- 100 }
+      if (is_nanull(n)) { n <- 10000 }
+      if (self$check_state_consistency())
       {
-
-      sample <- self$get_random(1000)
+      sample <- self$get_random(n = n)
       return(
         plot_sample(
           sample = sample,
-          title = "Sample histogram with outliers"))       }
+          title = title,
+          subtitle = subtitle,
+          caption = caption,
+          bins = bins,
+          x_start = x_start,
+          x_end = x_end,
+          x_scale_type = x_scale_type,
+          y_scale_type = y_scale_type
+          ))}
       else
       {
-        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+        return(plot_vignette(
+          title = "Invalid parameters",
+          text = self$check_state_consistency(output_format = "report")))
       }
     },
     plot_vignette = function(...) {

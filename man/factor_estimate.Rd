@@ -9,7 +9,7 @@
 factor_estimate
 }
 \value{
-An instance of the factor_estimate \code{\link{R6Class}}.
+An instance of the \code{factor_estimate} \code{\link{R6Class}}.
 }
 \description{
 A risk model "factor estimate".
