@@ -12,26 +12,43 @@ plot_sample = function(
   bins = NULL,
   x_scale_type = NULL,
   y_scale_type = NULL,
-  ...) {
+  variable_type = NULL,
+  ...)
+{
 
   # Default values
   if (is_nanull(title)) { title <- "Sample Histogram" }
+  if (is_nanull(subtitle)) { subtitle <- paste0("n = ", fn(length(sample),0)) }
   if (is_nanull(bins)) { bins <- 100 }
   if (is_nanull(x_scale_type)) { x_scale_type <- "default" }
   if (is_nanull(y_scale_type)) { y_scale_type <- "default" }
+  if (is_nanull(variable_type)) { variable_type <- "Continuous" }
 
   # Prepare the data
   df <- data.frame(x = sample)
 
   # Configure the graph
-  graph <- ggplot(df, aes(x)) +
+  graph <- ggplot(df, aes(x))
 
   # Limit the number of digits on the vertical axis
   # scale_y_continuous(label = function(x) { round(x,3) }) +
 
+  if (variable_type == "Continuous") {
+    graph <- graph + stat_bin(
+      alpha = .8,
+      bins = bins,
+      colour = "black",
+      fill = "skyblue2")
+  }
+  else if(variable_type == "Discrete") {
+    graph <- graph + geom_histogram(
+        alpha = .8,
+        colour = "black",
+        fill = "skyblue2",
+        binwidth = 1)
+  }
     # coord_trans(x="log2") +
     #geom_histogram(bins=1000, colour="black", fill="white") +
-    stat_bin(bins = bins, colour="black", fill="skyblue2") +
     #geom_dotplot(
     #  binwidth = 100)
       #dotsize = 1.25,
@@ -41,6 +58,7 @@ plot_sample = function(
     #scale_x_log10()+
     #scale_x_sqrt() +
 
+  graph <- graph +
     labs(
       title = title,
       subtitle = subtitle,

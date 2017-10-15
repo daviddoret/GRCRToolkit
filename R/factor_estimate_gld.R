@@ -25,6 +25,7 @@ factor_estimate_gld <- R6Class(
       ...) {
       super$initialize(
         distribution_name = "Generalized Lambda (aka Tukey Lambda)",
+        distribution_type = "Continuous",
         limit_min_value = limit_min_value,
         limit_max_value = limit_max_value,
         ...)

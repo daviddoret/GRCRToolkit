@@ -1,16 +1,24 @@
-# REFERENCE:
-# - http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
 
-# Multiple plot function
-#
-# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
-# - cols:   Number of columns in layout
-# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
-#
-# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
-# then plot 1 will go in the upper left, 2 will go in the upper right, and
-# 3 will go all the way across the bottom.
-#
+#' multiplot
+#'
+#' Reference:
+#' - http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+#'
+#' @param ... ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+#'
+#' @param cols Number of columns in layout
+#'
+#' @param layout A matrix specifying the layout. If present, 'cols' is ignored.\cr
+#' If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+#' then plot 1 will go in the upper left, 2 will go in the upper right, and
+#' 3 will go all the way across the bottom.
+#'
+#' @return nicely formatted numbers
+#'
+#' @examples
+#' multiplot(g1, g2, g3)
+#'
+#' @export
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
 

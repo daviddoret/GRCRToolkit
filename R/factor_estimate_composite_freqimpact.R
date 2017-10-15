@@ -36,6 +36,7 @@ factor_estimate_composite_freqimpact <- R6Class(
       # Call the constructor of the parent class
       super$initialize(
         estimation_method_name = "Frequency x Impact",
+        distribution_type = "Continuous",
         limit_min_value = limit_min_value,
         limit_max_value = limit_max_value,
         ...)

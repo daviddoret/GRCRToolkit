@@ -29,11 +29,13 @@ factor_estimate_composite <- R6Class(
     initialize = function(
       limit_min_value = NULL,
       limit_max_value = NULL,
+      distribution_type = NULL,
       ...) {
 
       # Call the constructor of the parent class
       super$initialize(
         distribution_name = "Composite",
+        distribution_type = distribution_type,
         limit_min_value = limit_min_value,
         limit_max_value = limit_max_value,
         ...)

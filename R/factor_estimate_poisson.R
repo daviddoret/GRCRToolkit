@@ -20,6 +20,7 @@ factor_estimate_poisson <- R6Class(
       ...) {
       super$initialize(
         distribution_name = "Poisson",
+        distribution_type = "Discrete",
         limit_min_value = limit_min_value,
         limit_max_value = limit_max_value,
         ...)

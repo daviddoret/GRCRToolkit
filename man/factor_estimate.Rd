@@ -18,6 +18,19 @@ This approach makes it possible to work separately on the risk model and on the 
 \code{factor_estimate} is an "abstract" class that shouldn't be used directly.
 Instead, use the specialized classes that inherits from it.
 }
+\section{Fields}{
+
+\describe{
+\item{\code{estimation_method_name}}{A descriptive name identifying the estimation method, e.g.: "PERT-like 3 points estimate".}
+
+\item{\code{distribution_name}}{The name of the probability distribution, e.g. "Poisson", "Composite", etc.}
+
+\item{\code{distribution_type}}{Either "Continuous" or "Discrete".}
+
+\item{\code{limit_min_value}}{A strict lower bound applied to the factor simulation values. If NULL or NA, no lower bound will be applied.}
+
+\item{\code{limit_max_value}}{A strict upper bound applied to the factor simulation values. If NULL or NA, no upper bound will be applied.}
+}}
 \section{Inherits}{
 
 \describe{

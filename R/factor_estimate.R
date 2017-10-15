@@ -15,6 +15,11 @@ pacman::p_load(R6,ggplot2)
 #' @return An instance of the \code{factor_estimate} \code{\link{R6Class}}.
 #' @examples
 #' fe1 <- factor_estimate$new()
+#' @field estimation_method_name A descriptive name identifying the estimation method, e.g.: "PERT-like 3 points estimate".
+#' @field distribution_name The name of the probability distribution, e.g. "Poisson", "Composite", etc.
+#' @field distribution_type Either "Continuous" or "Discrete".
+#' @field limit_min_value A strict lower bound applied to the factor simulation values. If NULL or NA, no lower bound will be applied.
+#' @field limit_max_value A strict upper bound applied to the factor simulation values. If NULL or NA, no upper bound will be applied.
 #' @section Inherits:
 #' \describe{
 #'   \item{This is a root class.}{}
@@ -29,13 +34,16 @@ factor_estimate <- R6Class(
     initialize = function(
       estimation_method_name = NULL,
       distribution_name = NULL,
-      limit_min_value = NA,
-      limit_max_value = NA,
+      distribution_type = NULL,
+      limit_min_value = NULL,
+      limit_max_value = NULL,
       ...) {
-      if(is.null(limit_min_value)) { limit_min_value <- NA }
-      if(is.null(limit_max_value)) { limit_max_value <- NA }
+      if (is_nanull(limit_min_value)) { limit_min_value <- NA }
+      if (is_nanull(limit_max_value)) { limit_max_value <- NA }
+      if (is_nanull(distribution_type)) { distribution_type <- NA }
       self$estimation_method_name <- estimation_method_name
       self$distribution_name <- distribution_name
+      self$distribution_type <- distribution_type
       self$limit_min_value <- limit_min_value
       self$limit_max_value <- limit_max_value
       },
@@ -246,7 +254,8 @@ factor_estimate <- R6Class(
           x_start = x_start,
           x_end = x_end,
           x_scale_type = x_scale_type,
-          y_scale_type = y_scale_type
+          y_scale_type = y_scale_type,
+          variable_type = self$distribution_type
           ))}
       else
       {
@@ -299,6 +308,9 @@ factor_estimate <- R6Class(
     distribution_name = function(value,...) {
       if(missing(value)) { return(private$private_distribution_name) }
       else { private$private_distribution_name <- value }},
+    distribution_type = function(value,...) {
+      if(missing(value)) { return(private$private_distribution_type) }
+      else { private$private_distribution_type <- value }},
     density_function = function(value,...) {
       if(missing(value)) { return(private$private_density_function) }
       else { private$private_density_function <- value }},
@@ -432,6 +444,7 @@ factor_estimate <- R6Class(
   private = list(
     private_estimation_method_name = NA,
     private_distribution_name = NA,
+    private_distribution_type = NA,
     private_density_function = NA,
     private_probability_function = NA,
     private_quantile_function = NA,

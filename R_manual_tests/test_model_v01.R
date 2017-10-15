@@ -30,10 +30,19 @@ risk <- model_factor$new(
   )
 )
 risk$get_random(n = 16, output_class = "data.frame")
-risk$plot_simulation_sample(
-  n = 100,
+
+# PLOT
+freq_plot <- frequency$plot_simulation_sample(
+  n = 10000,
+  bins = 200,
+  x_scale_type = "normal")
+impact_plot <- impact$plot_simulation_sample(
+  n = 10000,
   bins = 200,
   x_scale_type = "log10")
-  #,x_end = 10, bins = 200)
-
-df <- risk$get_random(n = 100, output_class = "data.frame")
+risk_plot <- risk$plot_simulation_sample(
+  n = 10000,
+  bins = 200,
+  x_scale_type = "log10")
+multiplot(freq_plot,impact_plot,risk_plot)
+# df <- risk$get_random(n = 100000, output_class = "data.frame")
