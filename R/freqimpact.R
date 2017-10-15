@@ -18,7 +18,7 @@ if (!require(pacman)) install.packages(pacman)
 #' freqimpact(
 #'   n = 8,
 #'   frequency_function = function(n) {return(rbinom(n = n, size = 4, prob = .5))},
-#'   impact_function = function(n) { return(rnorm(n = n, mean = 0, sd = 100))},
+#'   impact_function = function(n) { return(rnorm(n = n, mean = 100, sd = 5))},
 #'   output_class = "data.frame")
 #'
 #' @export
@@ -33,16 +33,32 @@ freqimpact <- function(n, frequency_function, impact_function, output_class = NU
   df$impact_list <- lapply(
     X = frequencies,
     FUN = function(frequency){
-      return(
-        ifelse(frequency == 0, NA, impact_function(n = frequency)))
+      if(frequency == 0) {
+        # When frequency is zero, no event took place.
+        # For this reason, NA sounds more natural than 0
+        # specifically in the impact_list column.
+        return(NA)
+      }
+      else
+      {
+        return(impact_function(n = frequency))
+      }
     })
 
   df$factor_value <- unlist(lapply(
     X = df$impact_list,
     FUN = function(impact_list){
-      return(
-        ifelse(is.na(impact_list), 0, sum(unlist(impact_list)
-            )))
+      if (length(impact_list) == 1) # The test on length avoids a warning as is.na() does not support vectors.
+        {
+        if (is.na(impact_list)) {
+          # But the factor_value column is the result of freq x impact,
+          # so here if no event took place, NA would be a bad choice
+          # because during that period of time, we really had an impact
+          # of 0
+          return(0)
+          }
+        }
+      return(sum(unlist(impact_list)))
     }))
 
   if (output_class == "vector") {

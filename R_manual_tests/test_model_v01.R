@@ -31,6 +31,7 @@ risk <- model_factor$new(
 )
 risk$get_random(n = 16, output_class = "data.frame")
 risk$plot_simulation_sample(
+  n = 100,
   bins = 200,
   x_scale_type = "log10")
   #,x_end = 10, bins = 200)

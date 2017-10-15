@@ -4,7 +4,7 @@
 \alias{freqimpact}
 \title{freqimpact}
 \usage{
-freqimpact(n, frequency_function, impact_function, output_class, ...)
+freqimpact(n, frequency_function, impact_function, output_class = NULL, ...)
 }
 \arguments{
 \item{n}{The desired size of the frequency vector.}
@@ -25,7 +25,7 @@ Blablabla
 freqimpact(
   n = 8,
   frequency_function = function(n) {return(rbinom(n = n, size = 4, prob = .5))},
-  impact_function = function(n) { return(rnorm(n = n, mean = 0, sd = 100))},
+  impact_function = function(n) { return(rnorm(n = n, mean = 100, sd = 5))},
   output_class = "data.frame")
 
 }
