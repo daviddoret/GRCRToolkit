@@ -1,6 +1,6 @@
 # Package preparation
 if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorspace, ggplot2, labeling)
+pacman::p_load(colorspace, ggplot2, labeling, cowplot, ggExtra)
 
 plot_sample = function(
   sample,
@@ -28,58 +28,69 @@ plot_sample = function(
   df <- data.frame(x = sample)
 
   # Configure the graph
-  graph <- ggplot(df, aes(x))
-
-  # Limit the number of digits on the vertical axis
-  # scale_y_continuous(label = function(x) { round(x,3) }) +
+  histo <- ggplot(df, aes(x))
 
   if (variable_type == "Continuous") {
-    graph <- graph + stat_bin(
+    histo <- histo + stat_bin(
       alpha = .8,
       bins = bins,
       colour = "black",
       fill = "skyblue2")
   }
   else if(variable_type == "Discrete") {
-    graph <- graph + geom_histogram(
+    histo <- histo + geom_histogram(
         alpha = .8,
         colour = "black",
         fill = "skyblue2",
         binwidth = 1)
   }
-    # coord_trans(x="log2") +
-    #geom_histogram(bins=1000, colour="black", fill="white") +
-    #geom_dotplot(
-    #  binwidth = 100)
-      #dotsize = 1.25,
-      #position = "dodge") +
 
-    #scale_x_log10(breaks=c(-1000,-100,-10,-1,1,10,100,1000,10000,30000)) +
-    #scale_x_log10()+
-    #scale_x_sqrt() +
+  histo <- histo + theme(plot.title = element_text(size = 12, face = "bold"))
 
-  graph <- graph +
+  histo <- histo +
     labs(
-      title = title,
+      title = paste0(title, "\n "), # Ugly hack to assure a margin between the title and the marginal boxplot
       subtitle = subtitle,
       caption = caption,
       x = "Factor value",
-      y = "Number") +
-    #ggtitle(title)
-    theme(plot.title = element_text(size = 12, face = "bold"))
+      y = "Number")
+
+
+#  whisker <- ggplot(df, aes(x)) +
+#    geom_boxplot(outlier.shape = 1) +  coord_flip()
 
   if (!is.null(x_start) & !is.null(x_end))
   {
-    graph <- graph + xlim(x_start, x_end)
+    histo <- histo + xlim(x_start, x_end)
   }
 
   if (x_scale_type == "log10" ) {
-    graph <- graph + scale_x_log10()
+    histo <- histo + scale_x_log10()
+#    whisker <- whisker + scale_y_log10()
   }
 
   if (y_scale_type == "log10" ) {
-    graph <- graph + scale_y_log10()
+    histo <- histo + scale_y_log10()
+#    whisker <- whisker + scale_y_log10()
   }
 
-  return(graph)
+#  multi <- plot_grid(
+#    risk_plot,
+#    graph,
+#    align="v",
+#    nrow = 2,
+#    ncol = 1,
+#    rel_heights = c(1,.2))
+
+  output <- ggMarginal(
+    histo,
+    type = "boxplot",
+    fill = "plum2",
+    colour = "grey35",
+    alpha = .5,
+    size = 15,
+    margins = c("x"))
+
+  return(output)
+
 }

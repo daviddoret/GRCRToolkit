@@ -248,7 +248,7 @@ factor_estimate <- R6Class(
         plot_sample(
           sample = sample,
           title = title,
-          subtitle = subtitle,
+          subtitle = paste0("n = ", n),
           caption = caption,
           bins = bins,
           x_start = x_start,

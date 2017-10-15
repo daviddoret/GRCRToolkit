@@ -44,5 +44,13 @@ risk_plot <- risk$plot_simulation_sample(
   n = 10000,
   bins = 200,
   x_scale_type = "log10")
-multiplot(freq_plot,impact_plot,risk_plot)
-# df <- risk$get_random(n = 100000, output_class = "data.frame")
+risk_plot
+
+#multiplot(freq_plot,impact_plot,risk_plot)
+#df <- risk$get_random(n = 100000, output_class = "data.frame")
+#require(ggplot2)
+#require(cowplot)
+#graph <- ggplot(df, aes("x",factor_value))
+#graph <- graph + geom_boxplot(outlier.shape = 1) +  scale_y_log10() + coord_flip()
+#multiplot(risk_plot, graph)
+#plot_grid(risk_plot, graph, align="v", nrow = 2, ncol = 1, rel_heights = c(1,.2))
