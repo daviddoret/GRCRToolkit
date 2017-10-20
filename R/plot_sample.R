@@ -2,6 +2,41 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(colorspace, ggplot2, labeling, cowplot, ggExtra)
 
+#' plot_sample
+#'
+#' A friendly shortcut function that produces a good looking graph of a population sample.
+#' The main and lower part is composed of an histogram.
+#' The upper part is enriched with a marginal box plot.
+#'
+#' @param sample A vector of the population sample.
+#'
+#' @param title A title for the plot.
+#'
+#' @param subtitle A subtitle for the plot. Unfortunately, this is not yet supported with the non-dev version of GGPlot2, but should come soon.
+#'
+#' @param caption A caption for the plot. Unfortunately, this is not yet supported with the non-dev version of GGPlot2, but should come soon.
+#'
+#' @param x_start The left most position that will be displayed on the x axis. Overflowing values will be ignored.
+#'
+#' @param x_end The right most position that will be displayed on the x axis. Overflowing values will be ignored.
+#'
+#' @param bins The number of bins in the histogram.
+#'
+#' @param x_scale_type "Normal" (default) or "Log10".
+#'
+#' @param y_scale_type "Normal" (default) or "Log10".
+#'
+#' @param variable_type "Discrete" (default) or "Continuous".
+#'
+#' @param verbosity 0: no messages. > 0 more and more verbose messages.
+#'
+#' @return a good looking graph
+#'
+#' @examples
+#' plot_sample(sample = rnorm(n = 10000), title = "Normal sample")
+#' plot_sample(sample = rpois(n = 10000, lambda = exp(1)), title = "Poisson sample", variable_type = "Discrete")
+#' plot_sample(sample = rgeom(n = 1000, p = .2), title = "Geometric sample", variable_type = "Discrete")
+#' @export
 plot_sample = function(
   sample,
   title = NULL,
@@ -18,7 +53,7 @@ plot_sample = function(
 
   # Default values
   if (is_nanull(title)) { title <- "Sample Histogram" }
-  if (is_nanull(subtitle)) { subtitle <- paste0("n = ", fn(length(sample),0)) }
+  if (is_nanull(caption)) { caption <- paste0("n = ", fn(length(sample),0)) }
   if (is_nanull(bins)) { bins <- 100 }
   if (is_nanull(x_scale_type)) { x_scale_type <- "default" }
   if (is_nanull(y_scale_type)) { y_scale_type <- "default" }
@@ -35,13 +70,13 @@ plot_sample = function(
       alpha = .8,
       bins = bins,
       colour = "black",
-      fill = "skyblue2")
+      fill = "lightblue2")
   }
   else if(variable_type == "Discrete") {
     histo <- histo + geom_histogram(
         alpha = .8,
         colour = "black",
-        fill = "skyblue2",
+        fill = "lightblue2",
         binwidth = 1)
   }
 
@@ -50,11 +85,10 @@ plot_sample = function(
   histo <- histo +
     labs(
       title = paste0(title, "\n "), # Ugly hack to assure a margin between the title and the marginal boxplot
-      subtitle = subtitle,
-      caption = caption,
+      subtitle = subtitle, # Unfortunately, not yet supported with CRAN version of GGPlot2, but should come soon
+      caption = caption, # Unfortunately, not yet supported with CRAN version of GGPlot2, but should come soon
       x = "Factor value",
-      y = "Number")
-
+      y = "Count")
 
 #  whisker <- ggplot(df, aes(x)) +
 #    geom_boxplot(outlier.shape = 1) +  coord_flip()
@@ -85,10 +119,14 @@ plot_sample = function(
   output <- ggMarginal(
     histo,
     type = "boxplot",
-    fill = "plum2",
+    fill = "plum1",
     colour = "grey35",
     alpha = .5,
     size = 15,
+    outlier.color = "plum1",
+    outlier.shape = 3,
+    outlier.size = 3,
+    outlier.stroke = 1,
     margins = c("x"))
 
   return(output)

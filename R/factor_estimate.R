@@ -20,6 +20,8 @@ pacman::p_load(R6,ggplot2)
 #' @field distribution_type Either "Continuous" or "Discrete".
 #' @field limit_min_value A strict lower bound applied to the factor simulation values. If NULL or NA, no lower bound will be applied.
 #' @field limit_max_value A strict upper bound applied to the factor simulation values. If NULL or NA, no upper bound will be applied.
+#' @field limit_min_behavior One of the following options determining how values will be maintained within \code{limit_min_value}: \code{"Limit"} (default), \code{"Redraw"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Redraw"}: When an out of bound value is drawn, we redraw it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.
+#' @field limit_max_behavior One of the following options determining how values will be maintained within \code{limit_max_value}: \code{"Limit"} (default), \code{"Redraw"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Redraw"}: When an out of bound value is drawn, we redraw it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.
 #' @section Inherits:
 #' \describe{
 #'   \item{This is a root class.}{}
@@ -37,6 +39,8 @@ factor_estimate <- R6Class(
       distribution_type = NULL,
       limit_min_value = NULL,
       limit_max_value = NULL,
+      limit_min_behavior = NULL,
+      limit_max_behavior = NULL,
       ...) {
       if (is_nanull(limit_min_value)) { limit_min_value <- NA }
       if (is_nanull(limit_max_value)) { limit_max_value <- NA }
@@ -112,19 +116,35 @@ factor_estimate <- R6Class(
           output_class = output_class,
           ...)
 
-        if (!is.na(self$limit_min_value)) {
+        if (!is_nanull(self$limit_min_value)) {
           if (is.vector(random_sample)) {
-            random_sample <- pmax(random_sample, rep(self$limit_min_value, times = n))
+            random_sample <- apply_limit_min(x = random_sample, limit_value = self$limit_min_value, limit_behavior = self$limit_min_behavior, redraw_function = self$random_function)
+            #random_sample <- pmax(random_sample, rep(self$limit_min_value, times = n))
             }
           if (is.data.frame(random_sample)) {
+
+            # TODO: Implement the limit behavior here: Limit/Redraw/Ignore
+            # Use a dedicated function apply_limit(limit_type, vector)
+            xxx
+
             random_sample$factor_value <- pmax(random_sample$factor_value, rep(self$limit_min_value, times = n))
             }
         }
-        if (!is.na(self$limit_max_value)) {
+        if (!is_nanull(self$limit_max_value)) {
           if (is.vector(random_sample)) {
+
+            # TODO: Implement the limit behavior here: Limit/Redraw/Ignore
+            # Use a dedicated function apply_limit(limit_type, vector)
+            xxx
+
             random_sample <- pmin(random_sample, rep(self$limit_max_value, times = n))
           }
           if (is.data.frame(random_sample)) {
+
+            # TODO: Implement the limit behavior here: Limit/Redraw/Ignore
+            # Use a dedicated function apply_limit(limit_type, vector)
+            xxx
+
             random_sample$factor_value <- pmin(random_sample$factor_value, rep(self$limit_max_value, times = n))
           }
         }
@@ -303,73 +323,85 @@ factor_estimate <- R6Class(
   ),
   active = list(
     estimation_method_name = function(value,...) {
-      if(missing(value)) { return(private$private_estimation_method_name) }
-      else { private$private_estimation_method_name <- value }},
+      if (missing(value)) { return(private$private_estimation_method_name) }
+      else {private$private_estimation_method_name <- value }},
     distribution_name = function(value,...) {
-      if(missing(value)) { return(private$private_distribution_name) }
-      else { private$private_distribution_name <- value }},
+      if (missing(value)) { return(private$private_distribution_name) }
+      else {private$private_distribution_name <- value }},
     distribution_type = function(value,...) {
-      if(missing(value)) { return(private$private_distribution_type) }
-      else { private$private_distribution_type <- value }},
+      if (missing(value)) { return(private$private_distribution_type) }
+      else {private$private_distribution_type <- value }},
     density_function = function(value,...) {
-      if(missing(value)) { return(private$private_density_function) }
-      else { private$private_density_function <- value }},
+      if (missing(value)) { return(private$private_density_function) }
+      else {private$private_density_function <- value }},
     limit_min_value = function(value,...) {
-      if(missing(value)) {
-        if(is.null(private$private_limit_min_value)) {
+      if (missing(value)) {
+        if (is.null(private$private_limit_min_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_limit_min_value <- NA }
         return(private$private_limit_min_value) }
       else {
-        if(is.null(value)) { value <- NA }
-        if(
-          ( is.na(value) & !is.na(self$limit_min_value) ) |
-          ( !is.na(value) & is.na(self$limit_min_value) ) |
-          ( !is.na(value) & !is.na(self$limit_min_value) & value != self$limit_min_value ) )
+        if (is.null(value)) { value <- NA }
+        # We only change the property if it has been changed.
+        # The goal of this conservative approach is to avoid regenerating
+        # large and potentially CPU/memory intensive samples when nothing changed.
+        if (
+          (is.na(value) & !is.na(self$limit_min_value) ) |
+          (!is.na(value) & is.na(self$limit_min_value) ) |
+          (!is.na(value) & !is.na(self$limit_min_value) & value != self$limit_min_value ) )
         {
           private$private_limit_min_value <- value
           # No need to re-fit the distribution.
           # TODO: Re-populate the simulation sample.
         }}},
     limit_max_value = function(value,...) {
-      if(missing(value)) {
-        if(is.null(private$private_limit_max_value)) {
+      if (missing(value)) {
+        if (is.null(private$private_limit_max_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_limit_max_value <- NA }
         return(private$private_limit_max_value) }
       else {
-        if(is.null(value)) { value <- NA }
-        if(
-          ( is.na(value) & !is.na(self$limit_max_value) ) |
-          ( !is.na(value) & is.na(self$limit_max_value) ) |
-          ( !is.na(value) & !is.na(self$limit_max_value) & value != self$limit_max_value ) )
+        if (is.null(value)) { value <- NA }
+        # We only change the property if it has been changed.
+        # The goal of this conservative approach is to avoid regenerating
+        # large and potentially CPU/memory intensive samples when nothing changed.
+        if (
+          (is.na(value) & !is.na(self$limit_max_value) ) |
+          (!is.na(value) & is.na(self$limit_max_value) ) |
+          (!is.na(value) & !is.na(self$limit_max_value) & value != self$limit_max_value ) )
         {
           private$private_limit_max_value <- value
           # No need to re-fit the distribution.
           # TODO: Re-populate the simulation sample.
         }}},
+    limit_max_behavior = function(value,...) {
+      if (missing(value)) { return(private$private_limit_max_behavior) }
+      else {private$private_limit_max_behavior <- value }},
+    limit_min_behavior = function(value,...) {
+      if (missing(value)) { return(private$private_limit_min_behavior) }
+      else {private$private_limit_min_behavior <- value }},
     probability_function = function(value,...) {
-      if(missing(value)) { return(private$private_probability_function) }
-      else { private$private_probability_function <- value }},
+      if (missing(value)) { return(private$private_probability_function) }
+      else {private$private_probability_function <- value }},
     quantile_function = function(value,...) {
-      if(missing(value)) { return(private$private_quantile_function) }
-      else { private$private_quantile_function <- value }},
+      if (missing(value)) { return(private$private_quantile_function) }
+      else {private$private_quantile_function <- value }},
     random_function = function(value,...) {
-      if(missing(value)) { return(private$private_random_function) }
-      else { private$private_random_function <- value }},
+      if (missing(value)) { return(private$private_random_function) }
+      else {private$private_random_function <- value }},
     # Beautiful graph preferences
     plot_value_start = function(value,...) {
-      if(missing(value)) { return(private$private_plot_value_start) }
-      else { private$private_plot_value_start <- value }},
+      if (missing(value)) { return(private$private_plot_value_start) }
+      else {private$private_plot_value_start <- value }},
     plot_value_end = function(value,...) {
-      if(missing(value)) { return(private$private_plot_value_end) }
-      else { private$private_plot_value_end <- value }},
+      if (missing(value)) { return(private$private_plot_value_end) }
+      else {private$private_plot_value_end <- value }},
     plot_probability_start = function(value,...) {
-      if(missing(value)) { return(private$private_plot_probability_start) }
-      else { private$private_plot_probability_start <- value }},
+      if (missing(value)) { return(private$private_plot_probability_start) }
+      else {private$private_plot_probability_start <- value }},
     plot_probability_end = function(value,...) {
-      if(missing(value)) { return(private$private_plot_probability_end) }
-      else { private$private_plot_probability_end <- value }},
+      if (missing(value)) { return(private$private_plot_probability_end) }
+      else {private$private_plot_probability_end <- value }},
     # Standard moments of the fitted distribution
     # These are conditionnaly implemented by the subclasses
     # if analytical solutions are available.
@@ -458,6 +490,8 @@ factor_estimate <- R6Class(
     private_plot_probability_end = NA,
     private_simulation_sample = NA,
     private_limit_min_value = NA,
-    private_limit_max_value = NA
+    private_limit_max_value = NA,
+    private_limit_min_behavior = NA,
+    private_limit_max_behavior = NA
   )
 )

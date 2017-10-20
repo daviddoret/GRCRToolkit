@@ -2,7 +2,6 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(colorspace, ggplot2, labeling)
 
-
 #' plot_probability_density_function
 #'
 #' Produces a good looking graph of a probability density function.
