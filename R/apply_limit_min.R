@@ -50,7 +50,7 @@ if (!require(pacman)) install.packages(pacman)
 #' apply_limit_min(x = data.frame(x = 1:10, y = 2, z = rnorm(n=10)), limit_value = 5, limit_behavior = "discard", target_column = "x")
 #'
 #' # Example with dataframe and replacement
-#' rf <- function(x,...){return(data.frame(x=rnorm(x,...),y="new individuals"))}
+#' rf <- function(x,...){return(data.frame(x = rnorm(x,...), y = "new individuals"))}
 #' df_original <- data.frame(x = rnorm(12), y = "old individuals")
 #' apply_limit_min(x = df_original, limit_value = 0, limit_behavior = "replace", target_column = "x", replace_function = rf)
 #'
