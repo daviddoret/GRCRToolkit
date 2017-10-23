@@ -1,5 +1,7 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(R6,random)
+#if (!require(pacman)) install.packages(pacman)
+#pacman::p_load(R6,random)
+require(R6)
+require(random)
 
 #' randomity
 #'

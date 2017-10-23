@@ -624,10 +624,14 @@ factor_estimate_gld_3points <- R6Class(
     dist_mode = function(value,...) {
       if (missing(value))
       {
-        return(get_dist_mode_from_pdf(
-          pdf = self$get_density,
+        return(get_gld_mode(
+          lambda1 = self$lambda1,
+          lambda2 = self$lambda2,
+          lambda3 = self$lambda3,
+          lambda4 = self$lambda4,
           search_range_start = self$estimated_range_min_value,
-          search_range_end = self$estimated_range_max_value))
+          search_range_end = self$estimated_range_max_value,
+          ...))
       }
       else { stop("This is a read-only attribute") }},
     estimated_range_min_value = function(value,...) {

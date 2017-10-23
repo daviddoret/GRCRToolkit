@@ -19,7 +19,11 @@ freqimpact(n, frequency_function, impact_function, output_class = NULL, ...)
 a vector or data.frame
 }
 \description{
-Blablabla
+\code{freqimpact} is a nickname / contraction for the famous equation \code{Frequency x Impact = Risk}, with:
+\itemize{
+\item{\code{Frequency} is the probability function of a discrete variable corresponding to the number of events taking place.}
+\item{\code{Impact} is the probability function of a continuous variable corresponding to the magnitude or cost of events taking place.}
+}
 }
 \examples{
 freqimpact(

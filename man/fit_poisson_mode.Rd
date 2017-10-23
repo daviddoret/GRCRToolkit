@@ -13,8 +13,9 @@ fit_poisson_mode(estimated_mode_value = NULL, verbosity = NULL, ...)
 the lambda parameter of the poisson distribution that yields the estimated mode
 }
 \description{
+Part of the fit_[distribution]_[method] function series.
 Finds the lambda parameter of a poisson distribution that best matches the estimated mode.
-This function is trivial but was written for consistency purposes with the other fitting functions.
+This function is trivial because lambda = mode, but was written for consistency purposes with the other fitting functions.
 }
 \examples{
 fit_poisson_lambda(estimated_mode = 17.35)

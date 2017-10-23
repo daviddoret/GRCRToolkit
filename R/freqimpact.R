@@ -2,7 +2,11 @@ if (!require(pacman)) install.packages(pacman)
 
 #' freqimpact
 #'
-#' Blablabla
+#' \code{freqimpact} is a nickname / contraction for the famous equation \code{Frequency x Impact = Risk}, with:
+#' \itemize{
+#' \item{\code{Frequency} is the probability function of a discrete variable corresponding to the number of events taking place.}
+#' \item{\code{Impact} is the probability function of a continuous variable corresponding to the magnitude or cost of events taking place.}
+#' }
 #'
 #' @param n The desired size of the frequency vector.
 #'

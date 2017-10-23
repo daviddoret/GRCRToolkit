@@ -8,37 +8,37 @@ apply_limit_min(x, limit_value = NULL, limit_behavior = NULL,
   replace_function = NULL, target_column = NULL, verbosity = NULL, ...)
 }
 \arguments{
-\item{x}{A vector of numeric values. Or a dataframe but then parameter \code{target_column} must be provided or, by default, the limit will be applied to the first column.}
+\item{x}{A vector of numeric values. \cr Or a dataframe but then parameter \code{target_column} must be provided or, by default, the limit will be applied to the first column.}
 }
 \value{
 A modified vector or dataframe whose values are within the limit
 }
 \description{
-A shortcut function to apply various types of minimum limits on a set of values.
+A shortcut function to apply various types of minimum limits on a data set.
 }
 \section{Fields}{
 
 \describe{
-\item{\code{limit_value}}{A strict (inclusive) lower bound applied to the vector values. If NULL or NA, no limit will be applied.}
+\item{\code{limit_value}}{A strict (inclusive) lower bound applied to the original values. If NULL or NA, no limit will be applied.}
 
-\item{\code{limit_behavior}}{One of the following options determining how values will be maintained within \code{limit_min_value}:
+\item{\code{limit_behavior}}{One of the following options determining how the limit will be applied to the original set of data:
 \itemize{
- \item{\code{Limit}: }{(default) When an out of bound value is found, apply \code{min}/\code{max} functions to force it within bounds.}
- \item{\code{Replace}: }{When an out of bound value is found, get a new one from \code{replace_function} until its is within bound.}
- \item{\code{Discard}: }{When an out of bound value is found, remove it from the sample.}
- \item{\code{Info}: }{Return a vector of boolean values with \code{TRUE} matching the positions of within limit values and \code{FALSE} the positions of outside limit values.}
+ \item{\code{Limit}: }{(default) When a value is beyond limit, apply \code{min}/\code{max} functions to force it within bounds.}
+ \item{\code{Replace}: }{When a value is beyond limit, get a new one from \code{replace_function} until its is within bound.}
+ \item{\code{Discard}: }{When a value is beyond limit, remove it from the sample.}
+ \item{\code{Info}: }{Return a vector of boolean values with \code{TRUE} matching the positions of values within limit and \code{FALSE} the positions of values beyond limit.}
 }}
 
 \item{\code{replace_function}}{If \code{limit_behavior} equals \code{Replace}, the function to be called to draw new individuals from the population. It is expected that the function receives first an integer parameter corresponding to the number of individuals to be drawn, followed by ...
 \cr WARNING #1: \code{replace_function} will be called until the population reaches its original size, which may end up in numerous calls or an infinite loop if \code{replace_function} does not return enough individuals within limit bounds.
 \cr WARNING #2: if \code{x} is a dataframe, \code{replace_function} must return a dataframe with the same data structure for rbind to succeed.}
 
-\item{\code{target_column}}{If x is a dataframe, the name of the column containing the numeric vector on which to apply the limit, or the index number of this column.}
+\item{\code{target_column}}{If x is a dataframe, the name or index position of the column containing the numeric vector on which to apply the limit.}
 }}
 \section{Future enhancements}{
 
 \itemize{
-\item{The replacement algorithm currently implemented is extremely naive. First, a protection mechanism should be implemented to prevent infinite loops. Second, an estimate of the individuals within limits should be made based on the original population and replacement samples, and this should be used to draw more individuals than needed to reduce the number of loops required.}
+\item{The replacement algorithm implemented is extremely naive. First, a protection mechanism should be implemented to prevent infinite loops. Second, the ratio of individuals within the limit should be computed from the original population and replacement samples, and should be used to retrieve more individuals than necessary when calling \code{replace_function} to reduce the number of loops required.}
 \item{Provide support for matrices}
 \item{Provide support for lists}
 }
@@ -62,9 +62,9 @@ apply_limit_min(x = data.frame(x = 1:10, y = 2, z = rnorm(n=10)), limit_value = 
 apply_limit_min(x = data.frame(x = 1:10, y = 2, z = rnorm(n=10)), limit_value = 5, limit_behavior = "discard", target_column = "x")
 
 # Example with dataframe and replacement
-rf <- function(x,...){return(data.frame(x=rnorm(x,...),y="new individuals"))}
+rf <- function(x,...){return(data.frame(x = rnorm(x,...), y = "new individuals"))}
 df_original <- data.frame(x = rnorm(12), y = "old individuals")
-apply_limit_min(x = df_original, limit_value = 0, limit_behavior = "replace", target_column = rf)
+apply_limit_min(x = df_original, limit_value = 0, limit_behavior = "replace", target_column = "x", replace_function = rf)
 
 }
 
