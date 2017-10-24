@@ -1,5 +1,4 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(R6,gld)
+require(gld)
 
 options(digits = 22)
 
@@ -68,17 +67,65 @@ fit_gld_3points = function(
   lambda3 <- -1
   lambda4 <- -1
 
-  self$fit_dist_location(verbosity = verbosity, ...)
-  self$fit_dist_scale(verbosity = verbosity, ...)
+  lambda1 <- fit_gld_3points_location(
+    lambda1 = lambda1,
+    lambda2 = lambda2,
+    lambda3 = lambda3,
+    lambda4 = lambda4,
+    estimated_range_min_value = estimated_range_min_value,
+    estimated_mode_value = estimated_mode_value,
+    estimated_range_max_value = estimated_range_max_value,
+    verbosity = verbosity - 1,
+    ...
+  )
+
+  lambda2 <- fit_gld_3points_scale(
+    estimated_range_min_value = estimated_range_min_value,
+    estimated_mode_value = estimated_mode_value,
+    estimated_range_max_value = estimated_range_max_value,
+    estimated_range_size_proba = estimated_range_size_proba,
+    verbosity = verbosity - 1,
+    ...
+  )
 
   # And then we apply our round trip approach
   for(iter in c(1 : max_iteration))
   {
-    self$fit_dist_location(verbosity = verbosity, ...)
-    #self$fit_dist_scale(verbosity = verbosity, ...)
-    self$fit_dist_left_skew(verbosity = verbosity, ...)
+    lambda1 <- fit_gld_3points_location(
+      lambda1 = lambda1,
+      lambda2 = lambda2,
+      lambda3 = lambda3,
+      lambda4 = lambda4,
+      estimated_range_min_value = estimated_range_min_value,
+      estimated_mode_value = estimated_mode_value,
+      estimated_range_max_value = estimated_range_max_value,
+      verbosity = verbosity - 1,
+      ...
+    )
 
-    self$fit_dist_location(verbosity = verbosity, ...)
+    lambda3 <- fit_gld_3points_skew_left(
+      lambda1 = lambda1,
+      lambda2 = lambda2,
+      lambda4 = lambda4,
+      estimated_range_min_value = estimated_range_min_value,
+      estimated_mode_value = estimated_mode_value,
+      estimated_range_max_value = estimated_range_max_value,
+      verbosity = verbosity - 1,
+      ...
+    )
+
+    lambda1 <- fit_gld_3points_location(
+      lambda1 = lambda1,
+      lambda2 = lambda2,
+      lambda3 = lambda3,
+      lambda4 = lambda4,
+      estimated_range_min_value = estimated_range_min_value,
+      estimated_mode_value = estimated_mode_value,
+      estimated_range_max_value = estimated_range_max_value,
+      verbosity = verbosity - 1,
+      ...
+    )
+
     self$fit_dist_right_skew(verbosity = verbosity, ...)
 
     iter_q1 <- self$get_quantile(self$estimated_range_min_proba)
@@ -105,40 +152,81 @@ fit_gld_3points = function(
     }
   }
   # At least, get the mode right:
-  self$fit_dist_location(verbosity = verbosity, ...)
+  lambda1 <- fit_gld_3points_location(
+    lambda1 = lambda1,
+    lambda2 = lambda2,
+    lambda3 = lambda3,
+    lambda4 = lambda4,
+    estimated_range_min_value = estimated_range_min_value,
+    estimated_mode_value = estimated_mode_value,
+    estimated_range_max_value = estimated_range_max_value,
+    verbosity = verbosity - 1,
+    ...
+  )
   warning("Couldn't make it within desired precision, sorry!")
 }
 
-fit_dist_location = function(verbosity = NULL, ...) {
+#' fit_gld_3points_location
+#'
+#' "Internal" function called by fit_gld_3points to fit the location parameter.
+#'
+#' @export
+fit_gld_3points_location = function(
+  lambda1,
+  lambda2,
+  lambda3,
+  lambda4,
+  estimated_range_min_value,
+  estimated_mode_value,
+  estimated_range_max_value,
+  verbosity = NULL,
+  ...) {
   # move the fitted distribution to the
   # position where its mode (peak) coincidate
   # with the expert estimated mode.
 
   if (is.null(verbosity)) { verbosity <- 0 }
 
-  # first, we calculate lambda1 (PDF shape location).
-  # self$lambda1 <- self$estimated_mode_value
-
   # Find the difference between the mode (peak)
   # of the currently fitted distribution with
   # the desired mode coming from the expert
   # estimate
-  delta <- self$estimated_mode_value - self$dist_mode
-  new_lambda1 <- self$lambda1 + delta
+  delta <- estimated_mode_value - get_gld_mode(
+    lambda1 = lambda1,
+    lambda2 = lambda2,
+    lambda3 = lambda3,
+    lambda4 = lambda4,
+    search_range_start = estimated_range_min_value,
+    search_range_end = estimated_range_max_value,
+    ...
+  )
+  new_lambda1 <- lambda1 + delta
 
   if (verbosity > 0) {
-    message(paste0("lambda1: ",self$lambda1, " --> ", new_lambda1,
-                   " estimated_mode_value: ",self$estimated_mode_value,
-                   " dist_mode: ", self$dist_mode))
+    message(paste0("lambda1: ",lambda1, " --> ", new_lambda1,
+                   " estimated_mode_value: ",estimated_mode_value,
+                   " dist_mode: ", dist_mode))
   }
 
   # Move the fitted distribution to compensate
   # for this difference
-  self$lambda1 <- new_lambda1
+  return(new_lambda1)
 
 }
 
-fit_dist_scale = function(scaling_side = NULL, verbosity = NULL, ...) {
+#' fit_gld_3points_scale
+#'
+#' "Internal" function called by fit_gld_3points to fit the scale parameter.
+#'
+#' @export
+fit_gld_3points_scale = function(
+  estimated_range_min_value,
+  estimated_mode_value,
+  estimated_range_max_value,
+  estimated_range_size_proba,
+  scaling_side = NULL,
+  verbosity = NULL,
+  ...) {
   # after lambda1 (location), we calculate lambda2 (PDF shape size or scale).
   # at this point, we don't consider skewness and assume shape symmetry.
   # lambda2 is like a "zoom" for the PDF,
@@ -169,10 +257,11 @@ fit_dist_scale = function(scaling_side = NULL, verbosity = NULL, ...) {
 
   if (is.null(verbosity)) { verbosity <- 0 }
 
-  left_value_range <- self$estimated_mode_value - self$estimated_range_min_value
-  #left_value_range
-  right_value_range <- self$estimated_range_max_value - self$estimated_mode_value
-  #right_value_range
+  estimated_range_min_proba <- (1 - estimated_range_size_proba) / 2
+  estimated_range_max_proba <- 1 - (1 - estimated_range_size_proba) / 2
+
+  left_value_range <- estimated_mode_value - estimated_range_min_value
+  right_value_range <- estimated_range_max_value - estimated_mode_value
 
   # which side should we use?
   side <- NULL
@@ -180,22 +269,22 @@ fit_dist_scale = function(scaling_side = NULL, verbosity = NULL, ...) {
   if (left_value_range > right_value_range) {
     if (scaling_side == "small") {
       side <- "right"
-      target_proba <- 1 - self$estimated_range_max_proba
+      target_proba <- 1 - estimated_range_max_proba
     }
     else
     {
       side <- "left"
-      target_proba <- self$estimated_range_min_proba
+      target_proba <- estimated_range_min_proba
     }
   } else {
     if (scaling_side == "small") {
       side <- "left"
-      target_proba <- self$estimated_range_min_proba
+      target_proba <- estimated_range_min_proba
     }
     else
     {
       side <- "right"
-      target_proba <- 1 - self$estimated_range_max_proba
+      target_proba <- 1 - estimated_range_max_proba
     }
   }
 
@@ -205,27 +294,37 @@ fit_dist_scale = function(scaling_side = NULL, verbosity = NULL, ...) {
   target_value <- NULL
   if (side == "left")
   {
-    target_value <- - left_value_range
+    target_value <- -left_value_range
   } else {
-    target_value <- - right_value_range
+    target_value <- -right_value_range
   }
 
-  # This is where the wizardry operates, abracadabra!!!
+  # This is where the wizardry operates, abracadabra!
   magic_value <- qgl(p = target_proba, lambda1 = 0, lambda2 = exp(1), lambda3 = -1, lambda4 = -1)
   magic_ratio <- magic_value / target_value
   magic_lambda2 = abs(exp(1) * magic_ratio)
 
-  # result <- qgl(p = target_proba, lambda1 = self$estimated_mode_value, lambda2 = magic_lambda2, lambda3 = -1, lambda4 = -1)
-  # message(paste0("result: ",result))
   # TODO: Add some result quality check here.
 
-  if (verbosity > 0) { message(paste0("lambda2: ",self$lambda2, " --> ", magic_lambda2)) }
+  if (verbosity > 0) { message(paste0("lambda2: ",lambda2, " --> ", magic_lambda2)) }
 
-  self$lambda2 <- magic_lambda2
+  return(magic_lambda2)
 
 }
 
-fit_dist_left_skew = function(verbosity = NULL, ...) {
+#' fit_gld_3points_skew_left
+#'
+#' "Internal" function called by fit_gld_3points to fit the lambda3 parameter.
+#'
+#' @export
+fit_gld_3points_skew_left = function(
+  lambda1,
+  lambda2,
+  lambda4,
+  estimated_range_min_value,
+  estimated_range_min_proba,
+  verbosity = NULL,
+  ...) {
 
   if (is.null(verbosity)) { verbosity <- 0 }
 
@@ -240,11 +339,11 @@ fit_dist_left_skew = function(verbosity = NULL, ...) {
       return(Inf)
     }
     return(pgl(
-      q = self$estimated_range_min_value,
-      lambda1 = self$lambda1,
-      lambda2 = self$lambda2,
+      q = estimated_range_min_value,
+      lambda1 = lambda1,
+      lambda2 = lambda2,
       lambda3 = x,
-      lambda4 = self$lambda4))
+      lambda4 = lambda4))
   }
 
   # Then I declare a minimization function
@@ -254,7 +353,7 @@ fit_dist_left_skew = function(verbosity = NULL, ...) {
       abs(
         vapply(x, flat_function, 0)
         -
-          self$estimated_range_min_proba
+          estimated_range_min_proba
       )
       # nlm prefers to reduce high numbers
       # so I artificially increase the output
@@ -292,21 +391,33 @@ fit_dist_left_skew = function(verbosity = NULL, ...) {
   if (!is.null(optimization$estimate))
   {
     new_lambda3 <- optimization$estimate
-    if (verbosity > 0) { message(paste0("lambda3: ",self$lambda3, " --> ", new_lambda3)) }
+    if (verbosity > 0) { message(paste0("lambda3: ",lambda3, " --> ", new_lambda3)) }
     # And we retrieve its output.
-    self$lambda3 <- new_lambda3
+    return(new_lambda3)
   }
   else
   {
     if (verbosity > 0)
     {
-      warning("nlm returns NULL")
-      self
+      warning("nlm returned NULL")
+      return(NA) # QUESTION: Not sure if returning NA is the best approach. Rethink this.
     }
   }
 }
 
-fit_dist_right_skew = function(verbosity = NULL, ...) {
+#' fit_gld_3points_skew_right
+#'
+#' "Internal" function called by fit_gld_3points to fit the lambda4 parameter.
+#'
+#' @export
+fit_gld_3points_skew_right = function(
+  lambda1,
+  lambda2,
+  lambda3,
+  estimated_range_max_value,
+  estimated_range_max_proba,
+  verbosity = NULL,
+  ...) {
 
   if (is.null(verbosity)) { verbosity <- 0 }
 
@@ -320,10 +431,10 @@ fit_dist_right_skew = function(verbosity = NULL, ...) {
       return(Inf)
     }
     return(pgl(
-      q = self$estimated_range_max_value,
-      lambda1 = self$lambda1,
-      lambda2 = self$lambda2,
-      lambda3 = self$lambda3,
+      q = estimated_range_max_value,
+      lambda1 = lambda1,
+      lambda2 = lambda2,
+      lambda3 = lambda3,
       lambda4 = x))
   }
 
@@ -334,7 +445,7 @@ fit_dist_right_skew = function(verbosity = NULL, ...) {
       abs(
         vapply(x, flat_function, 0)
         -
-          self$estimated_range_max_proba
+          estimated_range_max_proba
       )
       # nlm prefers to reduce high numbers
       # so I artificially increase the output
@@ -371,13 +482,16 @@ fit_dist_right_skew = function(verbosity = NULL, ...) {
 
   if (!is.null(optimization$estimate))
   {
-    new_lambda4 <- optimization$estimate
-    if (verbosity > 0) { message(paste0("lambda4: ",self$lambda4, " --> ", new_lambda4)) }
+    new_lambda3 <- optimization$estimate
+    if (verbosity > 0) { message(paste0("lambda3: ",lambda3, " --> ", new_lambda3)) }
     # And we retrieve its output.
-    self$lambda4 <- new_lambda4
+    return(new_lambda3)
   }
   else
   {
-    if (verbosity > 0) { warning("nlm returns NULL") }
+    if (verbosity > 0) {
+      warning("nlm returned NULL")
+      return(NA) # QUESTION: Not sure if returning NA is the best approach. Rethink this.
+    }
   }
 }

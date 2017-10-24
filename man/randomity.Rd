@@ -24,9 +24,11 @@ A helper class that generates pseudo random numbers with high entropy. Do not us
 
 \section{Future enhancements}{
 
-\describe{
-  \item{- Add entropy from local system time}{}
-  \item{- Add entropy from local system information}{}
+\itemize{
+  \item{Add entropy from local system time}
+  \item{Add entropy from local system information}
+  \item{Perform more serious research to make the function robust}
+  \item{Provide support when no internet connection is available}
 }
 }
 \examples{

@@ -21,9 +21,11 @@ require(random)
 #'   \item{\code{get(n,min,max,verbosity)}}{Generate \code{n} pseudo random numbers with values between \code{min} and \code{max}.}
 #' }
 #' @section Future enhancements:
-#' \describe{
-#'   \item{- Add entropy from local system time}{}
-#'   \item{- Add entropy from local system information}{}
+#' \itemize{
+#'   \item{Add entropy from local system time}
+#'   \item{Add entropy from local system information}
+#'   \item{Perform more serious research to make the function robust}
+#'   \item{Provide support when no internet connection is available}
 #' }
 randomity <- R6Class(
   "randomity",

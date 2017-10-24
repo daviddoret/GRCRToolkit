@@ -31,9 +31,9 @@ Instead, use the specialized classes that inherits from it.
 
 \item{\code{limit_max_value}}{A strict upper bound applied to the factor simulation values. If NULL or NA, no upper bound will be applied.}
 
-\item{\code{limit_min_behavior}}{One of the following options determining how values will be maintained within \code{limit_min_value}: \code{"Limit"} (default), \code{"Redraw"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Redraw"}: When an out of bound value is drawn, we redraw it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.}
+\item{\code{limit_min_behavior}}{One of the following options determining how values will be maintained within \code{limit_min_value}: \code{"Limit"} (default), \code{"Replace"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Replace"}: When an out of bound value is drawn, we replace it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.}
 
-\item{\code{limit_max_behavior}}{One of the following options determining how values will be maintained within \code{limit_max_value}: \code{"Limit"} (default), \code{"Redraw"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Redraw"}: When an out of bound value is drawn, we redraw it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.}
+\item{\code{limit_max_behavior}}{One of the following options determining how values will be maintained within \code{limit_max_value}: \code{"Limit"} (default), \code{"Replace"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Replace"}: When an out of bound value is drawn, we replace it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.}
 }}
 \section{Inherits}{
 

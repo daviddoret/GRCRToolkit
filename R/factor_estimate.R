@@ -20,8 +20,8 @@ pacman::p_load(R6,ggplot2)
 #' @field distribution_type Either "Continuous" or "Discrete".
 #' @field limit_min_value A strict lower bound applied to the factor simulation values. If NULL or NA, no lower bound will be applied.
 #' @field limit_max_value A strict upper bound applied to the factor simulation values. If NULL or NA, no upper bound will be applied.
-#' @field limit_min_behavior One of the following options determining how values will be maintained within \code{limit_min_value}: \code{"Limit"} (default), \code{"Redraw"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Redraw"}: When an out of bound value is drawn, we redraw it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.
-#' @field limit_max_behavior One of the following options determining how values will be maintained within \code{limit_max_value}: \code{"Limit"} (default), \code{"Redraw"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Redraw"}: When an out of bound value is drawn, we redraw it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.
+#' @field limit_min_behavior One of the following options determining how values will be maintained within \code{limit_min_value}: \code{"Limit"} (default), \code{"Replace"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Replace"}: When an out of bound value is drawn, we replace it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.
+#' @field limit_max_behavior One of the following options determining how values will be maintained within \code{limit_max_value}: \code{"Limit"} (default), \code{"Replace"}, \code{"Discard"}. \code{"Limit"}: When an out of bound value is drawn, apply \code{min}/\code{max} functions to force it within bounds. \code{"Replace"}: When an out of bound value is drawn, we replace it until it is within bound. \code{"Discard"}: When an out of bound value is drawn, remove it from the sample.
 #' @section Inherits:
 #' \describe{
 #'   \item{This is a root class.}{}
@@ -118,34 +118,46 @@ factor_estimate <- R6Class(
 
         if (!is_nanull(self$limit_min_value)) {
           if (is.vector(random_sample)) {
-            random_sample <- apply_limit_min(x = random_sample, limit_value = self$limit_min_value, limit_behavior = self$limit_min_behavior, redraw_function = self$random_function)
-            #random_sample <- pmax(random_sample, rep(self$limit_min_value, times = n))
+            random_sample <- apply_limit_min(
+              x = random_sample,
+              limit_value = self$limit_min_value,
+              limit_behavior = self$limit_min_behavior,
+              replace_function = self$random_function)
             }
-          if (is.data.frame(random_sample)) {
-
-            # TODO: Implement the limit behavior here: Limit/Redraw/Ignore
-            # Use a dedicated function apply_limit(limit_type, vector)
-            xxx
-
-            random_sample$factor_value <- pmax(random_sample$factor_value, rep(self$limit_min_value, times = n))
+          else if (is.data.frame(random_sample)) {
+            random_sample <- apply_limit_min(
+              x = random_sample,
+              limit_value = self$limit_min_value,
+              limit_behavior = self$limit_min_behavior,
+              replace_function = function(n) {
+                return(self$random_function(n = n,output_class = "data.frame"))
+                }
+              )
             }
+          else {
+            stop("unsupported class")
+          }
         }
         if (!is_nanull(self$limit_max_value)) {
           if (is.vector(random_sample)) {
-
-            # TODO: Implement the limit behavior here: Limit/Redraw/Ignore
-            # Use a dedicated function apply_limit(limit_type, vector)
-            xxx
-
-            random_sample <- pmin(random_sample, rep(self$limit_max_value, times = n))
+            random_sample <- apply_limit_max(
+              x = random_sample,
+              limit_value = self$limit_max_value,
+              limit_behavior = self$limit_max_behavior,
+              replace_function = self$random_function)
           }
-          if (is.data.frame(random_sample)) {
-
-            # TODO: Implement the limit behavior here: Limit/Redraw/Ignore
-            # Use a dedicated function apply_limit(limit_type, vector)
-            xxx
-
-            random_sample$factor_value <- pmin(random_sample$factor_value, rep(self$limit_max_value, times = n))
+          else if (is.data.frame(random_sample)) {
+            random_sample <- apply_limit_max(
+              x = random_sample,
+              limit_value = self$limit_max_value,
+              limit_behavior = self$limit_max_behavior,
+              replace_function = function(n) {
+                return(self$random_function(n = n,output_class = "data.frame"))
+              }
+            )
+          }
+          else {
+            stop("unsupported class")
           }
         }
 
