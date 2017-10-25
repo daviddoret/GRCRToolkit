@@ -55,9 +55,20 @@ randomity <- R6Class(
 
       if (is.null(verbosity)) { verbosity <- 0 }
 
-      new_seed <-
-        c(randomNumbers(n = 1, min = 0, max = 100000000, col = 1, base = 10, check = FALSE)) +
-        runif(n = 1, min = 0, max = 100000000)
+      new_seed <- tryCatch({
+        c(
+          randomNumbers(
+            n = 2,
+            min = 0,
+            max = 100000000, col = 1, base = 10, check = FALSE))
+      }, warning = function(w) {
+        # Failover if internet connexion is not available
+        runif(n = 2, min = 0, max = 100000000)
+      }, error = function(e) {
+        # Failover if internet connexion is not available
+        runif(n = 2, min = 0, max = 100000000)
+      }, finally = {
+      })
 
       if (verbosity > 0) {
         print(message("New random seed: ", new_seed))

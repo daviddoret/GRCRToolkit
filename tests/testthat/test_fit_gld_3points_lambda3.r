@@ -3,12 +3,12 @@ pacman::p_load(testthat, GRCRToolkit)
 
 require(GRCRToolkit)
 
-context("flt_gld_3points_skew_left")
+context("fit_gld_3points_lambda3")
 
 test_that("Known result #1", {
   expect_equal(
     round(
-      fit_gld_3points_skew_left(
+      fit_gld_3points_lambda3(
         lambda1 = 1000,
         lambda2 = 1,
         lambda4 = -1,
@@ -22,7 +22,7 @@ test_that("Known result #1", {
 test_that("Known result #2", {
   expect_equal(
     round(
-      fit_gld_3points_skew_left(
+      fit_gld_3points_lambda3(
         lambda1 = 1000,
         lambda2 = 10,
         lambda4 = -1,
@@ -36,7 +36,7 @@ test_that("Known result #2", {
 test_that("Known result #3", {
   expect_equal(
     round(
-      fit_gld_3points_skew_left(
+      fit_gld_3points_lambda3(
         lambda1 = 1000,
         lambda2 = .01,
         lambda4 = -1,
@@ -50,7 +50,7 @@ test_that("Known result #3", {
 test_that("Known result #4", {
   expect_equal(
     round(
-      fit_gld_3points_skew_left(
+      fit_gld_3points_lambda3(
         lambda1 = 1000,
         lambda2 = 1,
         lambda4 = -1,
@@ -64,7 +64,7 @@ test_that("Known result #4", {
 test_that("Known result #5", {
   expect_equal(
     round(
-      fit_gld_3points_skew_left(
+      fit_gld_3points_lambda3(
         lambda1 = 1000,
         lambda2 = 1,
         lambda4 = -10,

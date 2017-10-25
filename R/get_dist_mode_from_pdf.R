@@ -1,8 +1,6 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(stats)
 
-options(digits = 22)
-
 #' get_dist_mode_from_pdf
 #'
 #' Shortcut function to find the mode of an arbitrary probability density function (PDF).

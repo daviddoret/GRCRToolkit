@@ -1,8 +1,6 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(R6)
 
-options(digits = 22)
-
 #' factor_estimate_poisson_mode
 #'
 #' A risk model factor estimate.

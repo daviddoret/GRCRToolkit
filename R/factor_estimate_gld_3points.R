@@ -1,8 +1,6 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(R6,gld)
 
-options(digits = 22)
-
 #' factor_estimate_gld_3points
 #'
 #' A PERT-like factor estimate based on the Generalized Lambda (aka Tukey) Distribution.\cr
@@ -336,7 +334,7 @@ factor_estimate_gld_3points <- R6Class(
         -1,
         ndigit = 22,
         iterlim = 128,
-        print.level = verbosity,
+        #print.level = verbosity,
         verbosity = verbosity)
 
       # TODO: We should test the result against a tolerance threshold.
@@ -415,7 +413,7 @@ factor_estimate_gld_3points <- R6Class(
         -1,
         ndigit = 22,
         iterlim = 128,
-        print.level = verbosity,
+        #print.level = verbosity,
         verbosity = verbosity)
 
       # TODO: We should test the result against a tolerance threshold.

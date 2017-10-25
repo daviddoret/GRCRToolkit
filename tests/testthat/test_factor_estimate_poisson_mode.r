@@ -1,8 +1,6 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(testthat, GRCRToolkit, random)
 
-options(digits = 22)
-
 context("factor_estimate_poisson_mode")
 
 test_that("a known simple example yields a precise mode", {

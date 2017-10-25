@@ -1,12 +1,12 @@
 if (!require(pacman)) install.packages(pacman)
 pacman::p_load(testthat, GRCRToolkit)
 
-context("fit_gld_3points_location")
+context("fit_gld_3points_lambda1")
 
 test_that("Known result #1", {
   expect_equal(
     round(
-      fit_gld_3points_location(
+      fit_gld_3points_lambda1(
         lambda1 = 1,
         lambda2 = 1,
         lambda3 = -1,
@@ -22,7 +22,7 @@ test_that("Known result #1", {
 test_that("Known result #2", {
   expect_equal(
     round(
-      fit_gld_3points_location(
+      fit_gld_3points_lambda1(
         lambda1 = 1,
         lambda2 = 1,
         lambda3 = -1000,
@@ -39,7 +39,7 @@ test_that("Known result #2", {
 test_that("Known result #3", {
   expect_equal(
     round(
-      fit_gld_3points_location(
+      fit_gld_3points_lambda1(
         lambda1 = 12345,
         lambda2 = 345,
         lambda3 = -.678,
@@ -56,7 +56,7 @@ test_that("Known result #3", {
 test_that("Known result #4", {
   expect_equal(
     round(
-      fit_gld_3points_location(
+      fit_gld_3points_lambda1(
         lambda1 = 12345,
         lambda2 = 345,
         lambda3 = -.678,
