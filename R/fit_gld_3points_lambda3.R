@@ -13,6 +13,7 @@ require(gld)
 fit_gld_3points_lambda3 = function(
   lambda1,
   lambda2,
+  lambda3,
   lambda4,
   estimated_range_min_value,
   estimated_range_min_proba,
@@ -28,7 +29,7 @@ fit_gld_3points_lambda3 = function(
   flat_function <- function(x){
     if (x >= 0)
     {
-      if (verbosity > 0) { warning("x >= 0") }
+      #if (verbosity > 0) { warning("x >= 0") }
       return(Inf)
     }
     return(pgl(
@@ -59,41 +60,37 @@ fit_gld_3points_lambda3 = function(
 
   # Then we run the optimization.
   # TODO: Study nlm options in greater details.
-  nlm_wrapper <- NULL
-  if (verbosity == 0) {
-    nlm_wrapper <- function(...) {
-      suppressWarnings(nlm(...))
-    }
-  }
-  else
-  {
-    nlm_wrapper <- nlm
-  }
-  optimization <- nlm_wrapper(
-    minimization_function,
-    -1,
-    ndigit = 22,
-    iterlim = 128,
-    #print.level = verbosity,
-    verbosity = verbosity)
+  optimization <- tryCatch({
+    nlm(
+      minimization_function,
+      -1,
+      ndigit = 16, # TODO: Move this to a central configuration mechanism
+      iterlim = 128, # TODO: Move this to a central configuration mechanism
+      print.level = 0)},
+  warning = function(w) { if (verbosity > 0) { warning(w) } },
+  error = function(e) { stop(e) },
+  finally = {})
 
   # TODO: We should test the result against a tolerance threshold.
   #self$get_probability(self$estimated_range_max_value)
   #self$get_quantile(self$estimated_range_max_proba)
 
-  if (!is.null(optimization$estimate))
-  {
-    new_lambda3 <- optimization$estimate
-    if (verbosity > 0) { message(paste0("lambda3: ",lambda3, " --> ", new_lambda3)) }
-    # And we retrieve its output.
-    return(new_lambda3)
-  }
-  else
-  {
-    if (verbosity > 0)
-    {
-      warning("nlm returned NULL")
-      return(NA) # QUESTION: Not sure if returning NA is the best approach. Rethink this.
-    }
-  }
+  new_lambda3 <- NA
+  tryCatch( {
+    new_lambda3 <- optimization$estimate },
+  warning = function(w){},
+  error = function(e){},
+  finally = {
+    if (is_nanull(new_lambda3)) {
+      if (verbosity > 0) {
+        message("Lambda3 optimization failed. Recycling previous value.")
+      }
+      new_lambda3 <- lambda3
+      }
+  })
+
+  if (verbosity > 0) { message(paste0("lambda3: ", new_lambda3)) }
+
+  return(new_lambda3)
+
 }

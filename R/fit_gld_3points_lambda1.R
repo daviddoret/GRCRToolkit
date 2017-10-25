@@ -44,9 +44,7 @@ fit_gld_3points_lambda1 = function(
   # for this difference
   new_lambda1 <- lambda1 + delta
 
-  if (verbosity > 0) {
-    message(paste0("previous lambda1: ", lambda1, ", delta: ", delta, ", new lambda1: ", new_lambda1))
-  }
+  if (verbosity > 0) { message(paste0("lambda1: ", new_lambda1)) }
 
   return(new_lambda1)
 

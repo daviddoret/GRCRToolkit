@@ -4,8 +4,8 @@
 \alias{fit_gld_3points_lambda4}
 \title{fit_gld_3points_lambda4}
 \usage{
-fit_gld_3points_lambda4(lambda1, lambda2, lambda3, estimated_range_max_value,
-  estimated_range_max_proba, verbosity = NULL, ...)
+fit_gld_3points_lambda4(lambda1, lambda2, lambda3, lambda4,
+  estimated_range_max_value, estimated_range_max_proba, verbosity = NULL, ...)
 }
 \arguments{
 \item{estimated_range_max_value}{The upper value of the 3 points estimate.}

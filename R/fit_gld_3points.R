@@ -90,6 +90,8 @@ fit_gld_3points = function(
   # And then we apply our round trip approach
   for (iteration in c(1:max_iteration))
   {
+    if (verbosity > 0) {message(paste0("iteration: ", iteration))}
+
     lambda1 <- fit_gld_3points_lambda1(
       lambda1 = lambda1,
       lambda2 = lambda2,
@@ -104,6 +106,7 @@ fit_gld_3points = function(
     lambda3 <- fit_gld_3points_lambda3(
       lambda1 = lambda1,
       lambda2 = lambda2,
+      lambda3 = lambda3,
       lambda4 = lambda4,
       estimated_range_min_value = estimated_range_min_value,
       estimated_range_min_proba = estimated_range_min_proba,
@@ -125,6 +128,7 @@ fit_gld_3points = function(
       lambda1 = lambda1,
       lambda2 = lambda2,
       lambda3 = lambda3,
+      lambda4 = lambda4,
       estimated_range_max_value = estimated_range_max_value,
       estimated_range_max_proba = estimated_range_max_proba,
       verbosity = verbosity - 1,

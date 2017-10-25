@@ -97,7 +97,7 @@ fit_gld_3points_lambda2 = function(
 
   # TODO: Add some result quality check here.
 
-  if (verbosity > 0) { message(paste0("lambda2: ",lambda2, " --> ", magic_lambda2)) }
+  if (verbosity > 0) { message(paste0("lambda2: ", magic_lambda2)) }
 
   return(magic_lambda2)
 

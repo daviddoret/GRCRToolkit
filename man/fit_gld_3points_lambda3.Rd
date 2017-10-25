@@ -4,8 +4,8 @@
 \alias{fit_gld_3points_lambda3}
 \title{fit_gld_3points_lambda3}
 \usage{
-fit_gld_3points_lambda3(lambda1, lambda2, lambda4, estimated_range_min_value,
-  estimated_range_min_proba, verbosity = NULL, ...)
+fit_gld_3points_lambda3(lambda1, lambda2, lambda3, lambda4,
+  estimated_range_min_value, estimated_range_min_proba, verbosity = NULL, ...)
 }
 \arguments{
 \item{estimated_range_min_value}{The lower value of the 3 points estimate.}

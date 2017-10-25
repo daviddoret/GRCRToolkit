@@ -302,7 +302,7 @@ factor_estimate <- R6Class(
     },
     plot_all = function(x_start = NULL, x_end = NULL) {
       if(is.null(x_start)) { x_start <- self$plot_value_start }
-      if(is.null(x_end)) { x_end <- self$plot_value_end }
+      if (is.null(x_end)) { x_end <- self$plot_value_end }
 
       return(multiplot(
         self$plot_vignette(),
@@ -311,9 +311,12 @@ factor_estimate <- R6Class(
         self$plot_quantile(),
         self$plot_simulation_sample(),
         #self$plot_sample_without_outliers(),
-        layout = matrix(c(1,2,3,4,5,6), nrow=2, byrow=TRUE)))
+        layout = matrix(c(1,2,3,4,5,6), nrow = 2, byrow = TRUE)))
     },
-    simulate = function(n = NULL) {
+    simulate = function(
+      n = NULL,
+      verbosity = NULL,
+      ...) {
       # The simulate method may be overridden by a subclass.
       # This may be required to populate richer data frames
       # with complementary columns. I was thinking of this
@@ -325,8 +328,8 @@ factor_estimate <- R6Class(
       # to keep the individual impacts in an "individual impacts"
       # column in the data frame and use the standard factor_value column
       # for the final factor results.
-      if(is.null(n)) { n = 10000 }
-      if(n <= 0) {
+      if (is_nanull(n)) { n = 10000 }
+      if (n <= 0) {
         stop("n <= 0")
       }
       factor_value <- self$get_random(n = n)
