@@ -15,7 +15,7 @@ test_that("a known simple example yields a precise mode", {
 })
 
 test_that("a few pseudo random samples yield precise modes", {
-  for (iteration in 1:16) {
+  for (iteration in 1:4) {
     limit_min_value <- rand$get(max = 1000)
     print(paste0("limit_min_value: ", limit_min_value))
     estimated_range_min_value <- limit_min_value + rand$get(max = 1000)
