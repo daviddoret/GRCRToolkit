@@ -38,7 +38,7 @@ Given \code{f(x) = y} where \code{f} is a monotonic function, find \code{x} for 
 \cr WARNING: This algorithm is naive, i.e. performance-wise suboptimal.
 }
 \examples{
-    precision <- .0001
+precision <- .0001
 y_target <- runif(n = 1, min = -1000000, max = +1000000)
 c <- runif(n = 1, min = -1000000, max = +1000000)
 m <- runif(n = 1, min = -1000000, max = +1000000)

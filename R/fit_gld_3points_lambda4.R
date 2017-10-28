@@ -26,7 +26,7 @@ fit_gld_3points_lambda4 = function(
   # (which I must say is perfectly reasonable).
   # So I declare a flat scalar version and take this opportunity
   # to throw away positive values (nlm optimizer doesn't support bounds either).
-  flat_function <- function(x, ...){
+  f <- function(x, ...){
     if (x >= 0) {
       #if (verbosity > 0) { warning("x >= 0") }
       return(Inf)
@@ -39,55 +39,17 @@ fit_gld_3points_lambda4 = function(
       lambda4 = x))
   }
 
-  # Then I declare a minimization function
-  # that will vectorize the call to flat_function with vapply.
-  minimization_function <- function(x, verbosity = NULL, ...){
-    return(
-      abs(
-        vapply(x, flat_function, 0)
-        -
-          estimated_range_max_proba
-      )
-      # nlm prefers to reduce high numbers
-      # so I artificially increase the output
-      # of my minimization function by a factor
-      # that guarantees precise enough results.
-      * 1000000
-      # * 1000
+  new_lambda4 <- find_function_1param_value_divideby2(
+    f = f,
+    y_target_value = estimated_range_max_proba,
+    x_first_guess = -1,
+    x_first_step = .1,
+    x_search_limit_max = 0,
+    y_precision = .00000001,
+    verbosity = verbosity - 1
     )
-  }
 
-  # Then we run the optimization.
-  # TODO: Study nlm options in greater details.
-  optimization <- tryCatch({
-    nlm(
-      minimization_function,
-      -1,
-      ndigit = 16, # TODO: Move this to a central configuration mechanism
-      iterlim = 128, # TODO: Move this to a central configuration mechanism
-      print.level = 0) },
-    warning = function(w) { if (verbosity > 0) { warning(w) }},
-    error = function(e) { stop(e) },
-    finally = {})
-
-  # TODO: We should test the result against a tolerance threshold.
-  #self$get_probability(self$estimated_range_max_value)
-  #self$get_quantile(self$estimated_range_max_proba)
-
-  new_lambda4 <- NA
-  tryCatch({
-      new_lambda4 <- optimization$estimate
-      },
-    warning = function(w){},
-    error = function(e){},
-    finally = {
-      if (verbosity > 0) {
-        message("Lambda4 optimization failed. Recycling previous value.")
-      }
-      new_lambda4 <- lambda4
-    })
-
-  if (verbosity > 0) { message(paste0("lambda4: ", new_lambda4)) }
+  # TODO: Add a quality check on the resulting output
 
   return(new_lambda4)
 
