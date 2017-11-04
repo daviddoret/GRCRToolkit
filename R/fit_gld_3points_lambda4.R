@@ -20,7 +20,7 @@ fit_gld_3points_lambda4 = function(
   verbosity = NULL,
   ...) {
 
-  if (is_nanull(verbosity)) { verbosity <- 0 }
+  if (is_void(verbosity)) { verbosity <- 0 }
 
   # pgl does not support vectors in the lambda4 parameter,
   # (which I must say is perfectly reasonable).

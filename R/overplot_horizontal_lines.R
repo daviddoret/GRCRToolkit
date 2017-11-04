@@ -1,6 +1,4 @@
-# Package preparation
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(ggplot2)
+require(ggplot2)
 
 #' overplot_vertical_lines
 #'
@@ -21,12 +19,20 @@ pacman::p_load(ggplot2)
 #' graph_enriched <- overplot_horizontal_lines(graph=graph, x_values = c(.05,.95), x_labels = c("a","b"))
 #' graph_enriched
 #'
-overplot_horizontal_lines <- function(graph, y_values, y_labels = NULL, color = "black", alpha = 1, ...) {
+overplot_horizontal_lines <- function(
+  y_values,
+  y_labels = NULL,
+  color = NULL,
+  alpha = NULL,
+  plot_addition = NULL,
+  verbosity = NULL,
+  ...) {
 
-  if(is.null(color)){ color = model_config_get_option("plot", "estimates", "xintercept", "color") }
+  if (is_void(color)) { color = "red" }
+  if (is_void(alpha)) { alpha = .75 }
+  if (is_void(verbosity)) { verbosity <- 0 }
 
-  graph <- graph +
-
+  plot_01 <-
     # Enrich the plot with the vertical bars
     geom_hline(
       yintercept = y_values,
@@ -36,9 +42,8 @@ overplot_horizontal_lines <- function(graph, y_values, y_labels = NULL, color = 
       alpha = alpha,
       size = 1.05) + #model_config_get_option("plot", "estimates", "xintercept", "size")) +
 
-  if(!is.null(y_labels)) {
-    graph <- graph +
-
+  if (!is.null(y_labels)) {
+    plot_01 <- plot_01 +
       # Enrich the plot with the vertical bar labels
       annotate(
         color = "darkgrey",
@@ -50,9 +55,12 @@ overplot_horizontal_lines <- function(graph, y_values, y_labels = NULL, color = 
         hjust = .5,
         vjust = 0,
         size = 6)
-
   }
 
-  return(graph)
+  if (!is_void(plot_addition)) {
+    plot_01 <- plot_01 + plot_addition
+  }
+
+  return(plot_01)
 
   }

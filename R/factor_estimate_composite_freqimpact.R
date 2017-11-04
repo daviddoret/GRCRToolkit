@@ -49,9 +49,9 @@ factor_estimate_composite_freqimpact <- R6Class(
         output_class = NULL,
         ...)
         {
-        if (is_nanull(output_class)) {output_class <- "vector"}
-        if (is_nanull(self$frequency_factor)) { stop("frequency_factor is missing") }
-        if (is_nanull(self$impact_factor)) { stop("impact_factor is missing") }
+        if (is_void(output_class)) {output_class <- "vector"}
+        if (is_void(self$frequency_factor)) { stop("frequency_factor is missing") }
+        if (is_void(self$impact_factor)) { stop("impact_factor is missing") }
         return(
           freqimpact(
             n = n,
@@ -69,11 +69,11 @@ factor_estimate_composite_freqimpact <- R6Class(
       consistency_report <- NULL
 
       # Check if all mandatory parameters have been defined.
-      if (is_nanull(self$frequency_factor)) {
+      if (is_void(self$frequency_factor)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "Frequency factor is missing."), sep = "\n")
         }
-      if (is_nanull(self$impact_factor)) {
+      if (is_void(self$impact_factor)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "Impact factor is missing."), sep = "\n")
       }

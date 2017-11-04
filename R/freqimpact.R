@@ -28,7 +28,7 @@ if (!require(pacman)) install.packages(pacman)
 #' @export
 freqimpact <- function(n, frequency_function, impact_function, output_class = NULL, ...) {
 
-  if (is_nanull(output_class)) { output_class <- "vector" }
+  if (is_void(output_class)) { output_class <- "vector" }
 
   frequencies <- frequency_function(n = n, ...)
 
@@ -54,7 +54,7 @@ freqimpact <- function(n, frequency_function, impact_function, output_class = NU
     FUN = function(impact_list){
       if (length(impact_list) == 1) # The test on length avoids a warning as is.na() does not support vectors.
         {
-        if (is.na(impact_list)) {
+        if (is_void(impact_list)) {
           # But the factor_value column is the result of freq x impact,
           # so here if no event took place, NA would be a bad choice
           # because during that period of time, we really had an impact

@@ -4,17 +4,24 @@
 \alias{overplot_vertical_lines}
 \title{overplot_vertical_lines}
 \usage{
-overplot_vertical_lines(graph, x_values, x_labels = NULL, color, alpha, ...)
+overplot_vertical_lines(x_values, x_labels = NULL, color = NULL,
+  alpha = NULL, plot_addition = NULL, verbosity = NULL, ...)
 }
 \arguments{
-\item{graph}{a ggplot graph, typically a PDF or CDF}
+\item{color}{A GGPlot color value.}
+
+\item{alpha}{A GGPlot alpha value.}
+
+\item{plot_addition}{Complementary plot objets to be added to the new plot object for enrichment purposes.}
+
+\item{verbosity}{0: no messages. > 0 more and more verbose messages.}
 
 \item{estim_quantiles}{a vector of estimated quantiles (aka x values)}
 
 \item{estim_labels}{meaningful labels to describe the estimated quantiles}
 }
 \value{
-an good looking graph enriched with visual representations for the estimates
+A good looking geom object that may be used to enrich plots.
 }
 \description{
 Enriches a graph with good looking vertical lines.

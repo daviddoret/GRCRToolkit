@@ -1,6 +1,8 @@
-# Package preparation
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorspace, ggplot2, labeling, cowplot, ggExtra)
+require(colorspace)
+require(ggplot2)
+require(labeling)
+require(cowplot)
+require(ggExtra)
 
 #' plot_sample
 #'
@@ -30,12 +32,16 @@ pacman::p_load(colorspace, ggplot2, labeling, cowplot, ggExtra)
 #'
 #' @param verbosity 0: no messages. > 0 more and more verbose messages.
 #'
-#' @return a good looking graph
+#' @param plot_addition Complementary plot objets to be added to the new plot object for enrichment purposes.
+#' \cr This parameter was originally introduced because ggMarginal function from ggExtra made it easy to enrich the plot with a boxplot on top of it, but the resulting plot could no longer be further enriched with additions. To overcome this limitation, I simply open the plot to arbitrary additions via this new parameter.
+#'
+#' @return A good looking graph.
 #'
 #' @examples
 #' plot_sample(sample = rnorm(n = 10000), title = "Normal sample")
 #' plot_sample(sample = rpois(n = 10000, lambda = exp(1)), title = "Poisson sample", variable_type = "Discrete")
 #' plot_sample(sample = rgeom(n = 1000, p = .2), title = "Geometric sample", variable_type = "Discrete")
+#'
 #' @export
 plot_sample = function(
   sample,
@@ -48,16 +54,17 @@ plot_sample = function(
   x_scale_type = NULL,
   y_scale_type = NULL,
   variable_type = NULL,
+  plot_addition = NULL,
   ...)
 {
 
   # Default values
-  if (is_nanull(title)) { title <- "Sample Histogram" }
-  if (is_nanull(caption)) { caption <- paste0("n = ", fn(length(sample),0)) }
-  if (is_nanull(bins)) { bins <- 100 }
-  if (is_nanull(x_scale_type)) { x_scale_type <- "default" }
-  if (is_nanull(y_scale_type)) { y_scale_type <- "default" }
-  if (is_nanull(variable_type)) { variable_type <- "Continuous" }
+  if (is_void(title)) { title <- "Sample Histogram" }
+  if (is_void(caption)) { caption <- paste0("n = ", fn(length(sample),0)) }
+  if (is_void(bins)) { bins <- 100 }
+  if (is_void(x_scale_type)) { x_scale_type <- "default" }
+  if (is_void(y_scale_type)) { y_scale_type <- "default" }
+  if (is_void(variable_type)) { variable_type <- "Continuous" }
 
   # Prepare the data
   df <- data.frame(x = sample)
@@ -115,6 +122,10 @@ plot_sample = function(
 #    nrow = 2,
 #    ncol = 1,
 #    rel_heights = c(1,.2))
+
+  if (!is_void(plot_addition)) {
+    histo <- histo + plot_addition
+  }
 
   output <- ggMarginal(
     histo,

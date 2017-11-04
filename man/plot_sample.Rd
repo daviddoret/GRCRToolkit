@@ -6,7 +6,7 @@
 \usage{
 plot_sample(sample, title = NULL, subtitle = NULL, caption = NULL,
   x_start = NULL, x_end = NULL, bins = NULL, x_scale_type = NULL,
-  y_scale_type = NULL, variable_type = NULL, ...)
+  y_scale_type = NULL, variable_type = NULL, plot_addition = NULL, ...)
 }
 \arguments{
 \item{sample}{A vector of the population sample.}
@@ -29,10 +29,13 @@ plot_sample(sample, title = NULL, subtitle = NULL, caption = NULL,
 
 \item{variable_type}{"Discrete" (default) or "Continuous".}
 
+\item{plot_addition}{Complementary plot objets to be added to the new plot object for enrichment purposes.
+\cr This parameter was originally introduced because ggMarginal function from ggExtra made it easy to enrich the plot with a boxplot on top of it, but the resulting plot could no longer be further enriched with additions. To overcome this limitation, I simply open the plot to arbitrary additions via this new parameter.}
+
 \item{verbosity}{0: no messages. > 0 more and more verbose messages.}
 }
 \value{
-a good looking graph
+A good looking graph.
 }
 \description{
 A friendly shortcut function that produces a good looking graph of a population sample.
@@ -43,5 +46,6 @@ The upper part is enriched with a marginal box plot.
 plot_sample(sample = rnorm(n = 10000), title = "Normal sample")
 plot_sample(sample = rpois(n = 10000, lambda = exp(1)), title = "Poisson sample", variable_type = "Discrete")
 plot_sample(sample = rgeom(n = 1000, p = .2), title = "Geometric sample", variable_type = "Discrete")
+
 }
 

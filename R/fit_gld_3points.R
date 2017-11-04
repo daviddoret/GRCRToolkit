@@ -27,12 +27,12 @@ fit_gld_3points = function(
   ...) {
 
   # Default values
-  if (is_nanull(estimated_range_size_proba)) {
+  if (is_void(estimated_range_size_proba)) {
     estimated_range_size_proba <- .9 # TODO: replace with a default configuration setting
   }
-  if (is_nanull(verbosity)) { verbosity <- 0 }
-  if (is_nanull(max_iteration)) { max_iteration <- 256 }
-  if (is_nanull(precision)) { precision <- 1 } # Expressed in quantile value
+  if (is_void(verbosity)) { verbosity <- 0 }
+  if (is_void(max_iteration)) { max_iteration <- 256 }
+  if (is_void(precision)) { precision <- 1 } # Expressed in quantile value
 
   estimated_range_min_proba <- (1 - estimated_range_size_proba) / 2
   estimated_range_max_proba <- 1 - (1 - estimated_range_size_proba) / 2

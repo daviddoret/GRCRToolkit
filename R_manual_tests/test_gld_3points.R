@@ -6,10 +6,10 @@ fg4 <- factor_estimate_gld_3points$new(
   estimated_range_max_value = 300000,
   estimated_range_min_proba = .05,
   estimated_range_max_proba = .95,
-  fit_dist = FALSE,
+  fit_distribution = FALSE,
   simulate = FALSE
   )
-fg4$fit_dist(verbosity = 0)
+fg4$fit_distribution(verbosity = 0)
 
 fg4$limit_max_value <- 1000000
 fg4$limit_min_value <- 50000

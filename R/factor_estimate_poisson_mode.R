@@ -1,5 +1,4 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(R6)
+require(R6)
 
 #' factor_estimate_poisson_mode
 #'
@@ -8,7 +7,6 @@ pacman::p_load(R6)
 #' The estimation is based on the distribution mode.
 #'
 #' @docType class
-#' @export
 #' @keywords data
 #' @return Object of \code{\link{R6Class}} with properties and methods for simple integration in a risk model.
 #' @format \code{\link{R6Class}} object.
@@ -20,6 +18,8 @@ pacman::p_load(R6)
 #'   \item{\code{new(estimated_mode_value,time_interval_friendly_name)}}{This method is used to create a new object of this class with \code{estimated_mode_value} as the estimated mode.}
 #'   \item{\code{plot_density()}}{Plot the PDF.}
 #' }
+#'
+#' @export
 factor_estimate_poisson_mode <- R6Class(
   "factor_estimate_poisson_mode",
   inherit = factor_estimate_poisson,
@@ -29,13 +29,13 @@ factor_estimate_poisson_mode <- R6Class(
       time_interval_friendly_name = NULL,
       limit_min_value = NULL,
       limit_max_value = NULL,
-      fit_dist = NULL, # Triggers distribution fitting immediately.
+      fit_distribution = NULL, # Triggers distribution fitting immediately.
       simulate = NULL, # Triggers simulation immediately.
       ...) {
 
       # Default values
       if (is.null(estimated_mode_value)) { estimated_mode_value <- NA }
-      if (is.null(fit_dist)) { fit_dist <- TRUE }
+      if (is.null(fit_distribution)) { fit_distribution <- TRUE }
       if (is.null(simulate)) { simulate <- TRUE }
 
       super$initialize(
@@ -49,12 +49,13 @@ factor_estimate_poisson_mode <- R6Class(
       self$lambda <- NA
       self$estimated_mode_value <- estimated_mode_value
 
-      if (fit_dist) { self$fit_dist(...) }
+      if (fit_distribution) { self$fit_distribution(...) }
       if (simulate) { self$simulate(...) }
 
       },
-    fit_dist = function(...) {
-      self$lambda <- fit_poisson_mode(estimated_mode_value = self$estimated_mode_value, ...)
+    fit_distribution = function(...) {
+      self$lambda <- fit_poisson_mode(
+        estimated_mode_value = self$estimated_mode_value, ...)
       },
     get_print_lines = function(...) {
       return(
@@ -82,7 +83,7 @@ factor_estimate_poisson_mode <- R6Class(
       consistency_report <- super$check_state_consistency(output_format = "report")
 
       # Check if all mandatory parameters have been defined.
-      if (is.na(self$estimated_mode_value)) {
+      if (is_void(self$estimated_mode_value)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "estimated mode value is missing."), sep = "\n")
       }
@@ -112,10 +113,55 @@ factor_estimate_poisson_mode <- R6Class(
         stop("Sorry, this output format is not supported.")
       }
     },
+    overplot_quantile_vertical_lines = function(
+      verbosity = NULL,
+      ...) {
+      # Overplot enrichment for quantile dimension
+
+      # Default values
+      if (is_void(verbosity)) { verbosity <- 0 }
+
+      # Prepare a vector with the estimation parameters
+      estimates <- c(self$estimated_mode_value)
+
+      # Enrich the graph with the estimates represented as vertical lines
+      overplot_01 <- overplot_vertical_lines(
+        x_values = estimates,
+        color = "blue",
+        alpha = .2,
+        plot_addition = NULL,
+        verbosity = verbosity - 1,
+        ...)
+
+      limits_values <- c()
+      if (!is_void(self$limit_min_value))
+      {
+        limits_values <- c(limits_values, self$limit_min_value)
+      }
+      if (!is_void(self$limit_max_value))
+      {
+        limits_values <- c(limits_values, self$limit_max_value)
+      }
+
+      # Enrich the graph with the estimates represented as vertical lines
+      if (!is_void(self$limit_min_value) | !is_void(self$limit_max_value))
+      {
+        overplot_01 <- overplot_vertical_lines(
+          x_values = limits_values,
+          x_labels = NULL,
+          color = "red",
+          alpha = .2,
+          plot_addition = overplot_01,
+          verbosity = verbosity - 1,
+          ...)
+      }
+
+      return(overplot_01)
+    },
     plot_density = function(x_start = NULL, x_end = NULL, ...) {
       # Override the super-class method to append the limits and point estimates.
 
-      if (is.null(x_start) | is.null(x_end))
+      if (is_void(x_start) | is_void(x_end))
       {
         x_start <- min(self$estimated_range_min_value, self$limit_min_value)
         x_end <- max(self$estimated_range_max_value, self$limit_max_value)
@@ -124,37 +170,26 @@ factor_estimate_poisson_mode <- R6Class(
         x_end <- x_end + margin
       }
 
-      # Get the original PDF plot
-      plot_01 <- super$plot_density(x_start = x_start, x_end = x_end)
+      # Get overplot enrichments for the applicable dimensions
+      overplot_01 <- self$overplot_quantile_vertical_lines(...)
 
-      # Prepare a vector with the estimation parameters
-      estimates <- c(self$estimated_mode_value)
+      # Sum together plot additions
+      plot_addition <- overplot_01
 
-      # Enrich the graph with the estimates represented as vertical lines
-      plot_01 <- overplot_vertical_lines(plot_01, x_values = estimates, color = "blue", alpha = .2, ...)
-
-      limits_values <- c()
-      if (!is.na(self$limit_min_value))
-      {
-        limits_values <- c(limits_values, self$limit_min_value)
-      }
-      if (!is.na(self$limit_max_value))
-      {
-        limits_values <- c(limits_values, self$limit_max_value)
-      }
-
-      # Enrich the graph with the estimates represented as vertical lines
-      if (!is.na(self$limit_min_value) | !is.na(self$limit_max_value))
-      {
-        plot_01 <- overplot_vertical_lines(plot_01, x_values = limits_values, x_labels = NULL, color = "red", alpha = .2, ...)
-      }
+      # Get the plot from superclass, passing it plot additions
+      plot_01 <- super$plot_density(
+        x_start = x_start,
+        x_end = x_end,
+        plot_addition = plot_addition,
+        verbosity = verbosity - 1,
+        ...)
 
       return(plot_01)
     },
     plot_probability = function(x_start = NULL, x_end = NULL, ...) {
       # Override the super-class method to append the limits and point estimates.
 
-      if (is.null(x_start) | is.null(x_end))
+      if (is_void(x_start) | is_void(x_end))
       {
         x_start <- min(self$estimated_range_min_value, self$limit_min_value)
         x_end <- max(self$estimated_range_max_value, self$limit_max_value)
@@ -174,17 +209,17 @@ factor_estimate_poisson_mode <- R6Class(
       plot_01 <- overplot_vertical_lines(plot_01, x_values = x_estimates, color = "blue", alpha = .2, ...)
 
       x_limits_values <- c()
-      if (!is.na(self$limit_min_value))
+      if (!is_void(self$limit_min_value))
       {
         x_limits_values <- c(x_limits_values, self$limit_min_value)
       }
-      if (!is.na(self$limit_max_value))
+      if (!is_void(self$limit_max_value))
       {
         x_limits_values <- c(x_limits_values, self$limit_max_value)
       }
 
       # Enrich the graph with the estimates represented as vertical lines
-      if (!is.na(self$limit_min_value) | !is.na(self$limit_max_value))
+      if (!is_void(self$limit_min_value) | !is_void(self$limit_max_value))
       {
         plot_01 <- overplot_vertical_lines(plot_01, x_values = x_limits_values, x_labels = NULL, color = "red", alpha = .2, ...)
       }
@@ -217,10 +252,10 @@ factor_estimate_poisson_mode <- R6Class(
         }
       else {
         # We only do something if something changes... This is important for Shiny apps, etc. to avoid recomputing everything when recomputing is not required
-        if (is.na(self$estimated_mode_value) | value != self$estimated_mode_value)
+        if (is_void(self$estimated_mode_value) | value != self$estimated_mode_value)
           {
           private$private_estimated_mode_value <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
+          if (self$check_state_consistency()) { self$fit_distribution() }
           }
         }
       }

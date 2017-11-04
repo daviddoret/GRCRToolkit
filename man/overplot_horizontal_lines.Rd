@@ -4,8 +4,8 @@
 \alias{overplot_horizontal_lines}
 \title{overplot_vertical_lines}
 \usage{
-overplot_horizontal_lines(graph, y_values, y_labels = NULL, color = "black",
-  alpha = 1, ...)
+overplot_horizontal_lines(y_values, y_labels = NULL, color = NULL,
+  alpha = NULL, plot_addition = NULL, verbosity = NULL, ...)
 }
 \arguments{
 \item{graph}{a ggplot graph, typically a PDF or CDF}

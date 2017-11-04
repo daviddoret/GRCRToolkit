@@ -1,5 +1,5 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(R6,ggplot2)
+require(R6)
+require(ggplot2)
 
 #' factor_estimate
 #'
@@ -30,6 +30,7 @@ pacman::p_load(R6,ggplot2)
 #' \describe{
 #'   \item{get_random(n = 1, output_class = "vector")}{ Returns a random sample of size \code{n}. Returns a vector by default. If \code{output_class} = "data.frame", returns a data.frame with a column "factor_value". This second parameterization may be enriched by R6 subclasses to provide additional columns with complementary information. }
 #' }
+#' @export
 factor_estimate <- R6Class(
   "factor_estimate",
   public = list(
@@ -42,18 +43,22 @@ factor_estimate <- R6Class(
       limit_min_behavior = NULL,
       limit_max_behavior = NULL,
       ...) {
-      if (is_nanull(limit_min_value)) { limit_min_value <- NA }
-      if (is_nanull(limit_max_value)) { limit_max_value <- NA }
-      if (is_nanull(distribution_type)) { distribution_type <- NA }
+      if (is_void(limit_min_value)) { limit_min_value <- NA }
+      if (is_void(limit_min_behavior)) { limit_min_behavior <- "Limit" }
+      if (is_void(limit_max_value)) { limit_max_value <- NA }
+      if (is_void(limit_max_behavior)) { limit_max_behavior <- "Limit" }
+      if (is_void(distribution_type)) { distribution_type <- NA }
       self$estimation_method_name <- estimation_method_name
       self$distribution_name <- distribution_name
       self$distribution_type <- distribution_type
       self$limit_min_value <- limit_min_value
+      self$limit_min_behavior <- limit_min_behavior
       self$limit_max_value <- limit_max_value
+      self$limit_max_behavior <- limit_max_behavior
       },
-    check_state_consistency = function(output_format = NULL,...) {
+    check_state_consistency = function(output_format = NULL, ...) {
       # Informs us if the object state is consistent / logical.
-      if(is.null(output_format)) { output_format = "boolean" }
+      if (is.null(output_format)) { output_format = "boolean" }
       consistency_error_count <- 0
       consistency_report <- NULL
 
@@ -62,15 +67,15 @@ factor_estimate <- R6Class(
 
       # And eventually output the conclusion in the desired format.
       # And eventually output the conclusion in the desired format.
-      if(output_format == "boolean")
+      if (output_format == "boolean")
       {
         return(consistency_error_count == 0)
       }
-      else if(output_format == "int")
+      else if (output_format == "int")
       {
         return(consistency_error_count)
       }
-      else if(output_format == "report")
+      else if (output_format == "report")
       {
         return(consistency_report)
       }
@@ -108,15 +113,15 @@ factor_estimate <- R6Class(
     get_random = function(n = NULL, output_class = NULL, ...)
       {
         # Default values
-        if (is_nanull(n)) { n <- 1 }
-        if (is_nanull(output_class)) { output_class <- "vector" }
+        if (is_void(n)) { n <- 1 }
+        if (is_void(output_class)) { output_class <- "vector" }
 
         random_sample <- self$random_function(
           n = n,
           output_class = output_class,
           ...)
 
-        if (!is_nanull(self$limit_min_value)) {
+        if (!is_void(self$limit_min_value)) {
           if (is.vector(random_sample)) {
             random_sample <- apply_limit_min(
               x = random_sample,
@@ -138,7 +143,7 @@ factor_estimate <- R6Class(
             stop("unsupported class")
           }
         }
-        if (!is_nanull(self$limit_max_value)) {
+        if (!is_void(self$limit_max_value)) {
           if (is.vector(random_sample)) {
             random_sample <- apply_limit_max(
               x = random_sample,
@@ -192,10 +197,8 @@ factor_estimate <- R6Class(
     },
     plot_density = function(x_start = NULL, x_end = NULL)
       {
-      if(self$check_state_consistency())
+      if (self$check_state_consistency())
       {
-        if(is.null(x_start)) { x_start <- self$plot_value_start }
-        if(is.null(x_end)) { x_end <- self$plot_value_end }
         return(
           plot_probability_density_function(
             fun = self$density_function,
@@ -204,15 +207,15 @@ factor_estimate <- R6Class(
       }
       else
       {
-        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+        return(plot_vignette(
+          title = "Invalid parameters",
+          text = self$check_state_consistency(output_format = "report")))
       }
       },
     plot_mass = function(x_start = NULL, x_end = NULL)
     {
-      if(self$check_state_consistency())
+      if (self$check_state_consistency())
       {
-        if(is.null(x_start)) { x_start <- self$plot_value_start }
-        if(is.null(x_end)) { x_end <- self$plot_value_end }
         return(
           plot_probability_mass_function(
             fun = self$density_function,
@@ -221,16 +224,15 @@ factor_estimate <- R6Class(
       }
       else
       {
-        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+        return(plot_vignette(
+          title = "Invalid parameters",
+          text = self$check_state_consistency(output_format = "report")))
       }
     },
     plot_probability = function(x_start = NULL, x_end = NULL)
       {
-      if(self$check_state_consistency())
+      if (self$check_state_consistency())
       {
-
-      if(is.null(x_start)) { x_start <- self$plot_value_start }
-      if(is.null(x_end)) { x_end <- self$plot_value_end }
       return(
         plot_cumulative_distribution_function(
           fun = self$probability_function,
@@ -239,15 +241,15 @@ factor_estimate <- R6Class(
       }
       else
       {
-        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+        return(plot_vignette(
+          title = "Invalid parameters",
+          text = self$check_state_consistency(output_format = "report")))
       }
       },
     plot_quantile = function(x_start = NULL, x_end = NULL)
       {
-      if(self$check_state_consistency())
+      if (self$check_state_consistency())
       {
-      if(is.null(x_start)) { x_start <- 0 }
-      if(is.null(x_end)) { x_end <- 1 }
       return(
         plot_quantile_function(
           fun = self$quantile_function,
@@ -256,7 +258,9 @@ factor_estimate <- R6Class(
       }
       else
       {
-        return(plot_vignette(title="Invalid parameters",text=self$check_state_consistency(output_format = "report")))
+        return(plot_vignette(
+          title = "Invalid parameters",
+          text = self$check_state_consistency(output_format = "report")))
       }
     },
     plot_simulation_sample = function(
@@ -268,11 +272,13 @@ factor_estimate <- R6Class(
       bins = NULL,
       n = NULL,
       x_scale_type = NULL,
-      y_scale_type = NULL)
+      y_scale_type = NULL,
+      plot_addition = NULL,
+      ...)
     {
-      if (is_nanull(title)) { title <- "Simulation sample histogram" }
-      if (is_nanull(bins)) { bins <- 100 }
-      if (is_nanull(n)) { n <- 10000 }
+      if (is_void(title)) { title <- "Simulation sample histogram" }
+      if (is_void(bins)) { bins <- 100 }
+      if (is_void(n)) { n <- 10000 }
       if (self$check_state_consistency())
       {
       sample <- self$get_random(n = n)
@@ -287,7 +293,9 @@ factor_estimate <- R6Class(
           x_end = x_end,
           x_scale_type = x_scale_type,
           y_scale_type = y_scale_type,
-          variable_type = self$distribution_type
+          variable_type = self$distribution_type,
+          plot_addition = plot_addition,
+          ...
           ))}
       else
       {
@@ -298,10 +306,10 @@ factor_estimate <- R6Class(
     },
     plot_vignette = function(...) {
       # Plots a textual summary description of this factor.
-      return(plot_vignette(title="Summary", text=self$get_print_lines()))
+      return(plot_vignette(title = "Summary", text = self$get_print_lines()))
     },
     plot_all = function(x_start = NULL, x_end = NULL) {
-      if(is.null(x_start)) { x_start <- self$plot_value_start }
+      if (is.null(x_start)) { x_start <- self$plot_value_start }
       if (is.null(x_end)) { x_end <- self$plot_value_end }
 
       return(multiplot(
@@ -328,7 +336,7 @@ factor_estimate <- R6Class(
       # to keep the individual impacts in an "individual impacts"
       # column in the data frame and use the standard factor_value column
       # for the final factor results.
-      if (is_nanull(n)) { n = 10000 }
+      if (is_void(n)) { n = 10000 }
       if (n <= 0) {
         stop("n <= 0")
       }
@@ -361,9 +369,9 @@ factor_estimate <- R6Class(
         # The goal of this conservative approach is to avoid regenerating
         # large and potentially CPU/memory intensive samples when nothing changed.
         if (
-          (is.na(value) & !is.na(self$limit_min_value) ) |
-          (!is.na(value) & is.na(self$limit_min_value) ) |
-          (!is.na(value) & !is.na(self$limit_min_value) & value != self$limit_min_value ) )
+          (is_void(value) & !is_void(self$limit_min_value) ) |
+          (!is_void(value) & is_void(self$limit_min_value) ) |
+          (!is_void(value) & !is_void(self$limit_min_value) & value != self$limit_min_value ) )
         {
           private$private_limit_min_value <- value
           # No need to re-fit the distribution.
@@ -381,9 +389,9 @@ factor_estimate <- R6Class(
         # The goal of this conservative approach is to avoid regenerating
         # large and potentially CPU/memory intensive samples when nothing changed.
         if (
-          (is.na(value) & !is.na(self$limit_max_value) ) |
-          (!is.na(value) & is.na(self$limit_max_value) ) |
-          (!is.na(value) & !is.na(self$limit_max_value) & value != self$limit_max_value ) )
+          (is_void(value) & !is_void(self$limit_max_value) ) |
+          (!is_void(value) & is_void(self$limit_max_value) ) |
+          (!is_void(value) & !is_void(self$limit_max_value) & value != self$limit_max_value ) )
         {
           private$private_limit_max_value <- value
           # No need to re-fit the distribution.
@@ -405,25 +413,25 @@ factor_estimate <- R6Class(
       if (missing(value)) { return(private$private_random_function) }
       else {private$private_random_function <- value }},
     # Beautiful graph preferences
-    plot_value_start = function(value,...) {
-      if (missing(value)) { return(private$private_plot_value_start) }
-      else {private$private_plot_value_start <- value }},
-    plot_value_end = function(value,...) {
-      if (missing(value)) { return(private$private_plot_value_end) }
-      else {private$private_plot_value_end <- value }},
-    plot_probability_start = function(value,...) {
-      if (missing(value)) { return(private$private_plot_probability_start) }
-      else {private$private_plot_probability_start <- value }},
-    plot_probability_end = function(value,...) {
-      if (missing(value)) { return(private$private_plot_probability_end) }
-      else {private$private_plot_probability_end <- value }},
+    #plot_value_start = function(value,...) {
+    #  if (missing(value)) { return(private$private_plot_value_start) }
+    #  else {private$private_plot_value_start <- value }},
+    #plot_value_end = function(value,...) {
+    #  if (missing(value)) { return(private$private_plot_value_end) }
+    #  else {private$private_plot_value_end <- value }},
+    #plot_probability_start = function(value,...) {
+    #  if (missing(value)) { return(private$private_plot_probability_start) }
+    #  else {private$private_plot_probability_start <- value }},
+    #plot_probability_end = function(value,...) {
+    #  if (missing(value)) { return(private$private_plot_probability_end) }
+    #  else {private$private_plot_probability_end <- value }},
     # Standard moments of the fitted distribution
     # These are conditionnaly implemented by the subclasses
     # if analytical solutions are available.
     # At this level, we may only rely on optimization to
     # estimate solutions.
     dist_mode = function(value,...) {
-      if(missing(value))
+      if (missing(value))
       {
         warning("Should be implemented by the subclass")
         return(NA)
@@ -433,49 +441,49 @@ factor_estimate <- R6Class(
         # optimize() may or may not be the right solution.
         # return(get_dist_mode_from_pdf(pdf = self$get_density))
         }
-      else { stop("This is a read-only attribute") }},
+      else {stop("This is a read-only attribute") }},
     simulation_sample_mean = function(value,...) {
       if (missing(value)) {
-        if (is.na(self$simulation_sample)) { return(NA) }
+        if (is_void(self$simulation_sample)) { return(NA) }
         return(mean(self$simulation_sample$factor_value))
       }
-      else { stop("This is a read-only attribute") }},
+      else {stop("This is a read-only attribute") }},
     simulation_sample_sd = function(value,...) {
-      if(missing(value)) {
-        if (is.na(self$simulation_sample)) { return(NA) }
+      if (missing(value)) {
+        if (is_void(self$simulation_sample)) { return(NA) }
         return(sd(self$simulation_sample$factor_value))
       }
-      else { stop("This is a read-only attribute") }},
+      else {stop("This is a read-only attribute") }},
     simulation_sample_variance = function(value, ...) {
-      if(missing(value)) {
-        if (is.na(self$simulation_sample)) { return(NA) }
+      if (missing(value)) {
+        if (is_void(self$simulation_sample)) { return(NA) }
         return(var(self$simulation_sample$factor_value))
       }
-      else { stop("This is a read-only attribute") }},
+      else {stop("This is a read-only attribute") }},
     simulation_sample_size = function(value,...) {
-      if(missing(value)) {
-        if (is.na(self$simulation_sample)) { return(NA) }
+      if (missing(value)) {
+        if (is_void(self$simulation_sample)) { return(NA) }
         return(length(self$simulation_sample$factor_value))
       }
-      else { stop("This is a read-only attribute") }},
+      else {stop("This is a read-only attribute") }},
     simulation_sample_min = function(value,...) {
-      if(missing(value)) {
-        if (is.na(self$simulation_sample)) { return(NA) }
+      if (missing(value)) {
+        if (is_void(self$simulation_sample)) { return(NA) }
         return(min(self$simulation_sample$factor_value))
       }
-      else { stop("This is a read-only attribute") }},
+      else {stop("This is a read-only attribute") }},
     simulation_sample_max = function(value,...) {
-      if(missing(value)) {
-        if (is.na(self$simulation_sample)) { return(NA) }
+      if (missing(value)) {
+        if (is_void(self$simulation_sample)) { return(NA) }
         return(max(self$simulation_sample$factor_value))
       }
-      else { stop("This is a read-only attribute") }},
+      else {stop("This is a read-only attribute") }},
     dist_skewness = function(value,...) {
-      if(missing(value)) { return(NA) }
-      else { stop("This is an abstract attribute, it must be implemented by a subclass") }},
+      if (missing(value)) { return(NA) }
+      else {stop("This is an abstract attribute, it must be implemented by a subclass") }},
     dist_kurtosis = function(value,...) {
-      if(missing(value)) { return(NA) }
-      else { stop("This is an abstract attribute, it must be implemented by a subclass") }},
+      if (missing(value)) { return(NA) }
+      else {stop("This is an abstract attribute, it must be implemented by a subclass") }},
     simulation_sample = function(value,...) {
       # Returns a data frame with the simulation sample data.
       # The data frame mandatorily contains a column "factor_value" with
@@ -499,10 +507,10 @@ factor_estimate <- R6Class(
     # Limits for good-looking graph rendering.
     # Sub-classes implementing estimation methods
     # have the responsibility to set their values.
-    private_plot_value_start = NA,
-    private_plot_value_end = NA,
-    private_plot_probability_start = NA,
-    private_plot_probability_end = NA,
+    #private_plot_value_start = NA,
+    #private_plot_value_end = NA,
+    #private_plot_probability_start = NA,
+    #private_plot_probability_end = NA,
     private_simulation_sample = NA,
     private_limit_min_value = NA,
     private_limit_max_value = NA,

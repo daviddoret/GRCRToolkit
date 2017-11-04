@@ -1,9 +1,9 @@
-if (!require(pacman)) install.packages(pacman)
 
-#' is_nanull
+#' is_void
 #'
-#' A shortcut function that test if a variable \code{x} is \code{NULL} or \code{NA}.
-#' If \code{x} is a vector, \code{is_nanull} does not test the elements of the vector,
+#' Systematically testing for variable "emptiness" in R is a bit of a pain.
+#' This is a shortcut function that tests if a variable \code{x} is \code{NULL} or \code{NA}.
+#' If \code{x} is a vector, \code{is_void} does not test the elements of the vector,
 #' but returns \code{FALSE} because a vector is an object that is neither \code{NULL} nor \code{NA}.
 #'
 #' @param x a variable
@@ -11,13 +11,13 @@ if (!require(pacman)) install.packages(pacman)
 #' @return boolean
 #'
 #' @examples
-#' is_nanull(NULL)
-#' is_nanull(NA)
-#' is_nanull(0)
-#' is_nanull(c(NA,NA,NA))
+#' is_void(NULL)
+#' is_void(NA)
+#' is_void(0)
+#' is_void(c(NA,NA,NA))
 #'
 #' @export
-is_nanull <- function(x, ...) {
+is_void <- function(x, ...) {
   if (is.null(x)) return(TRUE)
   # If it contains > 1 element, I consider x a real object
   # even if it only contains NAs.

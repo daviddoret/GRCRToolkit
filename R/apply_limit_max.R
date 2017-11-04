@@ -65,14 +65,14 @@ apply_limit_max <- function(
   ...) {
 
   # Default values
-  if (is_nanull(limit_behavior)) { limit_behavior = "Limit" }
+  if (is_void(limit_behavior)) { limit_behavior = "Limit" }
   if (!tolower(limit_behavior) == "replace") { replace_function <- NULL } # Conservatively cleaning useless parameters
-  if (is_nanull(target_column)) { target_column = 1 }
-  if (is_nanull(verbosity)) { verbosity = 0 }
+  if (is_void(target_column)) { target_column = 1 }
+  if (is_void(verbosity)) { verbosity = 0 }
 
   if (verbosity > 0) { message(limit_behavior) }
 
-  if (!is_nanull(limit_value)) {
+  if (!is_void(limit_value)) {
 
     if (is.vector(x)) {
       if (tolower(limit_behavior) == "limit") {

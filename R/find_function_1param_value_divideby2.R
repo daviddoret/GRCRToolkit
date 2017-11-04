@@ -62,11 +62,11 @@ find_function_1param_value_divideby2 <- function(
   ...) {
 
   # Default values
-  if (is_nanull(y_precision)) { y_precision <- .01 }
-  if (is_nanull(max_iteration)) { max_iteration <- 2048 }
-  if (is_nanull(verbosity)) { verbosity <- 0 }
-  if (is_nanull(x_first_guess)) { x_first_guess <- 0 }
-  if (is_nanull(x_first_step)) { x_first_step <- 1 }
+  if (is_void(y_precision)) { y_precision <- .01 }
+  if (is_void(max_iteration)) { max_iteration <- 2048 }
+  if (is_void(verbosity)) { verbosity <- 0 }
+  if (is_void(x_first_guess)) { x_first_guess <- 0 }
+  if (is_void(x_first_step)) { x_first_step <- 1 }
   y_precision <- abs(y_precision) # Precision can't be negative.
 
   if (verbosity > 0) { message(paste0("y_target_value: ", y_target_value)) }

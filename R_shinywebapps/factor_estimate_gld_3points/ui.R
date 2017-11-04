@@ -7,7 +7,13 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
+require(shiny)
+require(GRCRToolkit)
+require(ggplot2)
+require(colorspace)
+require(labeling)
+require(cowplot)
+require(ggExtra)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -31,9 +37,13 @@ shinyUI(fluidPage(
           ),
       tags$p("You may type in limits. For loss events, the minimum should be set to 0 (excluding opportunities or positive risks) or the minimum financial loss being considered a loss as per the organization's risk management policy. The maximum should be set to the highest possible risk, usually equaly to the company's equity value"),
       fluidRow(
-        column(width=4, numericInput(inputId = "limit_min_value", label = "Min.", value = 100, min = 0, max = 1000000000, step = 1, width = "100%")),
-        column(width=4, numericInput(inputId = "limit_max_value", label = "Max.", value = 500, min = 0, max = 1000000000, step = 1, width = "100%"))
-          ),
+        column(width = 4, numericInput(inputId = "limit_min_value", label = "Min.", value = 100, min = 0, max = 1000000000, step = 1, width = "100%")),
+        column(width = 4, numericInput(inputId = "limit_max_value", label = "Max.", value = 500, min = 0, max = 1000000000, step = 1, width = "100%"))
+      ),
+      fluidRow(
+        column(width = 4, selectInput(inputId = "limit_min_behavior", label = "Min. behavior", selected = "Limit", choices = c("Limit", "Replace", "Discard"))),
+        column(width = 4, selectInput(inputId = "limit_max_behavior", label = "Max. behavior", selected = "Limit", choices = c("Limit", "Replace", "Discard")))
+        ),
       tags$p("Graph navigation"),
       fluidRow(
         column(width=4, numericInput(inputId = "x_start", label = "X start", value = 0, min = 0, max = 1, step = 1, width = "100%")),
@@ -45,7 +55,7 @@ shinyUI(fluidPage(
     mainPanel(
       tabsetPanel(
       tabPanel("Fitted Distribution",
-               verbatimTextOutput("fit_dist_summary"),
+               verbatimTextOutput("fit_distribution_summary"),
                plotOutput("plot_density"),
                plotOutput("plot_probability"),
                plotOutput("plot_quantile")),

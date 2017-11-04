@@ -31,7 +31,7 @@ factor_estimate_composite_custsom <- R6Class(
       random_function = NULL,
       ...) {
       # Default values
-      if(is_nanull(random_function)) {
+      if(is_void(random_function)) {
         random_function <- function(n, ...){
           warning("Sorry, this function is not available.")
           return(NA)

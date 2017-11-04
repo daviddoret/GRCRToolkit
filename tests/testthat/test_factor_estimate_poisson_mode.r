@@ -8,7 +8,7 @@ test_that("a known simple example yields a precise mode", {
     limit_min_value = 0,
     estimated_mode_value = 0.1,
     limit_max_value = 3.14,
-    fit_dist = TRUE,
+    fit_distribution = TRUE,
     simulate = FALSE)
   expect_equal(fe1$dist_mode, fe1$estimated_mode_value)
 })

@@ -4,10 +4,10 @@ fg4 <- factor_estimate_poisson_range$new(
   estimated_range_min_value = 0,
   estimated_range_max_value = .1,
   estimated_range_size = .9,
-  fit_dist = FALSE,
+  fit_distribution = FALSE,
   simulate = FALSE
   )
-fg4$fit_dist(verbosity = 0)
+fg4$fit_distribution(verbosity = 0)
 fg4$simulate()
 fg4$get_simulation_sample_head(5)
 fg4$get_simulation_sample_tail(5)

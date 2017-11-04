@@ -23,7 +23,7 @@ fit_gld_3points_lambda1 = function(
   # position where its mode (peak) coincidate
   # with the expert estimated mode.
 
-  if (is_nanull(verbosity)) { verbosity <- 0 }
+  if (is_void(verbosity)) { verbosity <- 0 }
 
   current_mode <- get_gld_mode(
     lambda1 = lambda1,

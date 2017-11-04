@@ -53,27 +53,31 @@ factor_estimate_gld_3points <- R6Class(
       estimated_range_max_value = NULL,
       estimated_range_size_proba = NULL,
       limit_min_value = NULL,
+      limit_min_behavior = NULL,
       limit_max_value = NULL,
-      fit_dist = NULL, # Triggers distribution fitting immediately.
+      limit_max_behavior = NULL,
+      fit_distribution = NULL, # Triggers distribution fitting immediately.
       simulate = NULL, # Triggers simulation immediately.
       verbosity = NULL,
       ...) {
 
-      if (is_nanull(verbosity)) { verbosity <- 0 }
+      if (is_void(verbosity)) { verbosity <- 0 }
 
       super$initialize(
         estimation_method_name = "PERT-like 3 points estimate",
         limit_min_value = limit_min_value,
+        limit_min_behavior = limit_min_behavior,
         limit_max_value = limit_max_value,
+        limit_max_behavior = limit_max_behavior,
         verbosity = verbosity - 1,
         ...)
 
       # Default values
-      if (is.null(estimated_range_size_proba)) {
+      if (is_void(estimated_range_size_proba)) {
         estimated_range_size_proba <- .9 # TODO: replace with a default configuration setting
       }
-      if (is.null(fit_dist)) { fit_dist <- TRUE }
-      if (is.null(simulate)) { simulate <- TRUE }
+      if (is_void(fit_distribution)) { fit_distribution <- TRUE }
+      if (is_void(simulate)) { simulate <- TRUE }
 
       # Initialize lambda parameters
       # to avoid the presence of NULLs.
@@ -88,10 +92,10 @@ factor_estimate_gld_3points <- R6Class(
 
       self$estimated_range_size_proba <- estimated_range_size_proba
 
-      if (fit_dist) { self$fit_dist(verbosity = verbosity, ...) }
+      if (fit_distribution) { self$fit_distribution(verbosity = verbosity, ...) }
       if (simulate) { self$simulate(verbosity = verbosity, ...) }
       },
-    fit_dist = function(
+    fit_distribution = function(
       max_iteration = NULL,
       precision = NULL,
       verbosity = NULL, ...) {
@@ -135,7 +139,7 @@ factor_estimate_gld_3points <- R6Class(
                     " ,max = ", fn(self$estimated_range_max_value,2), " (", fn(self$get_probability(self$estimated_range_max_value), 2), ")")
                     ))
     },
-    check_state_consistency = function(output_format = NULL,...) {
+    check_state_consistency = function(output_format = NULL, ...) {
       # Informs us if the current parameters are consistent / logical.
       # This makes it possible to prevent useless calls to expensive functions
       # that may output multitude of warnings and errors when we know
@@ -147,23 +151,23 @@ factor_estimate_gld_3points <- R6Class(
       consistency_report <- super$check_state_consistency(output_format = "report")
 
       # Check if all mandatory parameters have been defined.
-      if (is.na(self$estimated_range_min_value)) {
+      if (is_void(self$estimated_range_min_value)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "est. range min value is missing."), sep = "\n")
       }
-      if (is.na(self$estimated_mode_value)) {
+      if (is_void(self$estimated_mode_value)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "est. mode value is missing"), sep = "\n")
       }
-      if (is.na(self$estimated_range_max_value)) {
+      if (is_void(self$estimated_range_max_value)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "est. range max value is missing"), sep = "\n")
       }
-      if (is.na(self$estimated_range_min_proba)) {
+      if (is_void(self$estimated_range_min_proba)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "est. range min proba. is missing"), sep = "\n")
       }
-      if (is.na(self$estimated_range_max_proba)) {
+      if (is_void(self$estimated_range_max_proba)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "est. range max proba. is missing"), sep = "\n")
       }
@@ -204,102 +208,219 @@ factor_estimate_gld_3points <- R6Class(
         stop("Sorry, this output format is not supported.")
       }
     },
-    plot_density = function(x_start = NULL, x_end = NULL, ...) {
-      # Override the super-class method to append the limits and point estimates.
-
-      if (is.null(x_start) | is.null(x_end))
-      {
+    get_plot_quantile_default_x_start = function(x_start = NULL, x_end = NULL, ...) {
+      if (is_void(x_start)) {
         x_start <- min(self$estimated_range_min_value, self$limit_min_value)
-        x_end <- max(self$estimated_range_max_value, self$limit_max_value)
-        margin <- (x_end - x_start) * .1 # Add a visual 10% margin
+        if (is_void(x_end)) {
+          # If x_end is not available, we use a temporary best-effort substitute.
+          x_end <- max(self$estimated_range_max_value, self$limit_max_value)
+        }
+        range <- x_end - x_start
+        # We add a 10% on the left of the first significant point of interest.
+        margin <- range * .1
         x_start <- x_start - margin
-        x_end <- x_end + margin
       }
-
-      # Get the original PDF plot
-      plot_01 <- super$plot_density(x_start = x_start, x_end = x_end)
-
-      # Prepare a vector with the 3 points estimates
-      estimates <- c(self$estimated_range_min_value,
-                           self$estimated_mode_value,
-                           self$estimated_range_max_value)
-
-      # Enrich the graph with the estimates represented as vertical lines
-      plot_01 <- overplot_vertical_lines(plot_01, x_values = estimates, color = "blue", alpha = .2, ...)
-
-      limits_values <- c()
-      if (!is.na(self$limit_min_value))
-      {
-        limits_values <- c(limits_values, self$limit_min_value)
-      }
-      if (!is.na(self$limit_max_value))
-      {
-        limits_values <- c(limits_values, self$limit_max_value)
-      }
-
-      # Enrich the graph with the estimates represented as vertical lines
-      if (!is.na(self$limit_min_value) | !is.na(self$limit_max_value))
-      {
-        plot_01 <- overplot_vertical_lines(plot_01, x_values = limits_values, x_labels = NULL, color = "red", alpha = .2, ...)
-      }
-
-      return(plot_01)
+      return(x_start)
     },
-    plot_probability = function(x_start = NULL, x_end = NULL, ...) {
-      # Override the super-class method to append the limits and point estimates.
-
-      if (is.null(x_start) | is.null(x_end))
-      {
-        x_start <- min(self$estimated_range_min_value, self$limit_min_value)
+    get_plot_quantile_default_x_end = function(x_start = NULL, x_end = NULL, ...) {
+      if (is_void(x_end)) {
         x_end <- max(self$estimated_range_max_value, self$limit_max_value)
-        margin <- (x_end - x_start) * .1 # Add a visual 10% margin
-        x_start <- x_start - margin
+        if (is_void(x_start)) {
+          # If x_start is not available, we use a temporary best-effort substitute.
+          x_start <- min(self$estimated_range_min_value, self$limit_min_value)
+        }
+        range <- x_end - x_start
+        # We add a 10% on the left of the first significant point of interest.
+        margin <- range * .1
         x_end <- x_end + margin
       }
-
-      # Get the original CPF plot
-      plot_01 <- super$plot_probability(x_start = x_start, x_end = x_end)
-
-      # Prepare a vector with the 3 points estimates
-      x_estimates <- c(self$estimated_range_min_value,
-                     self$estimated_mode_value,
-                     self$estimated_range_max_value)
-
-      # Enrich the graph with the estimates represented as vertical lines
-      plot_01 <- overplot_vertical_lines(plot_01, x_values = x_estimates, color = "blue", alpha = .2, ...)
-
-      x_limits_values <- c()
-      if (!is.na(self$limit_min_value))
-      {
-        x_limits_values <- c(x_limits_values, self$limit_min_value)
-      }
-      if (!is.na(self$limit_max_value))
-      {
-        x_limits_values <- c(x_limits_values, self$limit_max_value)
-      }
-
-      # Enrich the graph with the estimates represented as vertical lines
-      if (!is.na(self$limit_min_value) | !is.na(self$limit_max_value))
-      {
-        plot_01 <- overplot_vertical_lines(plot_01, x_values = x_limits_values, x_labels = NULL, color = "red", alpha = .2, ...)
-      }
+      return(x_end)
+    },
+    overplot_probability_horizontal_lines = function(
+      plot_addition = NULL,
+      verbosity = NULL,
+      ...) {
 
       # Prepare a vector with the 3 points estimates
       y_estimates <- c(self$estimated_range_min_proba,
                        self$estimated_range_max_proba)
 
       # Enrich the graph with the estimates represented as vertical lines
-      plot_01 <- overplot_horizontal_lines(plot_01, y_values = y_estimates, color = "blue", alpha = .2, ...)
+      overplot_01 <- overplot_horizontal_lines(
+        y_values = y_estimates,
+        color = "blue",
+        alpha = .2,
+        plot_addition = plot_addition,
+        ...)
+
+      return(overplot_01)
+    },
+    overplot_quantile_vertical_lines = function(
+      verbosity = NULL,
+      ...) {
+      # Overplot enrichment for quantile dimension
+
+      # Default values
+      if (is_void(verbosity)) { verbosity <- 0 }
+
+      # Prepare a vector with the 3 points estimates
+      estimates <- c(self$estimated_range_min_value,
+                     self$estimated_mode_value,
+                     self$estimated_range_max_value)
+
+      # Enrich the graph with the estimates represented as vertical lines
+      overplot_01 <- overplot_vertical_lines(
+        x_values = estimates,
+        color = "blue",
+        alpha = .2,
+        plot_addition = NULL,
+        verbosity = verbosity - 1,
+        ...)
+
+      limits_values <- c()
+      if (!is_void(self$limit_min_value))
+      {
+        limits_values <- c(limits_values, self$limit_min_value)
+      }
+      if (!is_void(self$limit_max_value))
+      {
+        limits_values <- c(limits_values, self$limit_max_value)
+      }
+
+      # Enrich the graph with the estimates represented as vertical lines
+      if (!is_void(self$limit_min_value) | !is_void(self$limit_max_value))
+      {
+        overplot_01 <- overplot_vertical_lines(
+          x_values = limits_values,
+          x_labels = NULL,
+          color = "red",
+          alpha = .2,
+          plot_addition = overplot_01, # Add plot enrichments together
+          verbosity = verbosity - 1,
+          ...)
+      }
+
+      return(overplot_01)
+    },
+    plot_density = function(
+      x_start = NULL,
+      x_end = NULL,
+      plot_addition = NULL,
+      verbosity = NULL,
+      ...) {
+      # Override the super-class method to append the limits and point estimates.
+
+      if (is_void(x_start)) {x_start <- self$get_plot_quantile_default_x_start(x_start = x_start, x_end = x_end, ...)}
+      if (is_void(x_end)) {x_end <- self$get_plot_quantile_default_x_end(x_start = x_start, x_end = x_end, ...)}
+      if (is_void(verbosity)) { verbosity = 0 }
+
+      # Get overplot enrichments for the applicable dimensions
+      overplot_01 <- self$overplot_quantile_vertical_lines(...)
+
+      # Sum together plot additions
+      if (is_void(plot_addition)) {
+        plot_addition <- overplot_01
+      } else {
+        if (!is_void(overplot_01)) {
+          plot_addition <- plot_addition + overplot_01
+        }
+      }
+
+      # Get the plot from superclass, passing it plot additions
+      plot_01 <- super$plot_density(
+        x_start = x_start,
+        x_end = x_end,
+        plot_addition = plot_addition)
 
       return(plot_01)
     },
-    reset_plot_limits = function() {
-      # Set default scale margins containing all estimation parameters for pretty graph rendering.
-      self$plot_value_start <- self$estimated_range_min_value
-      self$plot_value_end <- self$estimated_range_max_value
-      self$plot_probability_start <- self$estimated_range_min_proba / 4
-      self$plot_probability_end <- self$estimated_range_max_proba + (1 - self$estimated_range_max_proba) / 4
-    }
+    plot_simulation_sample = function(
+      title = NULL,
+      subtitle = NULL,
+      caption = NULL,
+      x_start = NULL,
+      x_end = NULL,
+      bins = NULL,
+      n = NULL,
+      x_scale_type = NULL,
+      y_scale_type = NULL,
+      plot_addition = NULL,
+      ...)
+    {
+      # Override the super-class method to append the limits and point estimates.
+      if (is_void(x_start)) {x_start <- self$get_plot_quantile_default_x_start(x_start = x_start, x_end = x_end, ...)}
+      if (is_void(x_end)) {x_end <- self$get_plot_quantile_default_x_end(x_start = x_start, x_end = x_end, ...)}
+
+      # Get overplot enrichments for this dimension
+      overplot_01 <- self$overplot_quantile_vertical_lines(...)
+
+      # Sum together plot additions
+      if (is_void(plot_addition)) {
+        plot_addition <- overplot_01
+      } else {
+        if (!is_void(overplot_01)) {
+          plot_addition <- plot_addition + overplot_01
+        }
+      }
+
+      # Get the plot from superclass, passing it plot additions
+      plot_01 <- super$plot_simulation_sample(
+        title = title,
+        subtitle = subtitle,
+        caption = caption,
+        x_start = x_start,
+        x_end = x_end,
+        bins = bins,
+        n = n,
+        x_scale_type = x_scale_type,
+        y_scale_type = y_scale_type,
+        plot_addition = plot_addition,
+        ...)
+
+      return(plot_01)
+
+    },
+    plot_probability = function(
+      x_start = NULL,
+      x_end = NULL,
+      plot_addition = NULL,
+      verbosity = NULL,
+      ...) {
+      # Override the super-class method to append the limits and point estimates.
+
+      if (is_void(x_start)) {x_start <- self$get_plot_quantile_default_x_start(x_start = x_start, x_end = x_end, ...)}
+      if (is_void(x_end)) {x_end <- self$get_plot_quantile_default_x_end(x_start = x_start, x_end = x_end, ...)}
+      if (is_void(verbosity)) { verbosity = 0 }
+
+      # Get overplot enrichments for the applicable dimensions
+      overplot_01 <- self$overplot_quantile_vertical_lines(verbosity = verbosity - 1, ...)
+      overplot_02 <- self$overplot_probability_horizontal_lines(verbosity = verbosity - 1, ...)
+
+      # Sum together plot additions
+      # TODO: FACTOR THIS INTO A add_plot(...) GENERIC FUNCTION THAT TEST FOR NULL, NA, ETC.
+      if (is_void(plot_addition)) {
+        plot_addition <- overplot_01 + overplot_02
+      } else {
+          plot_addition <- plot_addition + overplot_01 + overplot_02
+      }
+
+      # Get the plot from superclass, passing it plot additions
+      plot_01 <- super$plot_probability(
+        x_start = x_start,
+        x_end = x_end,
+        plot_addition = plot_addition,
+        verbosity = verbosity - 1,
+        ...)
+
+      return(plot_01)
+    } #,
+#    reset_plot_limits = function() {
+#      # Set default scale margins containing all estimation parameters for pretty graph rendering.
+#      self$plot_value_start <- self$estimated_range_min_value
+#      self$plot_value_end <- self$estimated_range_max_value
+#      self$plot_probability_start <- self$estimated_range_min_proba / 4
+#      self$plot_probability_end <- self$estimated_range_max_proba + (1 - self$estimated_range_max_proba) / 4
+#    }
   ),
   active = list(
     dist_mode = function(value,...) {
@@ -327,8 +448,9 @@ factor_estimate_gld_3points <- R6Class(
         if (is.na(self$estimated_range_min_value) | value != self$estimated_range_min_value)
         {
         private$private_estimated_range_min_value <- value
-        if (self$check_state_consistency()) { self$fit_dist() }
-        self$reset_plot_limits() }}},
+        if (self$check_state_consistency()) { self$fit_distribution() }
+        # self$reset_plot_limits()
+        }}},
     estimated_mode_value = function(value,...) {
       if (missing(value)) {
         if (is.null(private$private_estimated_mode_value)) {
@@ -341,48 +463,57 @@ factor_estimate_gld_3points <- R6Class(
         if (is.na(self$estimated_mode_value) | value != self$estimated_mode_value)
           {
           private$private_estimated_mode_value <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits()
+          if (self$check_state_consistency()) { self$fit_distribution() }
+          # self$reset_plot_limits()
           }
         }
       },
     estimated_range_max_value = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_estimated_range_max_value)) {
+        if (is_void(private$private_estimated_range_max_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_estimated_range_max_value <- NA }
         return(private$private_estimated_range_max_value) }
       else {
         # We only do something if something changes... This is important for Shiny apps, etc. to avoid recomputing everything when recomputing is not required
-        if (is.na(self$estimated_range_max_value) | value != self$estimated_range_max_value)
+        if (is_void(self$estimated_range_max_value) | value != self$estimated_range_max_value)
         {
           private$private_estimated_range_max_value <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits() }}},
+          if (self$check_state_consistency()) { self$fit_distribution() }
+          # self$reset_plot_limits()
+        }
+      }
+    },
     estimated_range_min_proba = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_estimated_range_min_proba)) {
+        if (is_void(private$private_estimated_range_min_proba)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_estimated_range_min_proba <- NA }
         return(private$private_estimated_range_min_proba) }
       else {
-        if (is.na(self$estimated_range_min_proba) | value != self$estimated_range_min_proba)
+        if (is_void(self$estimated_range_min_proba) | value != self$estimated_range_min_proba)
         {
           private$private_estimated_range_min_proba <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits() }}},
+          if (self$check_state_consistency()) { self$fit_distribution() }
+          #self$reset_plot_limits()
+        }
+      }
+    },
     estimated_range_max_proba = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_estimated_range_max_proba)) {
+        if (is_void(private$private_estimated_range_max_proba)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_estimated_range_max_proba <- NA }
           return(private$private_estimated_range_max_proba) }
       else {
-        if (is.na(self$estimated_range_max_proba) | value != self$estimated_range_max_proba)
+        if (is_void(self$estimated_range_max_proba) | value != self$estimated_range_max_proba)
         {
           private$private_estimated_range_max_proba <- value
-          if (self$check_state_consistency()) { self$fit_dist() }
-          self$reset_plot_limits() }}},
+          if (self$check_state_consistency()) { self$fit_distribution() }
+          #self$reset_plot_limits()
+        }
+      }
+    },
     estimated_range_size_proba = function(value,...) {
       # This is a shortcut parameter to estimated range min / max.
       # It computes a centered estimated range.
@@ -393,7 +524,9 @@ factor_estimate_gld_3points <- R6Class(
         }
         self$estimated_range_min_proba <- (1 - value) / 2
         self$estimated_range_max_proba <- 1 - (1 - value) / 2
-        self$reset_plot_limits() }}
+        #self$reset_plot_limits()
+      }
+    }
   ),
   private = list(
     private_estimated_range_min_value = NA,

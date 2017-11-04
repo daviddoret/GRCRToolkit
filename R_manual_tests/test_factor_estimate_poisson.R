@@ -4,13 +4,13 @@ fac_01 <- factor_estimate_poisson$new(
   lambda = 6,
   time_interval_friendly_name = "Year"
   )
-fac_01$fit_dist(verbosity = 0)
+fac_01$fit_distribution(verbosity = 0)
 fac_01$simulate()
 print(fac_01)
 
 fac_01$get_simulation_sample_head(5)
 fac_01$get_simulation_sample_tail(5)
-fac_01$get_simulation_sample_random(n=10)
+fac_01$get_simulation_sample_random(n = 10)
 fac_01$get_random(5)
 fac_01$limit_min_value <- 0
 fac_01$limit_max_value <- 20

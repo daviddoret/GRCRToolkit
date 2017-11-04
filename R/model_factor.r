@@ -35,16 +35,16 @@ model_factor <- R6Class(
          invisible(self)
        },
       get_random = function(n = NULL, output_class = NULL, ...) {
-        if (is_nanull(n)) { n <- 1 }
-        if (is_nanull(output_class)) { output_class <- "vector" }
-        if (is_nanull(self$factor_estimate)) {
+        if (is_void(n)) { n <- 1 }
+        if (is_void(output_class)) { output_class <- "vector" }
+        if (is_void(self$factor_estimate)) {
           warning("Factor estimate is not available") }
         else {
           return(self$factor_estimate$get_random(n = n, output_class = output_class, ...))
           }
       },
       get_density = function(...) {
-        if (is_nanull(self$factor_estimate)) {
+        if (is_void(self$factor_estimate)) {
           warning("Factor estimate is not available") }
         else {
           return(self$factor_estimate$get_density(...))}
@@ -60,8 +60,8 @@ model_factor <- R6Class(
         x_scale_type = NULL,
         y_scale_type = NULL)
       {
-        if (is_nanull(title)) { title <- self$name }
-        if (is_nanull(title)) { subtitle <- "Simulation sample histogram" }
+        if (is_void(title)) { title <- self$name }
+        if (is_void(title)) { subtitle <- "Simulation sample histogram" }
 
         self$factor_estimate$plot_simulation_sample(
           title = title,

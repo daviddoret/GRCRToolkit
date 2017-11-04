@@ -50,7 +50,7 @@ factor_estimate_poisson <- R6Class(
       consistency_report <- super$check_state_consistency(output_format = "report")
 
       # Check if all mandatory parameters have been defined.
-      if(is.na(self$lambda)) {
+      if(is_void(self$lambda)) {
         consistency_error_count <- consistency_error_count + 1
         consistency_report <- paste0(c(consistency_report, "\U3bb is missing."), sep = "\n") # Unicode 3bb = 	greek small letter lamda
       }
