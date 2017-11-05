@@ -25,8 +25,8 @@ factor_estimate_poisson <- R6Class(
         limit_max_value = limit_max_value,
         ...)
 
-      if(is.null(lambda)) { lambda <- NA }
-      if(is.null(time_interval_friendly_name)) { time_interval_friendly_name <- NA }
+      if(is_void(lambda)) { lambda <- NA }
+      if(is_void(time_interval_friendly_name)) { time_interval_friendly_name <- NA }
 
       self$lambda <- lambda
       self$time_interval_friendly_name <- time_interval_friendly_name
@@ -45,7 +45,7 @@ factor_estimate_poisson <- R6Class(
       # from the beginning that this parameterization is doomed to failure.
       # Returns TRUE if parameters are consistent.
       # Returns a descriptive
-      if(is.null(output_format)) { output_format = "boolean" }
+      if(is_void(output_format)) { output_format = "boolean" }
       consistency_error_count <- super$check_state_consistency(output_format = "int")
       consistency_report <- super$check_state_consistency(output_format = "report")
 

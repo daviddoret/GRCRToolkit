@@ -1,7 +1,6 @@
-# Package preparation
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorspace, ggplot2, labeling)
-
+require(colorspace)
+require(ggplot2)
+require(labeling)
 
 #' plot_vignette
 #'
@@ -25,7 +24,7 @@ plot_vignette = function(
   text = NULL...) {
 
   # And put a title on top of it
-  if(is.null(title)){ title <- "Vignette" }
+  if (is_void(title)){ title <- "Vignette" }
 
   vignette <- ggplot() +
     geom_blank() +

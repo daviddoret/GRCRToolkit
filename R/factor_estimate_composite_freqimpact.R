@@ -64,7 +64,7 @@ factor_estimate_composite_freqimpact <- R6Class(
     },
     check_state_consistency = function(output_format = NULL, ...) {
       # Informs us if the object state is consistent / logical.
-      if (is.null(output_format)) { output_format = "boolean" }
+      if (is_void(output_format)) { output_format = "boolean" }
       consistency_error_count <- 0
       consistency_report <- NULL
 

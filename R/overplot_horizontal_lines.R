@@ -42,7 +42,7 @@ overplot_horizontal_lines <- function(
       alpha = alpha,
       size = 1.05) + #model_config_get_option("plot", "estimates", "xintercept", "size")) +
 
-  if (!is.null(y_labels)) {
+  if (!is_void(y_labels)) {
     plot_01 <- plot_01 +
       # Enrich the plot with the vertical bar labels
       annotate(

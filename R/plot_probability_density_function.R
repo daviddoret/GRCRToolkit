@@ -1,6 +1,6 @@
-# Package preparation
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorspace, ggplot2, labeling)
+require(colorspace)
+require(ggplot2)
+require(labeling)
 
 #' plot_probability_density_function
 #'
@@ -30,7 +30,7 @@ plot_probability_density_function = function(
   ...) {
 
   # And put a title on top of it
-  if(is.null(title)){ title <- "Probability Density Function" }
+  if (is_void(title)){ title <- "Probability Density Function" }
 
   # Prepare a data frame for the GGPlot plot
   df <- data.frame(x=c(x_start, x_end))

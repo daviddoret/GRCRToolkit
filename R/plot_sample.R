@@ -100,7 +100,7 @@ plot_sample = function(
 #  whisker <- ggplot(df, aes(x)) +
 #    geom_boxplot(outlier.shape = 1) +  coord_flip()
 
-  if (!is.null(x_start) & !is.null(x_end))
+  if (!is_void(x_start) & !is_void(x_end))
   {
     histo <- histo + xlim(x_start, x_end)
   }

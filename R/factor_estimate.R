@@ -58,7 +58,7 @@ factor_estimate <- R6Class(
       },
     check_state_consistency = function(output_format = NULL, ...) {
       # Informs us if the object state is consistent / logical.
-      if (is.null(output_format)) { output_format = "boolean" }
+      if (is_void(output_format)) { output_format = "boolean" }
       consistency_error_count <- 0
       consistency_report <- NULL
 
@@ -309,8 +309,8 @@ factor_estimate <- R6Class(
       return(plot_vignette(title = "Summary", text = self$get_print_lines()))
     },
     plot_all = function(x_start = NULL, x_end = NULL) {
-      if (is.null(x_start)) { x_start <- self$plot_value_start }
-      if (is.null(x_end)) { x_end <- self$plot_value_end }
+      if (is_void(x_start)) { x_start <- self$plot_value_start }
+      if (is_void(x_end)) { x_end <- self$plot_value_end }
 
       return(multiplot(
         self$plot_vignette(),
@@ -359,12 +359,12 @@ factor_estimate <- R6Class(
       else {private$private_density_function <- value }},
     limit_min_value = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_limit_min_value)) {
+        if (is_void(private$private_limit_min_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_limit_min_value <- NA }
         return(private$private_limit_min_value) }
       else {
-        if (is.null(value)) { value <- NA }
+        if (is_void(value)) { value <- NA }
         # We only change the property if it has been changed.
         # The goal of this conservative approach is to avoid regenerating
         # large and potentially CPU/memory intensive samples when nothing changed.
@@ -379,12 +379,12 @@ factor_estimate <- R6Class(
         }}},
     limit_max_value = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_limit_max_value)) {
+        if (is_void(private$private_limit_max_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_limit_max_value <- NA }
         return(private$private_limit_max_value) }
       else {
-        if (is.null(value)) { value <- NA }
+        if (is_void(value)) { value <- NA }
         # We only change the property if it has been changed.
         # The goal of this conservative approach is to avoid regenerating
         # large and potentially CPU/memory intensive samples when nothing changed.

@@ -68,13 +68,13 @@ model_config_get_option <- function(...){
   item_key <- ""
   for(i in 1 : length(option_args))
   {
-    if(! is.null(option_args[i])) {
-      if(i > 1) {
-        item_key <- paste0(item_key, ".", sep="") }
-      item_key <- paste0(item_key, option_args[i], sep="") } }
+    if (!is_void(option_args[i])) {
+      if (i > 1) {
+        item_key <- paste0(item_key, ".", sep = "") }
+      item_key <- paste0(item_key, option_args[i], sep = "") } }
   item_default_value <- model_config_defaults[[item_key]]
   item_value <- getOption(item_key, default = item_default_value)
-  if(is.null(item_value))
+  if (is_void(item_value))
   {
     stop("No available value for the requested configuration item: ", item_key)
   }

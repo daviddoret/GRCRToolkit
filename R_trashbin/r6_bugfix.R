@@ -8,7 +8,7 @@ generator_funs$clone_method <- function(deep = FALSE) {
   # Need to embed these utility functions inside this closure because the
   # environment of this function will change.
   assign_func_envs <- function(objs, target_env) {
-    if (is.null(target_env)) return(objs)
+    if (is_void(target_env)) return(objs)
 
     lapply(objs, function(x) {
       if (is.function(x)) environment(x) <- target_env
@@ -20,7 +20,7 @@ generator_funs$clone_method <- function(deep = FALSE) {
                         hash = (length(x) >  100),
                         size = max(29L, length(x)),
                         empty_to_null = TRUE) {
-    if (is.null(envir)) {
+    if (is_void(envir)) {
       envir <- new.env(hash = hash, parent = parent, size = size)
     }
     if (length(x) == 0) {
@@ -36,7 +36,7 @@ generator_funs$clone_method <- function(deep = FALSE) {
                           has_private, private_bind_env)
   {
     old_super_bind_env <- old_enclos_env$super
-    if (is.null(old_super_bind_env))
+    if (is_void(old_super_bind_env))
       return()
 
     # Copy all the methods from the old super binding env to the new one, and
@@ -103,7 +103,7 @@ generator_funs$clone_method <- function(deep = FALSE) {
 
   old_public_bind_env <- self
   old_private_bind_env <- old_enclos_env$private
-  has_private <- !is.null(old_private_bind_env)
+  has_private <- !is_void(old_private_bind_env)
 
   # Figure out if we're in a portable class object
   portable <- !identical(old_public_bind_env, old_enclos_env)
@@ -118,7 +118,7 @@ generator_funs$clone_method <- function(deep = FALSE) {
       # fields that are R6 objects.
       deep_clone <- function(name, value) {
         # Check if it's an R6 object.
-        if (is.environment(value) && !is.null(value$`.__enclos_env__`)) {
+        if (is.environment(value) && !is_void(value$`.__enclos_env__`)) {
           return(value$clone(deep = TRUE))
         }
         value

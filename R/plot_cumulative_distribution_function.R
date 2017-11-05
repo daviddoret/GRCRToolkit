@@ -1,6 +1,6 @@
-# Package preparation
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorspace, ggplot2, labeling)
+require(colorspace)
+require(ggplot2)
+require(labeling)
 
 #' plot_cumulative_distribution_function
 #'
@@ -29,10 +29,10 @@ plot_cumulative_distribution_function <- function(
   caption = NULL, ...) {
 
   # Default title
-  if(is.null(title)){ title <- "Cumulative Distribution Function" }
+  if (is_void(title)){ title <- "Cumulative Distribution Function" }
 
   # Prepare the plot data frame
-  df <- data.frame(x=c(x_start, x_end))
+  df <- data.frame(x = c(x_start, x_end))
 
   # Configure the graph
   graph <- ggplot(df, aes(x)) +

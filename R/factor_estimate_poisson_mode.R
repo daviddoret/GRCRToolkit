@@ -34,9 +34,9 @@ factor_estimate_poisson_mode <- R6Class(
       ...) {
 
       # Default values
-      if (is.null(estimated_mode_value)) { estimated_mode_value <- NA }
-      if (is.null(fit_distribution)) { fit_distribution <- TRUE }
-      if (is.null(simulate)) { simulate <- TRUE }
+      if (is_void(estimated_mode_value)) { estimated_mode_value <- NA }
+      if (is_void(fit_distribution)) { fit_distribution <- TRUE }
+      if (is_void(simulate)) { simulate <- TRUE }
 
       super$initialize(
         estimation_method_name = "Mode estimate",
@@ -78,7 +78,7 @@ factor_estimate_poisson_mode <- R6Class(
       # from the beginning that this parameterization is doomed to failure.
       # Returns TRUE if parameters are consistent.
       # Returns a descriptive
-      if (is.null(output_format)) { output_format = "boolean" }
+      if (is_void(output_format)) { output_format = "boolean" }
       consistency_error_count <- super$check_state_consistency(output_format = "int")
       consistency_report <- super$check_state_consistency(output_format = "report")
 
@@ -245,7 +245,7 @@ factor_estimate_poisson_mode <- R6Class(
       else {stop("This is a read-only attribute")}},
     estimated_mode_value = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_estimated_mode_value)) {
+        if (is_void(private$private_estimated_mode_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_estimated_mode_value <- NA }
         return(private$private_estimated_mode_value)

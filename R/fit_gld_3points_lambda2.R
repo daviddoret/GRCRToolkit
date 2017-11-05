@@ -32,7 +32,7 @@ fit_gld_3points_lambda2 = function(
   # tells us if we initialize lambda2 from the "small" side of a skewed distribution
   # or the "big" side. if the distribution is symetric, this parameter will have
   # no meaningful influence.
-  if (is.null(scaling_side)) { scaling_side <- "small" }
+  if (is_void(scaling_side)) { scaling_side <- "small" }
   # OBSERVATION: when fitting the distribution from the small size, I get
   # excellent and consistent results. when we approach fitting from the big side,
   # we tend to fail to fit the distribution properly if the skewness is too large.
@@ -46,7 +46,7 @@ fit_gld_3points_lambda2 = function(
   # which means we will need to skew the other side
   # afterward.
 
-  if (is.null(verbosity)) { verbosity <- 0 }
+  if (is_void(verbosity)) { verbosity <- 0 }
 
   estimated_range_min_proba <- (1 - estimated_range_size_proba) / 2
   estimated_range_max_proba <- 1 - (1 - estimated_range_size_proba) / 2

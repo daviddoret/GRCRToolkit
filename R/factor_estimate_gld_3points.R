@@ -100,9 +100,9 @@ factor_estimate_gld_3points <- R6Class(
       precision = NULL,
       verbosity = NULL, ...) {
 
-      if (is.null(verbosity)) { verbosity <- 0 }
-      if (is.null(max_iteration)) { max_iteration <- 256 }
-      if (is.null(precision)) { precision <- 1 } # Expressed in quantile value.
+      if (is_void(verbosity)) { verbosity <- 0 }
+      if (is_void(max_iteration)) { max_iteration <- 256 }
+      if (is_void(precision)) { precision <- 1 } # Expressed in quantile value.
 
       lambdas <- fit_gld_3points(
         estimated_range_min_value = self$estimated_range_min_value,
@@ -146,7 +146,7 @@ factor_estimate_gld_3points <- R6Class(
       # from the beginning that this parameterization is doomed to failure.
       # Returns TRUE if parameters are consistent.
       # Returns a descriptive
-      if (is.null(output_format)) { output_format = "boolean" }
+      if (is_void(output_format)) { output_format = "boolean" }
       consistency_error_count <- super$check_state_consistency(output_format = "int")
       consistency_report <- super$check_state_consistency(output_format = "report")
 
@@ -438,7 +438,7 @@ factor_estimate_gld_3points <- R6Class(
       else { stop("This is a read-only attribute") }},
     estimated_range_min_value = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_estimated_range_min_value)) {
+        if (is_void(private$private_estimated_range_min_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_estimated_range_min_value <- NA }
         return(private$private_estimated_range_min_value)
@@ -453,7 +453,7 @@ factor_estimate_gld_3points <- R6Class(
         }}},
     estimated_mode_value = function(value,...) {
       if (missing(value)) {
-        if (is.null(private$private_estimated_mode_value)) {
+        if (is_void(private$private_estimated_mode_value)) {
           # If the attribute does not exist, initialize it with NA to prevent errors accessing it.
           private$private_estimated_mode_value <- NA }
         return(private$private_estimated_mode_value)

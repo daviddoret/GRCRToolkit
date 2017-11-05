@@ -27,8 +27,8 @@ maximize_function = function(
   verbosity = NULL,
   ...) {
 
-  if (is.null(tolerance)) { tolerance <- .Machine$double.eps ^ 0.25 }
-  if (is.null(verbosity)) { verbosity <- 0 }
+  if (is_void(tolerance)) { tolerance <- .Machine$double.eps ^ 0.25 }
+  if (is_void(verbosity)) { verbosity <- 0 }
 
   optimize_wrapper <- NULL
   if (verbosity == 0) {
@@ -48,7 +48,7 @@ maximize_function = function(
     tol = tolerance,
     ...)
 
-  if(is.null(optimization$maximum))
+  if(is_voids(optimization$maximum))
   {
     warning("Ooops, maximization failed miserably...")
   }

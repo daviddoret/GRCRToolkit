@@ -39,46 +39,46 @@ factor_estimate_gld <- R6Class(
         return(
           dgl(
             x = x,
-            lambda1 = ifelse(is.null(lambda1),self$lambda1, lambda1),
-            lambda2 = ifelse(is.null(lambda2),self$lambda2, lambda2),
-            lambda3 = ifelse(is.null(lambda3),self$lambda3, lambda3),
-            lambda4 = ifelse(is.null(lambda4),self$lambda4, lambda4)))}
+            lambda1 = ifelse(is_void(lambda1),self$lambda1, lambda1),
+            lambda2 = ifelse(is_void(lambda2),self$lambda2, lambda2),
+            lambda3 = ifelse(is_void(lambda3),self$lambda3, lambda3),
+            lambda4 = ifelse(is_void(lambda4),self$lambda4, lambda4)))}
       self$probability_function <- function(
         q, lambda1 = NULL, lambda2 = NULL, lambda3 = NULL, lambda4 = NULL, ...){
         return(
           pgl(
             q = q,
-            lambda1 = ifelse(is.null(lambda1),self$lambda1, lambda1),
-            lambda2 = ifelse(is.null(lambda2),self$lambda2, lambda2),
-            lambda3 = ifelse(is.null(lambda3),self$lambda3, lambda3),
-            lambda4 = ifelse(is.null(lambda4),self$lambda4, lambda4)))}
+            lambda1 = ifelse(is_void(lambda1),self$lambda1, lambda1),
+            lambda2 = ifelse(is_void(lambda2),self$lambda2, lambda2),
+            lambda3 = ifelse(is_void(lambda3),self$lambda3, lambda3),
+            lambda4 = ifelse(is_void(lambda4),self$lambda4, lambda4)))}
       self$quantile_function <- function(
         p, lambda1 = NULL, lambda2 = NULL, lambda3 = NULL, lambda4 = NULL, ...){
         return(
           qgl(
             p = p,
-            lambda1 = ifelse(is.null(lambda1),self$lambda1, lambda1),
-            lambda2 = ifelse(is.null(lambda2),self$lambda2, lambda2),
-            lambda3 = ifelse(is.null(lambda3),self$lambda3, lambda3),
-            lambda4 = ifelse(is.null(lambda4),self$lambda4, lambda4)))}
+            lambda1 = ifelse(is_void(lambda1),self$lambda1, lambda1),
+            lambda2 = ifelse(is_void(lambda2),self$lambda2, lambda2),
+            lambda3 = ifelse(is_void(lambda3),self$lambda3, lambda3),
+            lambda4 = ifelse(is_void(lambda4),self$lambda4, lambda4)))}
       self$random_function <- function(
         n, lambda1 = NULL, lambda2 = NULL, lambda3 = NULL, lambda4 = NULL, ...){
         return(
           rgl(
             n = n,
-            lambda1 = ifelse(is.null(lambda1),self$lambda1, lambda1),
-            lambda2 = ifelse(is.null(lambda2),self$lambda2, lambda2),
-            lambda3 = ifelse(is.null(lambda3),self$lambda3, lambda3),
-            lambda4 = ifelse(is.null(lambda4),self$lambda4, lambda4)))}
+            lambda1 = ifelse(is_void(lambda1),self$lambda1, lambda1),
+            lambda2 = ifelse(is_void(lambda2),self$lambda2, lambda2),
+            lambda3 = ifelse(is_void(lambda3),self$lambda3, lambda3),
+            lambda4 = ifelse(is_void(lambda4),self$lambda4, lambda4)))}
     },
-    check_state_consistency = function(output_format = NULL,...) {
+    check_state_consistency = function(output_format = NULL, ...) {
       # Informs us if the object state is consistent / logical.
       # This makes it possible to prevent useless calls to expensive functions
       # that may output multitude of warnings and errors when we know
       # from the beginning that this parameterization is doomed to failure.
       # Returns TRUE if parameters are consistent.
       # Returns a descriptive
-      if(is.null(output_format)) { output_format = "boolean" }
+      if (is_void(output_format)) { output_format = "boolean" }
       consistency_error_count <- super$check_state_consistency(output_format = "int")
       consistency_report <- super$check_state_consistency(output_format = "report")
 

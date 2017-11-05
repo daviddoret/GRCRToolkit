@@ -1,9 +1,6 @@
-# Package preparation
-#if (!require(pacman)) install.packages(pacman)
-#pacman::p_load(colorpsace, ggplot2,labeling)
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorspace, ggplot2, labeling)
-
+require(colorspace)
+require(ggplot2)
+require(labeling)
 
 #' plot_probability_mass_function
 #'
@@ -33,13 +30,13 @@ plot_probability_mass_function <- function(
   ...) {
 
   # And put a title on top of it
-  if(is.null(title)){ title <- "Probability Mass Function" }
+  if (is_void(title)){ title <- "Probability Mass Function" }
 
   # Prepare the data
-  df <- data.frame(x=c(x_start:x_end))
+  df <- data.frame(x = c(x_start:x_end))
 
   # Configure the graph
-  graph <- ggplot(df, aes(x, y=fun(x))) +
+  graph <- ggplot(df, aes(x, y = fun(x))) +
 
     # X-axis limits are inclusive (in my mind)
     xlim(x_start, x_end) +

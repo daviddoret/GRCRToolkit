@@ -4,8 +4,8 @@
 
 Sys.getenv("TZ")
 
-if(is.null(Sys.getenv("TZ"))){
-  Sys.setenv(TZ="Europe/Geneva")
+if (is_void(Sys.getenv("TZ"))) {
+  Sys.setenv(TZ = "Europe/Geneva")
 }
 
 Sys.getenv("TZ")

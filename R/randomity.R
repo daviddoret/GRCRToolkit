@@ -34,10 +34,10 @@ randomity <- R6Class(
       #self$reseed()
     },
     get = function(n = NULL, min = NULL, max = NULL, verbosity = NULL) {
-      if (is.null(n)) { n <- 1 }
-      if (is.null(min)) { min <- 0 }
-      if (is.null(max)) { max <- 1 }
-      if (is.null(verbosity)) { verbosity <- 0 }
+      if (is_void(n)) { n <- 1 }
+      if (is_void(min)) { min <- 0 }
+      if (is_void(max)) { max <- 1 }
+      if (is_void(verbosity)) { verbosity <- 0 }
 
       if (runif(n = 1, min = 0, max = 1) > .9 | private$private_first_call) {
         # Because calls to external services such as randomNumbers() are slow,
@@ -53,7 +53,7 @@ randomity <- R6Class(
     },
     reseed = function(verbosity = NULL) {
 
-      if (is.null(verbosity)) { verbosity <- 0 }
+      if (is_void(verbosity)) { verbosity <- 0 }
 
       new_seed <- tryCatch({
         c(

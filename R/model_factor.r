@@ -26,7 +26,7 @@ model_factor <- R6Class(
          name = NULL,
          factor_estimate = NULL,
          ...) {
-         if (is.null(name)) { name <- "Anonymous factor"}
+         if (is_void(name)) { name <- "Anonymous factor"}
          self$name <- name
          self$factor_estimate <- factor_estimate
        },

@@ -9,15 +9,16 @@
 measure
 }
 \arguments{
-\item{value}{the real value of the measure}
+\item{value}{The real value of the measure (i.e. the number).}
 
-\item{unit}{the unit of measurement}
+\item{unit}{The unit of measurement.}
 }
 \description{
 Represent a real-value accompanied with a unit of measurement.
+\cr In future versions, this class may be extended to provide support for unit conversions.
 }
 \examples{
-m1 <- measure$new(name = 100, unit = "year")
+m1 <- measure$new(value = 100, unit = "year")
 
 }
 \keyword{datasets}

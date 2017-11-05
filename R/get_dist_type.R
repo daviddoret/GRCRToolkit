@@ -46,7 +46,7 @@ get_dist_type <- function(dist_name, ...) {
          poissonpert = "discrete",
          rademacher = "discrete"
          )
-  if(is.null(output)) {
+  if (is_void(output)) {
     stop("Unknown distribution", dist_name) }
   else {
     return(output)

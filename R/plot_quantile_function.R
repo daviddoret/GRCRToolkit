@@ -1,7 +1,6 @@
-# Package preparation
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(colorspace, ggplot2, labeling)
-
+require(colorspace)
+require(ggplot2)
+require(labeling)
 
 # FUTURE ENHANCEMENT:
 # - Add a nice cat and whisker plot
@@ -36,10 +35,10 @@ plot_quantile_function = function(
   caption = NULL, ...) {
 
   # And put a title on top of it
-  if(is.null(title)){ title <- "Probability Quantile Function" }
+  if (is_void(title)) { title <- "Probability Quantile Function" }
 
   # Prepare the data
-  df <- data.frame(x=c(x_start, x_end))
+  df <- data.frame(x = c(x_start, x_end))
 
   # Configure the graph
   graph <- ggplot(df, aes(x)) +

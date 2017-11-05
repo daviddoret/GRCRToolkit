@@ -29,8 +29,8 @@ get_dist_mode_from_pdf = function(
   verbosity = NULL,
   ...) {
 
-  if (is.null(tolerance)) { tolerance <- .00000001 } #.Machine$double.eps * ^ 0.25 }
-  if (is.null(verbosity)) { verbosity <- 0 }
+  if (is_void(tolerance)) { tolerance <- .00000001 } #.Machine$double.eps * ^ 0.25 }
+  if (is_void(verbosity)) { verbosity <- 0 }
 
 #  # Declare the minimization function
 #  minimization_function <- function(x){
@@ -60,7 +60,7 @@ get_dist_mode_from_pdf = function(
     tol = tolerance,
     ...)
 
-  if(is.null(optimization$maximum))
+  if (is_void(optimization$maximum))
   {
     warning("Ooops, optimize() failed...")
   }
