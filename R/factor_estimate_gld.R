@@ -24,7 +24,12 @@ factor_estimate_gld <- R6Class(
       limit_min_behavior = NULL,
       limit_max_value = NULL,
       limit_max_behavior = NULL,
+      verbosity = NULL,
       ...) {
+
+      # Parameters validation
+      verbosity <- vp(verbosity, 1, "numeric", 1)
+
       super$initialize(
         distribution_name = "Generalized Lambda (aka Tukey Lambda)",
         distribution_type = "Continuous",
@@ -32,6 +37,7 @@ factor_estimate_gld <- R6Class(
         limit_min_behavior = limit_min_behavior,
         limit_max_value = limit_max_value,
         limit_max_behavior = limit_max_behavior,
+        verbosity = verbosity - 1,
         ...)
       #super$distribution_name <- "GLD"
       self$density_function <- function(

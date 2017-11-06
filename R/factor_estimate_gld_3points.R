@@ -61,7 +61,8 @@ factor_estimate_gld_3points <- R6Class(
       verbosity = NULL,
       ...) {
 
-      if (is_void(verbosity)) { verbosity <- 0 }
+      # Parameters validation.
+      verbosity <- vp(verbosity, 1, "numeric", 1)
 
       super$initialize(
         estimation_method_name = "PERT-like 3 points estimate",

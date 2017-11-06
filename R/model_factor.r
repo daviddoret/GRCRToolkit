@@ -1,5 +1,4 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(R6)
+require(R6)
 
 #' model_factor
 #'

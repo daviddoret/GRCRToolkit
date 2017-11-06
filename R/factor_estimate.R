@@ -42,12 +42,17 @@ factor_estimate <- R6Class(
       limit_max_value = NULL,
       limit_min_behavior = NULL,
       limit_max_behavior = NULL,
+      verbosity = NULL,
       ...) {
-      if (is_void(limit_min_value)) { limit_min_value <- NA }
+
+      # Parameters validation
+      verbosity <- vp(verbosity, 1, "numeric", 1)
+      limit_min_value <- vp(limit_min_value, NA, "numeric", 1)
+      limit_max_value <- vp(limit_max_value, NA, "numeric", 1)
       if (is_void(limit_min_behavior)) { limit_min_behavior <- "Limit" }
-      if (is_void(limit_max_value)) { limit_max_value <- NA }
       if (is_void(limit_max_behavior)) { limit_max_behavior <- "Limit" }
       if (is_void(distribution_type)) { distribution_type <- NA }
+
       self$estimation_method_name <- estimation_method_name
       self$distribution_name <- distribution_name
       self$distribution_type <- distribution_type
@@ -56,6 +61,7 @@ factor_estimate <- R6Class(
       self$limit_max_value <- limit_max_value
       self$limit_max_behavior <- limit_max_behavior
       },
+
     check_state_consistency = function(output_format = NULL, ...) {
       # Informs us if the object state is consistent / logical.
       if (is_void(output_format)) { output_format = "boolean" }

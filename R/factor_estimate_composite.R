@@ -1,5 +1,5 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(R6,gld)
+require(R6)
+require(gld)
 
 #' factor_estimate_composite
 #'
@@ -27,19 +27,30 @@ factor_estimate_composite <- R6Class(
   inherit = factor_estimate,
   public = list(
     initialize = function(
-      limit_min_value = NULL,
-      limit_max_value = NULL,
       distribution_type = NULL,
+      limit_min_value = NULL,
+      limit_min_behavior = NULL,
+      limit_max_value = NULL,
+      limit_max_behavior = NULL,
+      verbosity = NULL,
       ...) {
+
+      # Parameters validation
+      verbosity <- vp(verbosity, 1, "numeric", 1)
 
       # Call the constructor of the parent class
       super$initialize(
         distribution_name = "Composite",
         distribution_type = distribution_type,
         limit_min_value = limit_min_value,
+        limit_min_behavior = limit_min_behavior,
         limit_max_value = limit_max_value,
+        limit_max_behavior = limit_max_behavior,
+        verbosity = verbosity - 1,
         ...)
+
     },
+
     check_state_consistency = function(output_format = NULL, ...) {
       super$check_state_consistency(output_format = output_format, ...)
     },

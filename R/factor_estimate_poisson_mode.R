@@ -28,20 +28,27 @@ factor_estimate_poisson_mode <- R6Class(
       estimated_mode_value = NULL,
       time_interval_friendly_name = NULL,
       limit_min_value = NULL,
+      limit_min_behavior = NULL,
       limit_max_value = NULL,
+      limit_max_behavior = NULL,
+      verbosity = NULL,
       fit_distribution = NULL, # Triggers distribution fitting immediately.
       simulate = NULL, # Triggers simulation immediately.
       ...) {
 
-      # Default values
+      # Parameters validation
       if (is_void(estimated_mode_value)) { estimated_mode_value <- NA }
       if (is_void(fit_distribution)) { fit_distribution <- TRUE }
       if (is_void(simulate)) { simulate <- TRUE }
+      verbosity <- vp(verbosity, 1, "numeric", 1)
 
       super$initialize(
         estimation_method_name = "Mode estimate",
         limit_min_value = limit_min_value,
+        limit_min_behavior = limit_min_behavior,
         limit_max_value = limit_max_value,
+        limit_max_behavior = limit_max_behavior,
+        verbosity = verbosity - 1,
         ...)
 
       # Initialize lambda parameters

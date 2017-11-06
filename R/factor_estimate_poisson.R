@@ -15,18 +15,28 @@ factor_estimate_poisson <- R6Class(
     initialize = function(
       lambda = NULL,
       time_interval_friendly_name = NULL,
-      limit_min_value = NA,
-      limit_max_value = NA,
+      limit_min_value = NULL,
+      limit_min_behavior = NULL,
+      limit_max_value = NULL,
+      limit_max_behavior = NULL,
+      verbosity = NULL,
       ...) {
+
+      # Parameters validation
+      verbosity <- vp(verbosity, 1, "numeric", 1)
+
       super$initialize(
         distribution_name = "Poisson",
         distribution_type = "Discrete",
         limit_min_value = limit_min_value,
+        limit_min_behavior = limit_min_behavior,
         limit_max_value = limit_max_value,
+        limit_max_behavior = limit_max_behavior,
+        verbosity = verbosity - 1,
         ...)
 
-      if(is_void(lambda)) { lambda <- NA }
-      if(is_void(time_interval_friendly_name)) { time_interval_friendly_name <- NA }
+      if (is_void(lambda)) { lambda <- NA }
+      if (is_void(time_interval_friendly_name)) { time_interval_friendly_name <- NA }
 
       self$lambda <- lambda
       self$time_interval_friendly_name <- time_interval_friendly_name

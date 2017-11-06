@@ -26,19 +26,27 @@ factor_estimate_composite_freqimpact <- R6Class(
   inherit = factor_estimate_composite,
   public = list(
     initialize = function(
-      limit_min_value = NULL,
-      limit_max_value = NULL,
       frequency_factor = NULL,
       impact_factor = NULL,
+      limit_min_value = NULL,
+      limit_min_behavior = NULL,
+      limit_max_value = NULL,
+      limit_max_behavior = NULL,
+      verbosity = NULL,
       ...) {
-      # Default values
+
+      # Parameters validation
+      verbosity <- vp(verbosity, 1, "numeric", 1)
 
       # Call the constructor of the parent class
       super$initialize(
         estimation_method_name = "Frequency x Impact",
         distribution_type = "Continuous",
         limit_min_value = limit_min_value,
+        limit_min_behavior = limit_min_behavior,
         limit_max_value = limit_max_value,
+        limit_max_behavior = limit_max_behavior,
+        verbosity = verbosity - 1,
         ...)
 
       self$frequency_factor <- frequency_factor
