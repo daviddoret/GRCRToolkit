@@ -1,6 +1,6 @@
-Package: GRCRToolkit
+Package: grctoolkit
 Type: Package
-Title: Provide Miscellaneous GRC Related Utilities
+Title: GRC Toolkit
 Version: 0.1.0
 Author: David Doret
 Maintainer: David Doret <david.doret@me.com>

@@ -1,5 +1,6 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(testthat, GRCRToolkit, random)
+require(testthat)
+require(grctoolkit)
+require(random)
 
 context("factor_estimate_poisson_mode")
 

@@ -1,5 +1,5 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(testthat, GRCRToolkit)
+require(testthat)
+require(grctoolkit)
 
 context("get_gld_mode")
 

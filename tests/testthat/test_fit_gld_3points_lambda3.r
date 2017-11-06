@@ -1,7 +1,5 @@
-if (!require(pacman)) install.packages(pacman)
-pacman::p_load(testthat, GRCRToolkit)
-
-require(GRCRToolkit)
+require(testthat)
+require(grctoolkit)
 
 context("fit_gld_3points_lambda3")
 

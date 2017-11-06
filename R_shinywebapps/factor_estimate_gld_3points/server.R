@@ -8,7 +8,7 @@
 #
 
 require(shiny)
-require(GRCRToolkit)
+require(grctoolkit)
 require(ggplot2)
 require(colorspace)
 require(labeling)

@@ -2,9 +2,9 @@
 #pacman::p_load(testthat)
 
 #library(testthat)
-#library(GRCRToolkit)
+#library(grctoolkit)
 
-#test_check("GRCRToolkit")
+#test_check("grctoolkit")
 
 # Cool references:
 # - http://r-pkgs.had.co.nz/tests.html

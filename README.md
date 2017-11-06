@@ -1,2 +1,2 @@
-# GRCRToolkit
+# grctoolkit
 #
