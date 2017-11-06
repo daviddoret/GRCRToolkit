@@ -1,0 +1,80 @@
+---
+title: "Factor Estimate Limit Behaviors"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+
+GOAL
+
+The goal of this [R Markdown](http://rmarkdown.rstudio.com) Notebook is to demonstrate the various Limit Behaviors available in Factor Estimates.
+
+DEFINITIONS
+
+First of all, let's define our terms:
+
+Support (Probability Distributions): "In probability theory, the support of a probability distribution can be loosely thought of as the closure of the set of possible values of a random variable having that distribution." https://en.wikipedia.org/wiki/Support_(mathematics)
+
+Factor Estimate: In the context of the grctoolkit package, a Factor Estimate is a configurable estimate of a risk factor.
+
+Limit: Here, limit is taken in its plain meaning (i.e. not to be confused with a mathematical limit). "a prescribed maximum or minimum amount, quantity, or number" https://www.merriam-webster.com/dictionary/limit
+
+EXPLANATION
+
+When estimating a risk factor, we typically use a probability distribution. To keep this tutorial simple, we will use here the well-known normal distribution to represent the potential impact of a risk factor. In this simplistic scenario, we consider a typical loss of 100 with a standard deviation of 10.  
+
+```{r}
+require(ggplot2, grctoolkit)
+fun <- function(x, ...) { return(dnorm(x = x, mean = 100, sd = 10, log = FALSE))  }
+plot_addition <- overplot_vertical_lines(x_values = c(-10,0), x_labels = c(-10, 0), color = "red", line_type = "dotted")
+plot_probability_density_function(title = "Normal distribution", fun = fun, x_start = -50, x_end = 250, plot_addition = plot_addition)
+```
+
+This is all very nice. 
+
+Now let's have a look between the two dotted red lines in the range between -10 and 0. At first glance, it looks like it's all 0s.
+
+But to better understand the shape of our normal distribution, let's zoom into that range and see how it looks like:
+
+```{r}
+fun <- function(x, ...) { return(dnorm(x = x, mean = 100, sd = 10, log = FALSE))  }
+plot_addition <- overplot_vertical_lines(x_values = c(-10,0), x_labels = c(-10, 0), color = "red", line_type = "dotted")
+plot_probability_density_function(title = "Normal distribution", fun = fun, x_start = -11, x_end = 1, plot_addition = plot_addition)
+```
+
+
+
+Do you see? 
+
+
+TUTORIAL
+
+
+
+First of all, let's load the grctoolkit package.
+
+```{r}
+require(grctoolkit)
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+

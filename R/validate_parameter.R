@@ -14,12 +14,15 @@
 #'
 #' @param parameter_length Often, parameters are received as vectors. Often, functions and methods only support vectors of size 1 or sometimes of a very specific length.
 #'
+#' @param acceptable_values A list of of acceptable values. Any attempt to use a value not listed will raise an error. This is obvious, but note that \code{"default_value"} is applied before validation takes place against the list of acceptable values.
+#'
 #' @return The validated (sometimes coerced) parameter, possibly the default value. Sometimes, accompanied with warnings. If not coerction is possible, raises an error.
 #'
 #' @examples
 #' validate_parameter(NULL, 2, "Numeric", 1)
 #' vp(NA ,5, "Numeric", 1)
 #' vp(c("a", "b"), c("c", "d"), "String", 2)
+#' vp(c("a", "b"), NULL, "character", 2, c("a", "b", "c"))
 #'
 #' @export
 validate_parameter <- function(
@@ -27,6 +30,9 @@ validate_parameter <- function(
   default_value = NULL,
   category = NULL,
   parameter_length = NULL,
+  acceptable_values = NULL,
+  limit_min = NULL,
+  limit_max = NULL,
   verbosity = NULL,
   ...) {
 
@@ -57,6 +63,35 @@ validate_parameter <- function(
   } else if (tolower(category) == "character") {
     if (!is.character(parameter_value)) {
       stop("Non-character parameter received")
+    }
+  }
+
+  # Acceptable Values.
+  if (!is_void(acceptable_values)) {
+    if (tolower(category) == "character")
+    {
+      #
+      if (is.element(FALSE, is.element(tolower(parameter_value) ,tolower(acceptable_values)))) {
+        stop("Unacceptable parameter values received")
+      }
+    }
+    else
+    {
+      if (is.element(FALSE, is.element(parameter_value ,acceptable_values))) {
+        stop("Unacceptable parameter values received")
+      }
+    }
+  }
+
+  # Min / Max Limits.
+  if (!is_void(limit_min)) {
+    if (min(parameter_value) < limit_min) {
+      stop("Parameter values below minimum limit received")
+    }
+  }
+  if (!is_void(limit_max)) {
+    if (max(parameter_value) > limit_max) {
+      stop("Parameter values above maximum limit received")
     }
   }
 

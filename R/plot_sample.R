@@ -107,21 +107,11 @@ plot_sample = function(
 
   if (x_scale_type == "log10" ) {
     histo <- histo + scale_x_log10()
-#    whisker <- whisker + scale_y_log10()
   }
 
   if (y_scale_type == "log10" ) {
     histo <- histo + scale_y_log10()
-#    whisker <- whisker + scale_y_log10()
   }
-
-#  multi <- plot_grid(
-#    risk_plot,
-#    graph,
-#    align="v",
-#    nrow = 2,
-#    ncol = 1,
-#    rel_heights = c(1,.2))
 
   if (!is_void(plot_addition)) {
     histo <- histo + plot_addition

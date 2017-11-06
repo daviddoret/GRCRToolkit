@@ -11,4 +11,5 @@
 # or:
 #devtools::test()
 
-
+# To get rmarkdown 1.2
+install.packages("rmarkdown", repos = "https://cloud.r-project.org")

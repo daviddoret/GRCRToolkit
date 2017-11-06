@@ -6,10 +6,12 @@
 \title{validate_parameter, vp}
 \usage{
 validate_parameter(parameter_value, default_value = NULL, category = NULL,
-  parameter_length = NULL, verbosity = NULL, ...)
+  parameter_length = NULL, acceptable_values = NULL, limit_min = NULL,
+  limit_max = NULL, verbosity = NULL, ...)
 
 vp(parameter_value, default_value = NULL, category = NULL,
-  parameter_length = NULL, verbosity = NULL, ...)
+  parameter_length = NULL, acceptable_values = NULL, limit_min = NULL,
+  limit_max = NULL, verbosity = NULL, ...)
 }
 \arguments{
 \item{parameter_value}{The original function or method parameter.}
@@ -19,6 +21,8 @@ vp(parameter_value, default_value = NULL, category = NULL,
 \item{category}{One of the following strings: \code{"character"}, \code{"numeric"}, \code{"logical"}.}
 
 \item{parameter_length}{Often, parameters are received as vectors. Often, functions and methods only support vectors of size 1 or sometimes of a very specific length.}
+
+\item{acceptable_values}{A list of of acceptable values. Any attempt to use a value not listed will raise an error. This is obvious, but note that \code{"default_value"} is applied before validation takes place against the list of acceptable values.}
 }
 \value{
 The validated (sometimes coerced) parameter, possibly the default value. Sometimes, accompanied with warnings. If not coerction is possible, raises an error.
@@ -34,6 +38,7 @@ A friendly function to simplify the validation of function or method input param
 validate_parameter(NULL, 2, "Numeric", 1)
 vp(NA ,5, "Numeric", 1)
 vp(c("a", "b"), c("c", "d"), "String", 2)
+vp(c("a", "b"), NULL, "character", 2, c("a", "b", "c"))
 
 }
 
