@@ -18,7 +18,7 @@ vp <- function(
       acceptable_values = acceptable_values,
       limit_min = limit_min,
       limit_max = limit_max,
-      verbosity = verbosity,
+      verbosity = verbosity, # No decrementing because this is an alias.
       ...)
   )
 }
